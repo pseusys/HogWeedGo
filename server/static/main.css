@@ -1,0 +1,23 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+
+.mdl-grid {
+    height: 100%;
+    width: 100%;
+    padding: 0 !important;
+}
+
+.mdl-grid > * {
+    margin-right: 8px;
+    margin-left: 8px;
+    margin-bottom: 8px;
+}
+
+
+
+#ui {
+    background-color: lime;
+}

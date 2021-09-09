@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/app_graph.xml"
+    app:startDestination="@id/mapBearFragment">
+
+    <fragment
+        android:id="@+id/mapBearFragment"
+        android:name="com.ekdorn.hogweedgo.fragments.MapBearFragment"
+        android:label="MapBearFragment" >
+
+        <action
+            android:id="@+id/action_mapBearFragment_to_editInfoFragment"
+            app:destination="@id/editInfoFragment" />
+        <action
+            android:id="@+id/action_mapBearFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/editInfoFragment"
+        android:name="com.ekdorn.hogweedgo.fragments.EditInfoFragment"
+        android:label="EditInfoFragment" >
+
+        <argument
+            android:name="coords"
+            app:argType="com.ekdorn.hogweedgo.dataclasses.Coordinates" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.ekdorn.hogweedgo.fragments.SettingsFragment"
+        android:label="SettingsFragment" />
+
+</navigation>

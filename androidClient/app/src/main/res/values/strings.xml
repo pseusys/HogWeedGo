@@ -1,0 +1,96 @@
+<resources>
+    <string name="app_name" translatable="false">HogWeedGo</string>
+    <string name="app_default_tag">I found hogweed!</string>
+    <string name="app_no_location">No location is available yet!</string>
+
+    <string name="form_error_over_counter">Counter overflown!</string>
+    <string name="form_error_field_required">Field required!</string>
+
+    <string name="auth_description">Become a volunteer!</string>
+    <string name="auth_state_switch_sign_in">Already have account?</string>
+    <string name="auth_state_switch_log_in">New to HogWeedGo?</string>
+    <string name="auth_container_layout_description_sign_in">Sign in</string>
+    <string name="auth_container_layout_description_log_in">Log in</string>
+    <string name="auth_email_layout">Email</string>
+    <string name="auth_password_layout">Password</string>
+    <string name="auth_confirmation_layout">Password confirmation</string>
+    <string name="auth_send_button_sign_in">Sign in</string>
+    <string name="auth_send_button_log_in">Log in</string>
+    <string name="auth_accept_checkbox">Check</string>
+
+    <string name="auth_error_email_length">Email should be longer than 5 chars!</string>
+    <string name="auth_error_password_length">Password should be longer than 5 chars!</string>
+    <string name="auth_error_confirmation_match">Confirmation should match password!</string>
+
+    <string name="fullscreen_content_description">Fullscreen image</string>
+
+    <string name="main_app_bar_title">HogWeedGo</string>
+
+    <string name="edit_info_caption">What have you found?</string>
+    <string name="edit_info_tag_layout">Map tag</string>
+    <string name="edit_info_time">Time</string>
+    <string name="edit_info_date">Date</string>
+    <string name="edit_info_address_layout">Address</string>
+    <string name="edit_info_comment_layout">Comment</string>
+    <string name="edit_info_send_button">Send</string>
+
+    <string name="view_info_status">Info status</string>
+    <string name="view_info_tag">Tag</string>
+    <string name="view_info_date_time">Date + Time</string>
+    <string name="view_info_subs">User name</string>
+    <string name="view_info_subs_image">User profile picture</string>
+    <string name="view_info_coords">Coordinates</string>
+    <string name="view_info_address">Address</string>
+    <string name="view_info_comment">Comment</string>
+
+    <string name="header_user_picture">Your profile picture</string>
+
+    <string name="pref_picture">Your profile picture</string>
+    <string name="pref_close_button">Remove picture</string>
+    <string name="pref_text">Choose picture…</string>
+
+    <string name="picture_image">Image</string>
+    <string name="image_tile_close_button">Remove image</string>
+
+    <string name="nav_menu_map">Map</string>
+    <string name="nav_menu_settings">Settings</string>
+    <string name="nav_menu_feedback">Feedback</string>
+
+    <string name="prefs_user_display_header">User display</string>
+    <string name="prefs_user_display_picture_key" translatable="false">prefs_user_display_picture</string>
+    <string name="prefs_user_display_name_key" translatable="false">prefs_user_display_name</string>
+    <string name="prefs_user_display_name">Change user name</string>
+    <string name="prefs_user_settings_header">User settings</string>
+    <string name="prefs_user_settings_email_key" translatable="false">prefs_user_settings_email</string>
+    <string name="prefs_user_settings_email">Change user email</string>
+    <string name="prefs_user_settings_password_key" translatable="false">prefs_user_settings_password</string>
+    <string name="prefs_user_settings_password">Change user password</string>
+    <string name="prefs_user_settings_verify_key" translatable="false">prefs_user_settings_verify</string>
+    <string name="prefs_user_settings_verify_summ">Verify user email by sending confirmation email</string>
+    <string name="prefs_user_settings_verify">Verify user</string>
+    <string name="prefs_user_settings_logout_key" translatable="false">prefs_user_settings_logout</string>
+    <string name="prefs_user_settings_logout_summ">Logout from app</string>
+    <string name="prefs_user_settings_logout">Logout</string>
+    <string name="prefs_user_settings_delete_key" translatable="false">prefs_user_settings_delete</string>
+    <string name="prefs_user_settings_delete_summ">Deletes user, but not the user reports</string>
+    <string name="prefs_user_settings_delete">Delete user</string>
+    <!-- string name="prefs_style_header">Style settings</string>
+    < string name="prefs_style_header">Switch preference</string>
+    < string name="prefs_style_header">Check box preference</string -->
+    <string name="prefs_info_header">App info</string>
+    <string name="prefs_info_github_key" translatable="false">prefs_info_github</string>
+    <string name="prefs_info_github">Project GitHub</string>
+    <string name="prefs_info_website_key" translatable="false">prefs_info_website</string>
+    <string name="prefs_info_website">Project website</string>
+    <string name="prefs_info_policy_key" translatable="false">prefs_info_policy</string>
+    <string name="prefs_info_policy">Privacy policy</string>
+    <string name="prefs_info_version_key" translatable="false">prefs_info_version</string>
+    <string name="prefs_info_version">Build version</string>
+
+
+
+    <string name="toolbar_open" translatable="false">Open toolbar</string>
+    <string name="toolbar_close" translatable="false">Close toolbar</string>
+
+    <string name="connection_no_user">[no info]</string>
+</resources>

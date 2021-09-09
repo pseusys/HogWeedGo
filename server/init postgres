@@ -1,0 +1,9 @@
+sudo -u postgres psql
+CREATE USER admin WITH PASSWORD '12345';
+CREATE DATABASE hogweedgo WITH OWNER admin ENCODING UTF8;
+sudo -u postgres psql -d hogweedgo -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+psql -U admin -h 127.0.0.1 hogweedgo
+
+pip install Pillow psycopg2-binary
+sudo apt install gdal-bin postgresql postgis postgresql-postgis

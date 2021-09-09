@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/prefs_user_display_header">
+        <com.ekdorn.hogweedgo.views.ImagePreference
+            android:key="@string/prefs_user_display_picture_key" />
+        <EditTextPreference
+            android:key="@string/prefs_user_display_name_key"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/prefs_user_display_name" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/prefs_user_settings_header">
+        <EditTextPreference
+            android:key="@string/prefs_user_settings_email_key"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:enabled="false"
+            android:title="@string/prefs_user_settings_email" />
+        <EditTextPreference
+            android:key="@string/prefs_user_settings_password_key"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:enabled="false"
+            android:title="@string/prefs_user_settings_password" />
+        <Preference
+            android:key="@string/prefs_user_settings_verify_key"
+            android:summary="@string/prefs_user_settings_verify_summ"
+            android:title="@string/prefs_user_settings_verify" />
+        <Preference
+            android:key="@string/prefs_user_settings_logout_key"
+            android:summary="@string/prefs_user_settings_logout_summ"
+            android:title="@string/prefs_user_settings_logout" />
+        <Preference
+            android:key="@string/prefs_user_settings_delete_key"
+            android:summary="@string/prefs_user_settings_delete_summ"
+            android:title="@string/prefs_user_settings_delete" />
+    </PreferenceCategory>
+
+    <!-- PreferenceCategory android:title="Style settings">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="switch_preference_1"
+            android:title="Switch preference" />
+        <CheckBoxPreference
+            android:dependency="switch_preference_1"
+            android:defaultValue="false"
+            android:key="check_box_preference_1"
+            android:title="Check box preference" />
+    </PreferenceCategory -->
+
+    <PreferenceCategory android:title="@string/prefs_info_header">
+        <Preference
+            android:key="@string/prefs_info_github_key"
+            android:title="@string/prefs_info_github" />
+        <Preference
+            android:key="@string/prefs_info_website_key"
+            android:title="@string/prefs_info_website" />
+        <Preference
+            android:key="@string/prefs_info_policy_key"
+            android:title="@string/prefs_info_policy" />
+        <Preference
+            android:key="@string/prefs_info_version_key"
+            android:title="@string/prefs_info_version"
+            android:enabled="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
