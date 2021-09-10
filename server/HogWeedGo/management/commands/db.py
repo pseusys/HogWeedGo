@@ -7,6 +7,7 @@ from urllib.error import URLError
 from django.core import management
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
+from django.core.serializers.base import DeserializationError
 
 from HogWeedGo.models import Report, ReportImage, Reporter
 
@@ -26,7 +27,7 @@ class Command(BaseCommand):
                 for user in json_data["users"]:
                     if User.objects.filter(username=user["username"]).exists():
                         raise CommandError(f"{ User.objects.get(username=user['username']) } already in database!")
-                    usr = Reporter.decode(user)
+                    usr = Reporter.decode(user, True)
                     usr.save()
                     self.stdout.write(self.style.SUCCESS(f"{ usr } saved!"))
 
@@ -39,32 +40,28 @@ class Command(BaseCommand):
                     else:
                         raise CommandError(f"{ report['subs'] } does not exist!")
 
-                    rep = Report.decode(report, subs=user)
+                    rep = Report.decode(report, True, subs=user)
                     if Report.objects.filter(date=rep.date, subs=rep.subs).exists():
                         raise CommandError(f"{ rep } already in database!")
                     rep.save()
                     self.stdout.write(self.style.SUCCESS(f"{ rep } saved!"))
 
                     for photo in report["photos"]:
-                        img = ReportImage.decode(photo, report=rep)
+                        img = ReportImage.decode(photo, True, report=rep)
                         img.save()
                         self.stdout.write(self.style.SUCCESS(f"{ img } saved!"))
 
         except KeyError:
             raise CommandError(f"JSON data is malformed! Validate the data with ./sample_data.scheme.json scheme.")
-        except ValueError as e:
+        except (ValueError, DeserializationError) as e:
             raise CommandError(f"{ e }\nValidate the data with ./sample_data.scheme.json scheme.")
 
     def dump(self):
         omni = {"users": [], "reports": []}
-        for reporter in Reporter.objects.all():
-            omni["users"].append(reporter.encode())
+        omni["users"].append([reporter.encode(True) for reporter in Reporter.objects.all()])
         for report in Report.objects.all():
-            rep = report.encode()
-            rep["photos"] = []
-            for photo in ReportImage.objects.filter(report=report):
-                rep["photos"].append(photo.encode())
-            omni["reports"].append(rep)
+            photos = [photo.encode(True) for photo in ReportImage.objects.filter(report=report)]
+            omni["reports"].append(report.encode(True) | {"photos": photos})
         return json.dumps(omni, indent=2)
 
     def fetch(self, options):

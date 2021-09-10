@@ -7,5 +7,5 @@ psql -U admin -h 127.0.0.1 hogweedgo
 
 python manage.py createsuperuser
 
-pip install Pillow psycopg2-binary
+pip install Pillow psycopg2-binary django
 sudo apt install gdal-bin postgresql postgis postgresql-postgis

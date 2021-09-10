@@ -1,5 +1,6 @@
 import base64
 import io
+import os
 import uuid
 from datetime import datetime
 
@@ -12,11 +13,11 @@ from django.contrib.gis.geos import Point
 
 
 class Serializable:
-    def encode(self):
+    def encode(self, img_bundle):
         pass
 
     @staticmethod
-    def decode(data, **foreign):
+    def decode(data, img_bundle, **foreign):
         pass
 
 
@@ -40,7 +41,18 @@ class Reporter(models.Model, Serializable):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     photo = models.ImageField(upload_to="static/user_photos", null=True)
 
-    def encode(self):
+    def delete(self, using=None, keep_parents=False):
+        super().delete(self, using)
+        if self.photo.name:
+            os.remove(self.photo.name)
+
+    def encode(self, img_bundle):
+        photo = None
+        if self.photo.name:
+            if img_bundle:
+                photo = _to_base64(self.photo.read())
+            else:
+                photo = self.photo.name.split('/', 1)[1]
         return {
             "password": self.user.password,
             "last_login": _from_datetime(self.user.last_login),
@@ -54,11 +66,11 @@ class Reporter(models.Model, Serializable):
             "date_joined": _from_datetime(self.user.date_joined),
             "groups": [i.id for i in self.user.groups.all()],
             "user_permissions": [i.id for i in self.user.user_permissions.all()],
-            "photo": _to_base64(self.photo.read()) if self.photo.name else None
+            "photo": photo
         }
 
     @staticmethod
-    def decode(data, **foreign):
+    def decode(data, img_bundle, **foreign):
         user = User.objects.create(**{x: data[x] for x in data if x not in ["password", "photo", "groups", "user_permissions", "last_login", "date_joined"]})
         user.password = data["password"]
         user.last_login = _to_datetime(data["last_login"])
@@ -70,7 +82,7 @@ class Reporter(models.Model, Serializable):
         user.save()
 
         rep = Reporter(user=user)
-        if data["photo"] is not None:
+        if data["photo"] is not None and img_bundle:
             rep.photo.save(f"{str(uuid.uuid4())}.png", File(io.BytesIO(_from_base64(data["photo"]))), save=False)
             rep.photo.flush()
         else:
@@ -87,7 +99,7 @@ class ReportStatuses(models.TextChoices):
 
 class Report(models.Model, Serializable):
     class Meta:
-        unique_together = (('subs', 'date'),)
+        unique_together = [['subs', 'date']]
 
     address = models.CharField(max_length=128, default="")
     comment = models.CharField(max_length=1024, default="")
@@ -98,7 +110,7 @@ class Report(models.Model, Serializable):
     subs = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     type = models.CharField(max_length=64, default="")
 
-    def encode(self):
+    def encode(self, img_bundle):
         return {
             "address": self.address,
             "comment": self.comment,
@@ -111,7 +123,7 @@ class Report(models.Model, Serializable):
         }
 
     @staticmethod
-    def decode(data, **foreign):
+    def decode(data, img_bundle, **foreign):
         rep = Report(**{x: data[x] for x in data if x not in ["date", "place", "subs", "photos"]}, subs=foreign["subs"])
         rep.date = _to_datetime(data["date"])
         rep.place = Point(data["place"]["long"], data["place"]["lat"])
@@ -125,12 +137,17 @@ class ReportImage(models.Model, Serializable):
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
     image = models.ImageField(upload_to="static/report_photos")
 
-    def encode(self):
-        return _to_base64(self.image.read())
+    def delete(self, using=None, keep_parents=False):
+        super().delete(self, using, keep_parents)
+        os.remove(self.image.name)
+
+    def encode(self, img_bundle):
+        return _to_base64(self.image.read()) if img_bundle else self.image.name.split('/', 1)[1]
 
     @staticmethod
-    def decode(data, **foreign):
+    def decode(data, img_bundle, **foreign):
         img = ReportImage(report=foreign["report"])
-        img.image.save(f"{str(uuid.uuid4())}.png", File(io.BytesIO(_from_base64(data))), save=False)
-        img.image.flush()
+        if img_bundle:
+            img.image.save(f"{str(uuid.uuid4())}.png", File(io.BytesIO(_from_base64(data))), save=False)
+            img.image.flush()
         return img
