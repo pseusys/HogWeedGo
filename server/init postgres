@@ -5,5 +5,7 @@ sudo -u postgres psql -d hogweedgo -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
 psql -U admin -h 127.0.0.1 hogweedgo
 
+python manage.py createsuperuser
+
 pip install Pillow psycopg2-binary
 sudo apt install gdal-bin postgresql postgis postgresql-postgis

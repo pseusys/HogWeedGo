@@ -1,12 +1,81 @@
-from django.contrib.postgres.fields import ArrayField
+import base64
+import io
+import uuid
+from datetime import datetime
+
 from django.contrib.gis.db import models
+from django.core.files import File
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.utils.timezone import make_aware
+from django.contrib.gis.geos import Point
 
 
-class Reporter(models.Model):
+class Serializable:
+    def encode(self):
+        pass
+
+    @staticmethod
+    def decode(data, **foreign):
+        pass
+
+
+def _to_datetime(timestamp):
+    return make_aware(datetime.fromtimestamp(timestamp / 1000.0))
+
+
+def _from_datetime(dt):
+    return int(dt.timestamp() * 1000)
+
+
+def _to_base64(data):
+    return base64.b64encode(data).decode("utf-8")
+
+
+def _from_base64(base):
+    return base64.b64decode(base.encode("utf-8"))
+
+
+class Reporter(models.Model, Serializable):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.ImageField(null=True)
+    photo = models.ImageField(upload_to="static/user_photos", null=True)
+
+    def encode(self):
+        return {
+            "password": self.user.password,
+            "last_login": _from_datetime(self.user.last_login),
+            "is_superuser": self.user.is_superuser,
+            "username": self.user.username,
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "email": self.user.email,
+            "is_staff": self.user.is_staff,
+            "is_active": self.user.is_active,
+            "date_joined": _from_datetime(self.user.date_joined),
+            "groups": [i.id for i in self.user.groups.all()],
+            "user_permissions": [i.id for i in self.user.user_permissions.all()],
+            "photo": _to_base64(self.photo.read()) if self.photo.name else None
+        }
+
+    @staticmethod
+    def decode(data, **foreign):
+        user = User.objects.create(**{x: data[x] for x in data if x not in ["password", "photo", "groups", "user_permissions", "last_login", "date_joined"]})
+        user.password = data["password"]
+        user.last_login = _to_datetime(data["last_login"])
+        user.date_joined = _to_datetime(data["date_joined"])
+        for group in data["groups"]:
+            user.groups.add(name=group)
+        for permission in data["user_permissions"]:
+            user.user_permissions.add(name=permission)
+        user.save()
+
+        rep = Reporter(user=user)
+        if data["photo"] is not None:
+            rep.photo.save(f"{str(uuid.uuid4())}.png", File(io.BytesIO(_from_base64(data["photo"]))), save=False)
+            rep.photo.flush()
+        else:
+            rep.photo = None
+        return rep
 
 
 # Class representing report status
@@ -16,13 +85,52 @@ class ReportStatuses(models.TextChoices):
     INVALID = "INVALID"
 
 
-class Report(models.Model):
+class Report(models.Model, Serializable):
+    class Meta:
+        unique_together = (('subs', 'date'),)
+
     address = models.CharField(max_length=128, default="")
     comment = models.CharField(max_length=1024, default="")
     date = models.DateTimeField(default=timezone.now)
     name = models.CharField(max_length=32, default="")
-    photos = ArrayField(models.ImageField(), default=list)
     place = models.PointField(db_index=True)
     status = models.CharField(max_length=8, choices=ReportStatuses.choices, default=ReportStatuses.RECEIVED)
-    subs = models.ManyToManyField(User)
+    subs = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     type = models.CharField(max_length=64, default="")
+
+    def encode(self):
+        return {
+            "address": self.address,
+            "comment": self.comment,
+            "date": _from_datetime(self.date),
+            "name": self.name,
+            "place": {"long": self.place[0], "lat": self.place[1]},
+            "status": self.status,
+            "subs": self.subs.username if self.subs else None,
+            "type": self.type
+        }
+
+    @staticmethod
+    def decode(data, **foreign):
+        rep = Report(**{x: data[x] for x in data if x not in ["date", "place", "subs", "photos"]}, subs=foreign["subs"])
+        rep.date = _to_datetime(data["date"])
+        rep.place = Point(data["place"]["long"], data["place"]["lat"])
+        return rep
+
+    def __str__(self):
+        return f"Report by {self.subs.username if self.subs is not None else 'null'} sent at {self.date} with id {self.id}"
+
+
+class ReportImage(models.Model, Serializable):
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="static/report_photos")
+
+    def encode(self):
+        return _to_base64(self.image.read())
+
+    @staticmethod
+    def decode(data, **foreign):
+        img = ReportImage(report=foreign["report"])
+        img.image.save(f"{str(uuid.uuid4())}.png", File(io.BytesIO(_from_base64(data))), save=False)
+        img.image.flush()
+        return img
