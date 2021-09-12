@@ -24,18 +24,22 @@ class Command(BaseCommand):
         try:
             if "users" in json_data:
                 for user in json_data["users"]:
-                    self.stdout.write(self.style.SUCCESS(f"{ UserSerializer.parse(user) } saved!"))
+                    try:
+                        self.stdout.write(self.style.SUCCESS(f"{ UserSerializer.parse(user) } saved!"))
+                    except IntegrityError:
+                        self.stdout.write(self.style.NOTICE("Integrity problem, some of the users already present!"))
 
             if "reports" in json_data:
                 for report in json_data["reports"]:
-                    self.stdout.write(self.style.SUCCESS(f"{ ReportSerializer.parse(report) } saved!"))
+                    try:
+                        self.stdout.write(self.style.SUCCESS(f"{ ReportSerializer.parse(report) } saved!"))
+                    except IntegrityError:
+                        self.stdout.write(self.style.NOTICE("Integrity problem, some of the reports already present!"))
 
         except KeyError:
             raise CommandError(f"JSON data is malformed! Validate the data with ./sample_data.scheme.json scheme.")
         except ValueError as e:
             raise CommandError(f"{ e }\nValidate the data with ./sample_data.scheme.json scheme.")
-        except IntegrityError:
-            raise CommandError("Integrity error, data had been loaded already.")
 
     def dump(self):
         self.stdout.write(self.style.WARNING(f"Dumping { User.objects.count() } users and { Report.objects.count() } reports."))
@@ -50,10 +54,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Database cleared."))
             try:
                 shutil.rmtree("static/report_photos")
-                shutil.rmtree("static/user_photos")
-                self.stdout.write(self.style.SUCCESS("Static images folders deleted."))
+                self.stdout.write(self.style.SUCCESS("Report photos folder deleted."))
             except FileNotFoundError:
-                self.stdout.write(self.style.WARNING("Static images folders deletion skipped - folders not present."))
+                self.stdout.write(self.style.WARNING("Report photos folder deletion skipped - folder not present."))
+            try:
+                shutil.rmtree("static/user_photos")
+                self.stdout.write(self.style.SUCCESS("User photos folders deleted."))
+            except FileNotFoundError:
+                self.stdout.write(self.style.WARNING("User photos folders deletion skipped - folder not present."))
             return
 
         elif options["file"] is None:

@@ -49,15 +49,13 @@ class UserSerializer(Serializer):
 
         return {
             "password": model.password,
-            "last_login": _from_datetime(model.last_login),
+            "last_login": _from_datetime(model.last_login) if model.last_login else None,
             "is_superuser": model.is_superuser,
-            "username": model.username,
+            "email": model.email,
             "first_name": model.first_name,
             "is_staff": model.is_staff,
             "is_active": model.is_active,
             "date_joined": _from_datetime(model.date_joined),
-            "groups": [i.id for i in model.groups.all()],
-            "user_permissions": [i.id for i in model.user_permissions.all()],
             "photo": photo
         }
 
@@ -65,19 +63,12 @@ class UserSerializer(Serializer):
     def parse(data):
         password = data.pop("password")
         photo = data.pop("photo")
-        groups = data.pop("groups")
-        permissions = data.pop("user_permissions")
 
-        data["last_login"] = _to_datetime(data["last_login"])
+        data["last_login"] = _to_datetime(data["last_login"]) if data["last_login"] else None
         data["date_joined"] = _to_datetime(data["date_joined"])
 
         user = User.objects.create(**data)
         user.password = password
-        user.email = user.username
-        for group in groups:
-            user.groups.add(name=group)
-        for permission in permissions:
-            user.user_permissions.add(name=permission)
 
         if photo:
             user.photo.save(f"{str(uuid.uuid4())}.png", File(BytesIO(_from_base64(photo))))
@@ -113,9 +104,9 @@ class ReportSerializer(Serializer):
             "name": model.name,
             "place": {"long": model.place[0], "lat": model.place[1]},
             "status": model.status,
+            "subs": model.subs.email if model.subs else None,
             "type": model.type,
             "photos": [ReportPhotoSerializer.encode(photo, bundle_photo=bundle_photos) for photo in ReportPhoto.objects.filter(report=model)],
-            "subs": model.subs.username if model.subs else None
         }
 
     @staticmethod
@@ -125,7 +116,7 @@ class ReportSerializer(Serializer):
         data["date"] = _to_datetime(data["date"])
         data["place"] = Point(data["place"]["long"], data["place"]["lat"])
         if data["subs"]:
-            data["subs"] = User.objects.filter(username=data.pop("subs"))[0]
+            data["subs"] = User.objects.filter(email=data.pop("subs"))[0]
 
         report = Report.objects.create(**data)
 
