@@ -3,8 +3,9 @@ HogWeedGo/migrations/*
 venv/*
 .idea/*
 
-data/*
-!data/sample_*
+sample/*
+!sample/sample_data.json
+!sample/data.schema.json
 
 static/report_photos
 static/user_photos

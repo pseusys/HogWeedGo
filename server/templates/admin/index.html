@@ -1,0 +1,42 @@
+{% extends "admin/index.html" %}
+{% load leaflet_tags %}
+
+{% block extrastyle %}{{ block.super }}
+    {% leaflet_js %}
+    {% leaflet_css %}
+
+    <style>
+        #content_union {
+            display: flex;
+            flex-direction: column;
+            float: left;
+            width: 100%;
+        }
+
+        #map-container {
+            width: 100%;
+            flex-grow: 1;
+            box-sizing: border-box;
+            padding-bottom: 30px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="content_union">
+        {{ block.super }}
+        <div id="map-container">
+            <script>
+                function map_init (map) {
+                    {% for pair in markers %}
+                        L.marker({{ pair.coords }}).addTo(map).on("click", () => {
+                            window.location.href = "/HogWeedGo/report/" + {{ pair.id }};
+                        });
+                    {% endfor %}
+                }
+            </script>
+
+            {% leaflet_map "map" callback="window.map_init" %}
+        </div>
+    </div>
+{% endblock %}

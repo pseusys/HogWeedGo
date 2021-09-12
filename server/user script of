@@ -1,0 +1,9 @@
+init postgres
+createsuperuser and/or db
+static
+
+db
+test
+
+runserver
+navigate to /admin/

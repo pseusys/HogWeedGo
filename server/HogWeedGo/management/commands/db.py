@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("mode", nargs='?', choices=("load", "dump", "clear"), help="LOAD data from archive to db, DUMP data from db to archive or CLEAR db")
-        parser.add_argument("--file", "-f", nargs='?', dest="file", help="File destination for loading and dumping")
+        parser.add_argument("--file", "-f", nargs='?', dest="file", help="File destination for loading and dumping (./sample/data by default)")
         parser.add_argument("--gzip", "-z", action="store_true", dest="gzip", help="Compression of I/O file")
 
     def load(self, json_data):
@@ -37,9 +37,9 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.NOTICE("Integrity problem, some of the reports already present!"))
 
         except KeyError:
-            raise CommandError(f"JSON data is malformed! Validate the data with ./sample_data.scheme.json scheme.")
+            raise CommandError(f"JSON data is malformed! Validate the data with ./data/data.schema.json schema.")
         except ValueError as e:
-            raise CommandError(f"{ e }\nValidate the data with ./sample_data.scheme.json scheme.")
+            raise CommandError(f"{ e }\nValidate the data with ./data/_data.schema.json schema.")
 
     def dump(self):
         self.stdout.write(self.style.WARNING(f"Dumping { User.objects.count() } users and { Report.objects.count() } reports."))
@@ -64,8 +64,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING("User photos folders deletion skipped - folder not present."))
             return
 
-        elif options["file"] is None:
-            raise CommandError("No file specified. Aborting command.")
+        options.setdefault("file", f"./sample/data.{ 'json.gzip' if options['gzip'] else 'json' }")
 
         if options["mode"] == "load":
             try:

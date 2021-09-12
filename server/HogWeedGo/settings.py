@@ -31,13 +31,15 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'HogWeedGo.apps.HogWeedGoConfig',
-    'django.contrib.admin',
+    'HogWeedGo.apps.HogWeedGoAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis'
+    'django.contrib.gis',
+    'django.forms',
+    'leaflet'
 ]
 
 MIDDLEWARE = [
@@ -67,6 +69,8 @@ TEMPLATES = [
         },
     },
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 WSGI_APPLICATION = 'HogWeedGo.wsgi.application'
 
@@ -134,3 +138,9 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LEAFLET_CONFIG = {
+    'DEFAULT_CENTER': (59.937500, 30.308611),
+    'DEFAULT_ZOOM': 9,
+    'MIN_ZOOM': 1
+}

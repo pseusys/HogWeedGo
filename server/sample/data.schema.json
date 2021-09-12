@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pseusys/HogWeedGo/blob/master/server/sample/data.schema.json",
+  "title": "Schema defining JSON representation of HogWeedGo database",
+  "description": "A data file, made and parsed by 'bd' script (class: HogWeedGo/management/commands/db.Command)",
+
+  "type": "object",
+  "properties": {
+    "users": { "type": "array", "items": { "$ref": "#/$defs/user" } },
+    "reports": { "type": "array", "items": { "$ref": "#/$defs/report" } }
+  },
+  "required": [ "users", "reports" ],
+  "additionalProperties": false,
+
+  "$defs": {
+    "user": {
+      "description": "A user object, stored in database (class: HogWeedGo/models.User)",
+      "$comment": "Note! Photo property is SHA64 of photo in bundled file and path to static folder in API",
+      "type": "object",
+      "properties": {
+        "password": { "type": "string" },
+        "last_login": { "type": ["integer", "null"] },
+        "is_superuser": { "type": "boolean" },
+        "email": { "type": "string", "format": "email" },
+        "first_name": { "type": "string" },
+        "is_staff": { "type": "boolean" },
+        "is_active": { "type": "boolean" },
+        "date_joined": { "type": ["integer"] },
+        "photo": { "type": [ "string", "null" ] }
+      },
+      "required": [ "password", "last_login", "is_superuser", "email", "first_name", "is_staff", "is_active", "date_joined", "photo" ],
+      "additionalProperties": false
+    },
+
+    "report": {
+      "description": "A report object, stored in database (class: HogWeedGo/models.Report)",
+      "type": "object",
+      "properties": {
+        "address": { "type": "string", "maxLength": 128 },
+        "comment": { "type": "string", "maxLength": 1024 },
+        "date": { "type": "integer" },
+        "name": { "type": "string", "maxLength": 32 },
+        "place": { "$ref": "#/$defs/place" },
+        "status": { "enum": [ "RECEIVED", "APPROVED", "INVALID" ], "maxLength": 8 },
+        "subs": { "type": [ "string", "null" ], "format": "email" },
+        "type": { "type": "string", "maxLength": 64 },
+        "photos": {
+          "$comment": "Note! Items are SHA64 of photos in bundled file and path to static folder in API",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": [ "address", "comment", "date", "name", "place", "status", "subs", "type", "photos" ],
+      "additionalProperties": false
+    },
+
+    "place": {
+      "description": "A point object (x and y coordinates)",
+      "type": "object",
+      "properties": {
+        "lat": { "type": "number" },
+        "long": { "type": "number" }
+      },
+      "required": [ "lat", "long" ],
+      "additionalProperties": false
+    }
+  }
+}
