@@ -16,6 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from HogWeedGo import api
+
 urlpatterns = [
+    path('users/<int:user_id>/', api.get_user),
+    path('poll_reports', api.poll_reports),
     path('', admin.site.urls)
+
 ]

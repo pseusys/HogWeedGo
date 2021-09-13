@@ -29,7 +29,7 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = []
     form = UserForm
 
-    list_display = ("email", "first_name", "is_staff", "last_login")
+    list_display = ("email", "first_name", "is_active", "is_staff", "last_login")
     list_filter = ("is_staff", "is_superuser")
     search_fields = ["email", "first_name"]
     ordering = ["email"]
