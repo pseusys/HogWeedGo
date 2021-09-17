@@ -1,21 +1,25 @@
+import csv
+import tempfile
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, FileResponse, HttpResponse
 from django.shortcuts import redirect
 from leaflet.admin import LeafletGeoAdmin
 
 from HogWeedGo.forms import UserForm
 from HogWeedGo.models import User, Report, ReportPhoto
+from HogWeedGo.serializers import ReportSerializer
 
 
-@admin.action(description="Write an email to selected users")
+@admin.action(description="Write an email to selected Users")
 def mail_to(model_admin, request, queryset):
     if "mailto" not in HttpResponseRedirect.allowed_schemes:
         HttpResponseRedirect.allowed_schemes.append('mailto')
-    return redirect(f"mailto:{ ','.join([user.email for user in queryset]) }")
+    return redirect(f"mailto:{','.join([user.email for user in queryset])}")
 
 
-@admin.action(description="Make selected users inactive")
+@admin.action(description="Make selected Users inactive")
 def ban(model_admin, request, queryset):
     for user in queryset:
         user.is_active = False
@@ -50,17 +54,24 @@ class UserAdmin(BaseUserAdmin):
         })
     )
 
-    def get_actions(self, request):
-        actions = super().get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']
-        return actions
-
     def has_add_permission(self, request):
         return False
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.id == request.user.id)
+
+
+@admin.action(description="Dump selected Reports as .CSV")
+def dump(model_admin, request, queryset):
+    data = [ReportSerializer.encode(report, trim=True) for report in queryset]
+    with tempfile.SpooledTemporaryFile(mode="w", newline="") as tmp:
+        fc = csv.DictWriter(tmp, fieldnames=data[0].keys())
+        fc.writeheader()
+        fc.writerows(data)
+        tmp.seek(0)
+        file_response = FileResponse(tmp.read(), as_attachment=True, filename="reports.csv")
+        file_response.set_headers(tmp)
+        return file_response
 
 
 class ReportPhotoInline(admin.StackedInline):
@@ -77,6 +88,20 @@ class ReportPhotoInline(admin.StackedInline):
         return False
 
 
+class ExactTypeListFilter(admin.SimpleListFilter):
+    title = "Type"
+
+    parameter_name = "type"
+
+    def lookups(self, request, model_admin):
+        v = set([x.exact_type() for x in model_admin.get_queryset(request).all()])
+        return [(x, x) for x in v]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(type__contains=self.value())
+
+
 # Define a new User admin
 @admin.register(Report)
 class ReportAdmin(LeafletGeoAdmin):
@@ -88,12 +113,13 @@ class ReportAdmin(LeafletGeoAdmin):
 
     list_display = ("name", "date", "user_name", "status")
     list_editable = ["status"]
-    list_filter = ("status", "type")
+    list_filter = ("status", ExactTypeListFilter)
     search_fields = ["name"]
+    actions = [dump]
 
     fieldsets = (
         (None, {
-            "fields": (("name", "subs"), ("address", "date"), ("type", "status"))
+            "fields": (("name", "subs"), ("address", "date"), "type", "status")
         }),
         (None, {
             "fields": ("place", "comment"),

@@ -30,7 +30,7 @@
                 function map_init (map) {
                     {% for pair in markers %}
                         L.marker({{ pair.coords }}).addTo(map).on("click", () => {
-                            window.location.href = "/HogWeedGo/report/" + {{ pair.id }};
+                            window.location.href = "/HogWeedGo/report/{{ pair.id }}";
                         });
                     {% endfor %}
                 }

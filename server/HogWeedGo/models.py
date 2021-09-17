@@ -1,13 +1,20 @@
 import os
+import uuid
 
 from django.contrib import admin
 from django.contrib.gis.db import models
+from django.core.files import File
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from HogWeedGo.managers import UserManager
+
+
+def set_photo(image, raw):
+    image.save(f"{str(uuid.uuid4())}.png", File(raw), False)
+    image.flush()
 
 
 class User(AbstractUser):
@@ -28,9 +35,9 @@ class User(AbstractUser):
     objects = UserManager()
 
     def delete(self, using=None, keep_parents=False):
-        super().delete(self, using)
         if self.photo.name:
             os.remove(self.photo.name)
+        super().delete(using, keep_parents)
 
     @admin.display(description="User photo")
     def photo_tag(self):
@@ -57,10 +64,18 @@ class Report(models.Model):
     comment = models.CharField(max_length=1024, help_text=_("User comment about the report."), default="")
     date = models.DateTimeField(default=timezone.now, help_text=_("Date specified by user for his observation."))
     name = models.CharField(max_length=32, help_text=_("The name of the report marker on map."), default="")
-    place = models.PointField(db_index=True)
+    place = models.PointField()
     status = models.CharField(max_length=8, choices=ReportStatuses.choices, help_text=_("Report status."), default=ReportStatuses.RECEIVED)
     subs = models.ForeignKey(User, on_delete=models.SET_NULL, help_text=_("The sender of the report, subscription."), null=True)
-    type = models.CharField(max_length=64, help_text=_("Staff reply for the report."), default="")
+    type = models.CharField(
+        max_length=64,
+        help_text=_("Staff reply for the report. NB! Auto type check appends ' | NN%' to guessed type, thus everything after '|' is omitted by filtering."),
+        default=""
+    )
+
+    def exact_type(self):
+        delim = self.type.find('|')
+        return self.type[:delim - 1] if delim != -1 else self.type
 
     @admin.display(description="User", ordering="subs__email")
     def user_name(self):
@@ -78,8 +93,8 @@ class ReportPhoto(models.Model):
     photo = models.ImageField(upload_to="static/report_photos")
 
     def delete(self, using=None, keep_parents=False):
-        super().delete(self, using)
         os.remove(self.photo.name)
+        super().delete(using, keep_parents)
 
     @admin.display(description="Report photo")
     def photo_tag(self):

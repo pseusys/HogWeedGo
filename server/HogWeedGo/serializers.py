@@ -2,22 +2,23 @@ import base64
 import uuid
 from io import BytesIO
 
+from asgiref.sync import sync_to_async
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.utils.datetime_safe import datetime
 from django.utils.timezone import make_aware
 
-from HogWeedGo.models import User, ReportPhoto, Report
+from HogWeedGo.models import User, ReportPhoto, Report, set_photo
 
 
 class Serializer:
     @staticmethod
     def encode(model):
-        pass
+        raise NotImplementedError('subclasses of Serializer must provide an encode() method')
 
     @staticmethod
     def parse(data):
-        pass
+        raise NotImplementedError('subclasses of Serializer must provide an parse() method')
 
 
 def _to_datetime(timestamp):
@@ -71,12 +72,11 @@ class UserSerializer(Serializer):
         user.password = password
 
         if photo:
-            user.photo.save(f"{str(uuid.uuid4())}.png", File(BytesIO(_from_base64(photo))))
-            user.photo.flush()
+            set_photo(user.photo, BytesIO(_from_base64(photo)))
         else:
             user.photo = None
-            user.save()
 
+        user.save()
         return user
 
 
@@ -89,38 +89,54 @@ class ReportPhotoSerializer(Serializer):
     def parse(data):
         photo = ReportPhoto(report=data["report"])
         if data["photo"]:
-            photo.photo.save(f"{str(uuid.uuid4())}.png", File(BytesIO(_from_base64(data["photo"]))))
-            photo.photo.flush()
+            set_photo(photo.photo, data["photo"])
+            photo.save()
         return photo
 
 
 class ReportSerializer(Serializer):
     @staticmethod
-    def encode(model, bundle_photos=False):
-        return {
+    def encode(model, bundle_photos=False, trim=False):
+        data = {
             "address": model.address,
             "comment": model.comment,
             "date": _from_datetime(model.date),
             "name": model.name,
-            "place": {"long": model.place[0], "lat": model.place[1]},
             "status": model.status,
             "subs": model.subs.email if model.subs else None,
-            "type": model.type,
-            "photos": [ReportPhotoSerializer.encode(photo, bundle_photo=bundle_photos) for photo in ReportPhoto.objects.filter(report=model)],
+            "type": model.type
         }
+        if trim:
+            return data | {
+                "longitude": model.place[0],
+                "latitude": model.place[1]
+            }
+        else:
+            return data | {
+                "place": {"lng": model.place[0], "lat": model.place[1]},
+                "photos": [ReportPhotoSerializer.encode(photo, bundle_photo=bundle_photos) for photo in ReportPhoto.objects.filter(report=model)]
+            }
 
     @staticmethod
-    def parse(data):
+    def parse(data, loaded_photos=None, assigned=None):
         photos = data.pop("photos")
 
         data["date"] = _to_datetime(data["date"])
-        data["place"] = Point(data["place"]["long"], data["place"]["lat"])
-        if data["subs"]:
-            data["subs"] = User.objects.filter(email=data.pop("subs"))[0]
+        data["place"] = Point(data["place"]["lng"], data["place"]["lat"])
+        if assigned:
+            data["subs"] = assigned
+        elif data["subs"]:
+            data["subs"] = User.objects.get(email=data.pop("subs"))
 
         report = Report.objects.create(**data)
 
+        # TODO: NEURO API ENTRY
+
         for photo in photos:
-            ReportPhotoSerializer.parse({"report": report, "photo": photo})
+            ReportPhotoSerializer.parse({"report": report, "photo": BytesIO(_from_base64(photo))})
+
+        if loaded_photos:
+            for photo in photos:
+                ReportPhotoSerializer.parse({"report": report, "photo": photo})
 
         return report

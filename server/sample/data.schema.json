@@ -59,9 +59,9 @@
       "type": "object",
       "properties": {
         "lat": { "type": "number" },
-        "long": { "type": "number" }
+        "lng": { "type": "number" }
       },
-      "required": [ "lat", "long" ],
+      "required": [ "lat", "lng" ],
       "additionalProperties": false
     }
   }

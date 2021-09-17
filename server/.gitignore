@@ -4,8 +4,10 @@ venv/*
 .idea/*
 
 sample/*
-!sample/sample_data.json
+!sample/sample_*.json
 !sample/data.schema.json
 
 static/report_photos
 static/user_photos
+
+settings.json
