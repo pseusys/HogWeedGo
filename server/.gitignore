@@ -9,5 +9,6 @@ sample/*
 
 static/report_photos
 static/user_photos
+HogWeedGo/static
 
 settings.json

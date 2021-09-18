@@ -89,7 +89,8 @@ class ReportPhotoInline(admin.StackedInline):
 
 
 class CommentInline(admin.StackedInline):
-    fields = ["text"]
+    fields = ["subs", "text"]
+    readonly_fields = ["subs"]
 
     model = Comment
     extra = 0
