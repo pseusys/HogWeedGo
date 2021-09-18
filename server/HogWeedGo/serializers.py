@@ -1,14 +1,11 @@
 import base64
-import uuid
 from io import BytesIO
 
-from asgiref.sync import sync_to_async
 from django.contrib.gis.geos import Point
-from django.core.files import File
 from django.utils.datetime_safe import datetime
 from django.utils.timezone import make_aware
 
-from HogWeedGo.models import User, ReportPhoto, Report, set_photo
+from HogWeedGo.models import User, ReportPhoto, Report, set_photo, Comment
 
 
 class Serializer:
@@ -94,16 +91,33 @@ class ReportPhotoSerializer(Serializer):
         return photo
 
 
+class CommentSerializer(Serializer):
+    @staticmethod
+    def encode(model, subscribe_email=False):
+        return {
+            "text": model.text,
+            "subs": (model.subs.email if subscribe_email else model.subs.id) if model.subs else None
+        }
+
+    @staticmethod
+    def parse(data, assigned=None):
+        if assigned:
+            data["subs"] = assigned
+        else:
+            data["subs"] = User.objects.get(email=data.pop("subs"))
+        return Comment.objects.create(**data)
+
+
 class ReportSerializer(Serializer):
     @staticmethod
-    def encode(model, bundle_photos=False, trim=False):
+    def encode(model, subscribe_email=False, bundle_photos=False, trim=False):
         data = {
             "address": model.address,
-            "comment": model.comment,
+            "init_comment": model.init_comment,
             "date": _from_datetime(model.date),
             "name": model.name,
             "status": model.status,
-            "subs": model.subs.email if model.subs else None,
+            "subs": (model.subs.email if subscribe_email else model.subs.id) if model.subs else None,
             "type": model.type
         }
         if trim:
@@ -114,12 +128,14 @@ class ReportSerializer(Serializer):
         else:
             return data | {
                 "place": {"lng": model.place[0], "lat": model.place[1]},
-                "photos": [ReportPhotoSerializer.encode(photo, bundle_photo=bundle_photos) for photo in ReportPhoto.objects.filter(report=model)]
+                "photos": [ReportPhotoSerializer.encode(photo, bundle_photo=bundle_photos) for photo in ReportPhoto.objects.filter(report=model)],
+                "comments": [CommentSerializer.encode(comment, subscribe_email) for comment in Comment.objects.filter(report=model)]
             }
 
     @staticmethod
     def parse(data, loaded_photos=None, assigned=None):
         photos = data.pop("photos")
+        comments = data.pop("comments")
 
         data["date"] = _to_datetime(data["date"])
         data["place"] = Point(data["place"]["lng"], data["place"]["lat"])
@@ -138,5 +154,8 @@ class ReportSerializer(Serializer):
         if loaded_photos:
             for photo in photos:
                 ReportPhotoSerializer.parse({"report": report, "photo": photo})
+
+        for comment in comments:
+            CommentSerializer.parse(comment | {"report": report}, assigned)
 
         return report

@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
 from HogWeedGo.models import User, Report, set_photo
-from HogWeedGo.serializers import UserSerializer, ReportSerializer
+from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer
 
 
 # TODO: make async with Django async support.
@@ -171,6 +171,7 @@ def _event_stream():
         time.sleep(5)
 
 
+@csrf_exempt
 @require_GET
 def poll_reports(request):
     if not request.user.is_authenticated:
@@ -179,6 +180,7 @@ def poll_reports(request):
     return StreamingHttpResponse(_event_stream(), content_type="text/event-stream")
 
 
+@csrf_exempt
 @require_GET
 def get_reports(request):
     if not request.user.is_authenticated:
@@ -187,6 +189,7 @@ def get_reports(request):
     return JsonResponse([ReportSerializer.encode(x) for x in Report.objects.all()])
 
 
+@csrf_exempt
 @require_GET
 def get_report(request, report_id):
     if not request.user.is_authenticated:
@@ -195,6 +198,7 @@ def get_report(request, report_id):
     return JsonResponse(ReportSerializer.encode(get_object_or_404(Report, pk=report_id)))
 
 
+@csrf_exempt
 @require_GET
 def get_user(request, user_id):
     if not request.user.is_authenticated:
@@ -206,7 +210,7 @@ def get_user(request, user_id):
 # Set data
 
 
-recent_reporters = []
+recent_actors = []
 
 
 @require_POST
@@ -214,7 +218,7 @@ def set_report(request):
     if not request.user.is_authenticated:
         return HttpResponseUnauthorized()
 
-    if request.user.email in recent_reporters:
+    if request.user.email in recent_actors:
         return HttpResponseForbidden("Reporting too fast!")
 
     response = verify_request(request.POST, "report")
@@ -228,14 +232,26 @@ def set_report(request):
         else:
             photos.append(file)
 
-    asyncio.run(async_timer(60, lambda: recent_reporters.append(request.user.email)))
+    asyncio.run(async_timer(60, lambda: recent_actors.append(request.user.email)))
     ReportSerializer.parse(request.POST["report"], photos, request.user)
     return HttpResponse("Report sent!")
 
 
 @require_POST
 def set_comment(request):
-    pass
+    if not request.user.is_authenticated:
+        return HttpResponseUnauthorized()
+
+    if request.user.email in recent_actors:
+        return HttpResponseForbidden("Commenting too fast!")
+
+    response = verify_request(request.POST, "comment")
+    if response:
+        return response
+
+    asyncio.run(async_timer(60, lambda: recent_actors.append(request.user.email)))
+    CommentSerializer.parse(request.POST["comment"], request.user)
+    return HttpResponse("Comment sent!")
 
 
 @require_POST

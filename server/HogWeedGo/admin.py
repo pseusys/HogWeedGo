@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from leaflet.admin import LeafletGeoAdmin
 
 from HogWeedGo.forms import UserForm
-from HogWeedGo.models import User, Report, ReportPhoto
+from HogWeedGo.models import User, Report, ReportPhoto, Comment
 from HogWeedGo.serializers import ReportSerializer
 
 
@@ -88,6 +88,16 @@ class ReportPhotoInline(admin.StackedInline):
         return False
 
 
+class CommentInline(admin.StackedInline):
+    fields = ["text"]
+
+    model = Comment
+    extra = 0
+
+    def has_add_permission(self, request, obj):
+        return False
+
+
 class ExactTypeListFilter(admin.SimpleListFilter):
     title = "Type"
 
@@ -109,7 +119,7 @@ class ReportAdmin(LeafletGeoAdmin):
 
     date_hierarchy = "date"
     readonly_fields = ["date", "subs"]
-    inlines = [ReportPhotoInline]
+    inlines = [ReportPhotoInline, CommentInline]
 
     list_display = ("name", "date", "user_name", "status")
     list_editable = ["status"]
@@ -122,7 +132,7 @@ class ReportAdmin(LeafletGeoAdmin):
             "fields": (("name", "subs"), ("address", "date"), "type", "status")
         }),
         (None, {
-            "fields": ("place", "comment"),
+            "fields": ("place", "init_comment"),
             "classes": ["wide"]
         })
     )

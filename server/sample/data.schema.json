@@ -37,20 +37,28 @@
       "type": "object",
       "properties": {
         "address": { "type": "string", "maxLength": 128 },
-        "comment": { "type": "string", "maxLength": 1024 },
+        "init_comment": { "type": "string", "maxLength": 2048 },
         "date": { "type": "integer" },
         "name": { "type": "string", "maxLength": 32 },
         "place": { "$ref": "#/$defs/place" },
         "status": { "enum": [ "RECEIVED", "APPROVED", "INVALID" ], "maxLength": 8 },
-        "subs": { "type": [ "string", "null" ], "format": "email" },
+        "subs": {
+          "$comment": "Note! Items are e-mail addresses of users in bundled file and id of user in API",
+          "type": [ "string", "null" ],
+          "format": "email"
+        },
         "type": { "type": "string", "maxLength": 64 },
         "photos": {
           "$comment": "Note! Items are SHA64 of photos in bundled file and path to static folder in API",
           "type": "array",
           "items": { "type": "string" }
+        },
+        "comments": {
+          "type": "array",
+          "items": { "type": "#/$defs/comment" }
         }
       },
-      "required": [ "address", "comment", "date", "name", "place", "status", "subs", "type", "photos" ],
+      "required": [ "address", "init_comment", "date", "name", "place", "status", "subs", "type", "photos", "comments" ],
       "additionalProperties": false
     },
 
@@ -62,6 +70,21 @@
         "lng": { "type": "number" }
       },
       "required": [ "lat", "lng" ],
+      "additionalProperties": false
+    },
+
+    "comment": {
+      "description": "A comment, added to a report by another user",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "maxLength": 2048 },
+        "subs": {
+          "$comment": "Note! Items are e-mail addresses of users in bundled file and id of user in API",
+          "type": [ "string", "null" ],
+          "format": "email"
+        }
+      },
+      "required": [ "text", "subs" ],
       "additionalProperties": false
     }
   }

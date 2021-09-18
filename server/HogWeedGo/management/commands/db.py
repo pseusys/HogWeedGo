@@ -32,7 +32,7 @@ class Command(BaseCommand):
             if "reports" in json_data:
                 for report in json_data["reports"]:
                     try:
-                        self.stdout.write(self.style.SUCCESS(f"{ ReportSerializer.parse(report) } saved!"))
+                        self.stdout.write(self.style.SUCCESS(f"{ ReportSerializer.parse(report, subscribe_email=True) } saved!"))
                     except IntegrityError:
                         self.stdout.write(self.style.NOTICE("Integrity problem, some of the reports already present!"))
 
@@ -44,8 +44,8 @@ class Command(BaseCommand):
     def dump(self):
         self.stdout.write(self.style.WARNING(f"Dumping { User.objects.count() } users and { Report.objects.count() } reports."))
         return json.dumps({
-            "users": [UserSerializer.encode(user, True) for user in User.objects.all()],
-            "reports": [ReportSerializer.encode(report, True) for report in Report.objects.all()]
+            "users": [UserSerializer.encode(user, bundle_photo=True) for user in User.objects.all()],
+            "reports": [ReportSerializer.encode(report, bundle_photos=True, subscribe_email=True) for report in Report.objects.all()]
         }, indent=2)
 
     def handle(self, *args, **options):

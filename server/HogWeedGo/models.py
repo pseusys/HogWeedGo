@@ -61,7 +61,7 @@ class Report(models.Model):
         verbose_name = "Report"
 
     address = models.CharField(max_length=128, help_text=_("Address defined by user. May be just a geo-related recommendation."), default="")
-    comment = models.CharField(max_length=1024, help_text=_("User comment about the report."), default="")
+    init_comment = models.TextField(max_length=2048, help_text=_("User comment about the report."), default="")
     date = models.DateTimeField(default=timezone.now, help_text=_("Date specified by user for his observation."))
     name = models.CharField(max_length=32, help_text=_("The name of the report marker on map."), default="")
     place = models.PointField()
@@ -102,3 +102,15 @@ class ReportPhoto(models.Model):
 
     def __str__(self):
         return f"ReportPhoto (report { self.report.id }) with id { self.id }"
+
+
+class Comment(models.Model):
+    class Meta:
+        verbose_name = "Comment"
+
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    subs = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    text = models.TextField(max_length=2048, help_text=_("A comment, added to a report by another user."), default="")
+
+    def __str__(self):
+        return f"Comment (report { self.report.id }) with id { self.id }"
