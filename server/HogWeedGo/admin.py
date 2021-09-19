@@ -3,7 +3,7 @@ import tempfile
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.http import HttpResponseRedirect, FileResponse, HttpResponse
+from django.http import HttpResponseRedirect, FileResponse
 from django.shortcuts import redirect
 from leaflet.admin import LeafletGeoAdmin
 
@@ -88,7 +88,7 @@ class ReportPhotoInline(admin.StackedInline):
         return False
 
 
-class CommentInline(admin.StackedInline):
+class CommentInline(admin.TabularInline):
     fields = ["subs", "text"]
     readonly_fields = ["subs"]
 

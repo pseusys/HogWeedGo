@@ -32,7 +32,7 @@ class Command(BaseCommand):
             if "reports" in json_data:
                 for report in json_data["reports"]:
                     try:
-                        self.stdout.write(self.style.SUCCESS(f"{ ReportSerializer.parse(report, subscribe_email=True) } saved!"))
+                        self.stdout.write(self.style.SUCCESS(f"{ ReportSerializer.parse(report) } saved!"))
                     except IntegrityError:
                         self.stdout.write(self.style.NOTICE("Integrity problem, some of the reports already present!"))
 
