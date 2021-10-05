@@ -56,13 +56,11 @@ class ReportStatuses(models.TextChoices):
 class Report(models.Model):
     class Meta:
         unique_together = [["subs", "date"]]
-        indexes = [models.Index(fields=["name"])]
         verbose_name = "Report"
 
     address = models.CharField(max_length=128, help_text=_("Address defined by user. May be just a geo-related recommendation."))
     init_comment = models.TextField(max_length=2048, help_text=_("User comment about the report."))
     date = models.DateTimeField(help_text=_("Date specified by user for his observation."))
-    name = models.CharField(max_length=32, help_text=_("The name of the report marker on map."))
     place = models.PointField()
     status = models.CharField(max_length=8, choices=ReportStatuses.choices, help_text=_("Report status."))
     subs = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, help_text=_("The sender of the report, subscription."))

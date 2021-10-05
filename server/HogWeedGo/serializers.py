@@ -115,7 +115,6 @@ class ReportSerializer(Serializer):
             "address": model.address,
             "init_comment": model.init_comment,
             "date": _from_datetime(model.date),
-            "name": model.name,
             "status": model.status,
             "subs": (model.subs.email if subscribe_email else model.subs.id) if model.subs else None,
             "type": model.type

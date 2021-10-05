@@ -1,5 +1,5 @@
 **/__pycache__/*
-HogWeedGo/migrations/*
+HogWeedGo/migrations
 venv/*
 .idea/*
 
@@ -7,8 +7,6 @@ sample/*
 !sample/sample_*.json
 !sample/data.schema.json
 
-static/report_photos
-static/user_photos
-HogWeedGo/static
+static
 
 settings.json

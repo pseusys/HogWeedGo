@@ -122,15 +122,14 @@ class ReportAdmin(LeafletGeoAdmin):
     readonly_fields = ["date", "subs"]
     inlines = [ReportPhotoInline, CommentInline]
 
-    list_display = ("name", "date", "user_name", "status")
+    list_display = ("date", "user_name", "status")
     list_editable = ["status"]
     list_filter = ("status", ExactTypeListFilter)
-    search_fields = ["name"]
     actions = [dump]
 
     fieldsets = (
         (None, {
-            "fields": (("name", "subs"), ("address", "date"), "type", "status")
+            "fields": (("address", "date"), "type", ("status", "subs"))
         }),
         (None, {
             "fields": ("place", "init_comment"),

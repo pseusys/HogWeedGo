@@ -39,7 +39,6 @@
         "address": { "type": "string", "maxLength": 128 },
         "init_comment": { "type": "string", "maxLength": 2048 },
         "date": { "type": "integer" },
-        "name": { "type": "string", "maxLength": 32 },
         "place": { "$ref": "#/$defs/place" },
         "status": { "enum": [ "RECEIVED", "APPROVED", "INVALID" ], "maxLength": 8 },
         "subs": {

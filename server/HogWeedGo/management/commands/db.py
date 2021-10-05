@@ -64,7 +64,8 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING("User photos folders deletion skipped - folder not present."))
             return
 
-        options.setdefault("file", f"./sample/data.{ 'json.gzip' if options['gzip'] else 'json' }")
+        if options["file"] is None:
+            options["file"] = f"./sample/data.{ 'json.gzip' if options['gzip'] else 'json' }"
 
         if options["mode"] == "load":
             try:
