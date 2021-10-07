@@ -4,7 +4,7 @@ import 'main_drawer.dart';
 
 
 class AboutPage extends StatefulWidget {
-  const AboutPage({Key? key}) : super(key: key);
+  const AboutPage({Key? key}): super(key: key);
 
   final String title = "About";
   static const String route = "/about";

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'extensions.dart';
 import 'map_page.dart';
-import 'settings_page.dart';
+import 'account_page.dart';
 import 'about_page.dart';
 
 
@@ -15,9 +15,18 @@ class MainDrawer extends StatelessWidget {
         child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              const DrawerHeader(
-                  decoration: BoxDecoration(color: Colors.blue),
-                  child: Text('Drawer Header', style: TextStyle(color: Colors.white, fontSize: 24))
+              DrawerHeader(
+                  decoration: const BoxDecoration(color: Colors.blue),
+                  child: Center(child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: const [
+                        CircleAvatar(
+                            radius: 40,
+                            backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                        ),
+                        Text('Drawer Header', style: TextStyle(color: Colors.white, fontSize: 24))
+                      ]
+                  ))
               ),
 
               ListTile(
@@ -27,9 +36,9 @@ class MainDrawer extends StatelessWidget {
               ),
 
               ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text("Settings"),
-                  onTap: () => Navigator.of(context).popAllAndPushNamed(SettingsPage.route)
+                  leading: const Icon(Icons.account_circle),
+                  title: const Text("Account"),
+                  onTap: () => Navigator.of(context).popAllAndPushNamed(AccountPage.route)
               ),
 
               ListTile(
@@ -44,7 +53,7 @@ class MainDrawer extends StatelessWidget {
                   onTap: () => Navigator.pop(context)
               ),
 
-              const ListTile(title: Text("version..."))
+              const ListTile(title: Center(child: Text("version...")))
             ]
         )
     );

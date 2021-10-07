@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'main_drawer.dart';
+import 'report_page.dart';
+import 'report_view.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -18,14 +22,77 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   LatLng? _me;
+  set me (Position? p) { if (p != null) setState(() => _me = LatLng(p.latitude, p.longitude)); }
 
-  void _setMe(Position? p) => setState(() { _me = p != null ? LatLng(p.latitude, p.longitude) : null; });
+  late StreamSubscription me_stream;
 
   @override
   void initState() {
     super.initState();
-    Geolocator.getCurrentPosition().then((value) => _setMe(value)).catchError((e) => print("No location provided!"));
-    Geolocator.getPositionStream().listen((Position? p) => _setMe(p)).onError((e) => print("No location provided!"));
+    Geolocator.getCurrentPosition().then((value) => me = value).catchError((e) => print("No location provided!"));
+    me_stream = Geolocator.getPositionStream().listen((Position? p) => me = p)
+      ..onError((e) => print("No location received!"));
+  }
+
+  @override
+  void dispose() {
+    me_stream.cancel();
+    super.dispose();
+  }
+
+  Marker _generateMarker(BuildContext context) => Marker(
+      width: 40.0, 
+      height: 40.0,
+      point: LatLng(59.937500, 30.308611),
+      builder: (ctx) => MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+              onTap: () => showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) => const ReportView(),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                  isScrollControlled: true
+              ),
+              child: const FlutterLogo(textColor: Colors.green)
+          )
+      )
+  );
+
+  Scaffold _showMap(BuildContext context) {
+    return Scaffold(
+        body: FlutterMap(
+            options: MapOptions(
+                center: LatLng(59.937500, 30.308611),
+                zoom: 9.0,
+                minZoom: 1.0
+            ),
+
+            layers: [
+              TileLayerOptions(
+                  urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              ),
+
+              MarkerLayerOptions(
+                  markers: [
+                    _generateMarker(context),
+
+                    if (_me != null) Marker(
+                        width: 40.0,
+                        height: 40.0,
+                        point: _me!,
+                        builder: (ctx) => const FlutterLogo()
+                    )
+                  ]
+              )
+            ]
+        ),
+
+        floatingActionButton: FloatingActionButton(
+            onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route),
+            tooltip: "Report!",
+            child: const Icon(Icons.add)
+        )
+    );
   }
 
   @override
@@ -33,34 +100,8 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
         appBar: AppBar(title: Text(widget.title)),
 
-        body: FlutterMap(
-          options: MapOptions(
-            center: LatLng(59.937500, 30.308611),
-            zoom: 9.0,
-            minZoom: 1.0
-          ),
-
-          layers: [
-            TileLayerOptions(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            ),
-            MarkerLayerOptions(
-              markers: [
-                if (_me != null) Marker(
-                    width: 80.0,
-                    height: 80.0,
-                    point: _me!,
-                    builder: (ctx) => const FlutterLogo()
-                )
-              ]
-            )
-          ]
-        ),
-
-        floatingActionButton: FloatingActionButton(
-            onPressed: () {},
-            tooltip: 'Increment',
-            child: const Icon(Icons.add)
+        body: Navigator(
+            onGenerateRoute: (RouteSettings s) => MaterialPageRoute(builder: (BuildContext c) => _showMap(c), settings: s)
         ),
 
         drawer: const MainDrawer()

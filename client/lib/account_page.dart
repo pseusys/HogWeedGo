@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'main_drawer.dart';
 
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+class AccountPage extends StatefulWidget {
+  const AccountPage({Key? key}) : super(key: key);
 
-  final String title = "Settings";
-  static const String route = "/settings";
+  final String title = "Account";
+  static const String route = "/account";
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<AccountPage> createState() => _AccountPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

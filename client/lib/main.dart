@@ -3,7 +3,8 @@ import 'package:geolocator/geolocator.dart';
 
 import 'about_page.dart';
 import 'map_page.dart';
-import 'settings_page.dart';
+import 'account_page.dart';
+import 'report_page.dart';
 
 
 void _check_permissions() async {
@@ -46,8 +47,10 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(primarySwatch: Colors.blue),
         routes: {
           MapPage.route: (context) => const MapPage(),
-          SettingsPage.route: (context) => const SettingsPage(),
-          AboutPage.route: (context) => const AboutPage()
+          AccountPage.route: (context) => const AccountPage(),
+          AboutPage.route: (context) => const AboutPage(),
+
+          ReportPage.route: (context) => const ReportPage()
         }
     );
   }
