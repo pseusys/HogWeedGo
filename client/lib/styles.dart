@@ -1,3 +1,3 @@
 // margins
-// image sizes
+// image (user and map marker) sizes
 // font sizes

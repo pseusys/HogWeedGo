@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
-        initialRoute: AuthPage.route,
+        initialRoute: MapPage.route,
         theme: ThemeData(primarySwatch: Colors.blue),
         routes: {
           MapPage.route: (context) => const MapPage(),
