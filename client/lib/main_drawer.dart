@@ -24,7 +24,7 @@ class MainDrawer extends StatelessWidget {
                             radius: 40,
                             backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
                         ),
-                        Text('Drawer Header', style: TextStyle(color: Colors.white, fontSize: 24))
+                        Text('Drawer Header', /* style: TextStyle(color: Colors.white, fontSize: 24) */)
                       ]
                   ))
               ),

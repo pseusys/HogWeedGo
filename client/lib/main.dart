@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'about_page.dart';
 import 'map_page.dart';
 import 'account_page.dart';
+import 'auth_page.dart';
 import 'report_page.dart';
 
 
@@ -43,13 +44,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
-        initialRoute: MapPage.route,
+        initialRoute: AuthPage.route,
         theme: ThemeData(primarySwatch: Colors.blue),
         routes: {
           MapPage.route: (context) => const MapPage(),
           AccountPage.route: (context) => const AccountPage(),
           AboutPage.route: (context) => const AboutPage(),
 
+          AuthPage.route: (context) => const AuthPage(),
           ReportPage.route: (context) => const ReportPage()
         }
     );
