@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'const.dart';
+
 
 class AuthPage extends StatefulWidget {
   const AuthPage({Key? key}): super(key: key);
@@ -24,13 +26,13 @@ class _AuthPageState extends State<AuthPage> {
 
   Widget _authForm() {
     return Container(
-        margin: const EdgeInsets.all(20.0),
+        margin: const EdgeInsets.all(margins),
         child: Form(
             key: _formKey,
             child: Column(
                 children: [
-                  Text(_noAccount ? "Sign in" : "Log in"),
-                  const SizedBox(height: 10),
+                  Text(_noAccount ? "Sign in" : "Log in", style: Theme.of(context).textTheme.headline5),
+                  const SizedBox(height: margins / 2),
 
                   TextFormField(
                       decoration: const InputDecoration(hintText: 'Email'),
@@ -44,7 +46,7 @@ class _AuthPageState extends State<AuthPage> {
                       },
                       onSaved: (String? value) => email = value ?? ""
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: margins / 2),
 
                   TextFormField(
                       controller: _passwordController,
@@ -57,7 +59,7 @@ class _AuthPageState extends State<AuthPage> {
                       },
                       onSaved: (String? value) => password = value ?? ""
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: margins / 2),
 
                   if (_noAccount) TextFormField(
                       decoration: const InputDecoration(hintText: 'Validation'),
@@ -69,7 +71,7 @@ class _AuthPageState extends State<AuthPage> {
                         else { return null; }
                       }
                   ),
-                  SizedBox(height: _noAccount ? 20 : 10),
+                  SizedBox(height: margins / (_noAccount ? 1 : 2)),
 
                   ElevatedButton(
                     onPressed: (!_noAccount || _createAccount) ? () {
@@ -92,13 +94,10 @@ class _AuthPageState extends State<AuthPage> {
         appBar: AppBar(title: Text(widget.title)),
 
         body: Container(
-            margin: const EdgeInsets.all(20.0),
+            margin: const EdgeInsets.symmetric(vertical: margins, horizontal: margins * 2),
             child: Column(
                 children: [
-                  Container(
-                      margin: const EdgeInsets.all(20.0),
-                      child: const Text("Become a volunteer!")
-                  ),
+                  Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
 
                   Align(
                       alignment: Alignment.centerRight,
@@ -109,7 +108,7 @@ class _AuthPageState extends State<AuthPage> {
                   ),
 
                   Container(
-                      margin: const EdgeInsets.all(20.0),
+                      margin: const EdgeInsets.only(top: margins, bottom: margins),
                       child: Card(child: _authForm())
                   ),
 

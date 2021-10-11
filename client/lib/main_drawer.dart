@@ -4,6 +4,7 @@ import 'extensions.dart';
 import 'map_page.dart';
 import 'account_page.dart';
 import 'about_page.dart';
+import 'const.dart';
 
 
 class MainDrawer extends StatelessWidget {
@@ -16,15 +17,15 @@ class MainDrawer extends StatelessWidget {
             padding: EdgeInsets.zero,
             children: [
               DrawerHeader(
-                  decoration: const BoxDecoration(color: Colors.blue),
+                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                   child: Center(child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        CircleAvatar(
-                            radius: 40,
+                      children: [
+                        const CircleAvatar(
+                            radius: picture,
                             backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
                         ),
-                        Text('Drawer Header', /* style: TextStyle(color: Colors.white, fontSize: 24) */)
+                        Text('Drawer Header', style: Theme.of(context).primaryTextTheme.headline6)
                       ]
                   ))
               ),

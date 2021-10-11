@@ -8,6 +8,9 @@ import 'package:latlong2/latlong.dart';
 import 'main_drawer.dart';
 import 'report_page.dart';
 import 'report_view.dart';
+import 'const.dart';
+
+const marker = picture / 2;
 
 
 class MapPage extends StatefulWidget {
@@ -41,8 +44,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Marker _generateMarker(BuildContext context) => Marker(
-      width: 40.0, 
-      height: 40.0,
+      width: marker,
+      height: marker,
       point: LatLng(59.937500, 30.308611),
       builder: (ctx) => MouseRegion(
           cursor: SystemMouseCursors.click,
@@ -77,8 +80,8 @@ class _MapPageState extends State<MapPage> {
                     _generateMarker(context),
 
                     if (_me != null) Marker(
-                        width: 40.0,
-                        height: 40.0,
+                        width: marker,
+                        height: marker,
                         point: _me!,
                         builder: (ctx) => const FlutterLogo()
                     )
