@@ -6,8 +6,8 @@ import 'main_drawer.dart';
 class AccountPage extends StatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
 
-  final String title = "Account";
-  static const String route = "/account";
+  final title = "Account";
+  static const route = "/account";
 
   @override
   State<AccountPage> createState() => _AccountPageState();

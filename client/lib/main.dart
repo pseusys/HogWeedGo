@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'about_page.dart';
+import 'fullscreen_page.dart';
 import 'map_page.dart';
 import 'account_page.dart';
 import 'auth_page.dart';
+import 'none_page.dart';
 import 'report_page.dart';
 
 
@@ -38,7 +40,7 @@ void _check_permissions() async {
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}): super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +49,18 @@ class MyApp extends StatelessWidget {
         initialRoute: MapPage.route,
         theme: ThemeData(),
         routes: {
-          MapPage.route: (context) => const MapPage(),
-          AccountPage.route: (context) => const AccountPage(),
-          AboutPage.route: (context) => const AboutPage(),
+          MapPage.route: (_) => const MapPage(),
+          AccountPage.route: (_) => const AccountPage(),
+          AboutPage.route: (_) => const AboutPage(),
 
-          AuthPage.route: (context) => const AuthPage(),
-          ReportPage.route: (context) => const ReportPage()
+          AuthPage.route: (_) => const AuthPage(),
+          ReportPage.route: (_) => const ReportPage(),
+        },
+        onGenerateRoute: (RouteSettings settings) {
+          if ((settings.name != null) && settings.name!.startsWith(FullscreenPage.route)) {
+            String link = settings.name!.replaceFirst(FullscreenPage.route, "");
+            return MaterialPageRoute(builder: (_) => FullscreenPage(link));
+          } else { return MaterialPageRoute(builder: (_) => const NonePage()); }
         }
     );
   }

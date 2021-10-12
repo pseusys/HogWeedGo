@@ -54,7 +54,10 @@ class MainDrawer extends StatelessWidget {
                   onTap: () => Navigator.pop(context)
               ),
 
-              const ListTile(title: Center(child: Text("version...")))
+              const ListTile(
+                  title: Center(child: Text("version...")),
+                  // onTap: () => Navigator.of(context).popAndPushNamed("ita" + 'https://via.placeholder.com/140x100')
+              )
             ]
         )
     );

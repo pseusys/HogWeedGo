@@ -16,8 +16,8 @@ const marker = picture / 2;
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
 
-  final String title = "Map View";
-  static const String route = "/map";
+  final title = "Map View";
+  static const route = "/map";
 
   @override
   State<MapPage> createState() => _MapPageState();

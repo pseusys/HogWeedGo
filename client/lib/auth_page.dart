@@ -6,8 +6,8 @@ import 'const.dart';
 class AuthPage extends StatefulWidget {
   const AuthPage({Key? key}): super(key: key);
 
-  final String title = "Authentication";
-  static const String route = "/auth";
+  final title = "Authentication";
+  static const route = "/auth";
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -16,11 +16,11 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool _noAccount = true;
-  bool _createAccount = false;
+  var _noAccount = true;
+  var _createAccount = false;
 
-  String email = "";
-  String password = "";
+  var email = "";
+  var password = "";
 
   final TextEditingController _passwordController = TextEditingController();
 
@@ -80,7 +80,7 @@ class _AuthPageState extends State<AuthPage> {
                         // TODO: login!
                       }
                     } : null,
-                    child: const Text('Submit'),
+                    child: const Text('Submit')
                   )
                 ]
             )
