@@ -11,7 +11,7 @@ import 'package:client/pages/report.dart';
 import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
 
-const marker = picture / 2;
+const marker = picture * 2 / 3;
 
 
 class MapPage extends StatefulWidget {
@@ -28,19 +28,19 @@ class _MapPageState extends State<MapPage> {
   LatLng? _me;
   set me (Position? p) { if (p != null) setState(() => _me = LatLng(p.latitude, p.longitude)); }
 
-  late final StreamSubscription _me_stream;
+  late final StreamSubscription _meStream;
 
   @override
   void initState() {
     super.initState();
     Geolocator.getCurrentPosition().then((value) => me = value).catchError((e) => print("No location provided!"));
-    _me_stream = Geolocator.getPositionStream().listen((Position? p) => me = p)
+    _meStream = Geolocator.getPositionStream().listen((Position? p) => me = p)
       ..onError((e) => print("No location received!"));
   }
 
   @override
   void dispose() {
-    _me_stream.cancel();
+    _meStream.cancel();
     super.dispose();
   }
 

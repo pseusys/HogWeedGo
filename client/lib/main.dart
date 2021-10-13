@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
 
         onGenerateRoute: (RouteSettings settings) {
           if ((settings.name != null) && settings.name!.startsWith(FullscreenPage.route)) {
-            String link = settings.name!.replaceFirst(FullscreenPage.route, "");
+            String link = settings.name!.substring(FullscreenPage.route.length);
             return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
           } else { return MaterialPageRoute(builder: (_) => const NonePage()); }
         }
