@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'const.dart';
+import 'package:client/misc/const.dart';
 
 
 class NonePage extends StatelessWidget {

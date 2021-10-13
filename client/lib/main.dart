@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+
 import 'package:geolocator/geolocator.dart';
 
-import 'about_page.dart';
-import 'fullscreen_page.dart';
-import 'map_page.dart';
-import 'account_page.dart';
-import 'auth_page.dart';
-import 'none_page.dart';
-import 'report_page.dart';
+import 'package:client/pages/about.dart';
+import 'package:client/pages/fullscreen.dart';
+import 'package:client/pages/map.dart';
+import 'package:client/pages/account.dart';
+import 'package:client/pages/auth.dart';
+import 'package:client/pages/none.dart';
+import 'package:client/pages/report.dart';
 
 
 void _check_permissions() async {
@@ -42,13 +43,17 @@ void main() => runApp(const MyApp());
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  static const route = "/";
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
         initialRoute: MapPage.route,
         theme: ThemeData(),
+
         routes: {
+          route: (_) => const MapPage(),
           MapPage.route: (_) => const MapPage(),
           AccountPage.route: (_) => const AccountPage(),
           AboutPage.route: (_) => const AboutPage(),
@@ -56,10 +61,11 @@ class MyApp extends StatelessWidget {
           AuthPage.route: (_) => const AuthPage(),
           ReportPage.route: (_) => const ReportPage(),
         },
+
         onGenerateRoute: (RouteSettings settings) {
           if ((settings.name != null) && settings.name!.startsWith(FullscreenPage.route)) {
             String link = settings.name!.replaceFirst(FullscreenPage.route, "");
-            return MaterialPageRoute(builder: (_) => FullscreenPage(link));
+            return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
           } else { return MaterialPageRoute(builder: (_) => const NonePage()); }
         }
     );

@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'main_drawer.dart';
-import 'report_page.dart';
-import 'report_view.dart';
-import 'const.dart';
+import 'package:client/views/main_drawer.dart';
+import 'package:client/pages/report.dart';
+import 'package:client/views/report_view.dart';
+import 'package:client/misc/const.dart';
 
 const marker = picture / 2;
 
@@ -27,19 +28,19 @@ class _MapPageState extends State<MapPage> {
   LatLng? _me;
   set me (Position? p) { if (p != null) setState(() => _me = LatLng(p.latitude, p.longitude)); }
 
-  late StreamSubscription me_stream;
+  late final StreamSubscription _me_stream;
 
   @override
   void initState() {
     super.initState();
     Geolocator.getCurrentPosition().then((value) => me = value).catchError((e) => print("No location provided!"));
-    me_stream = Geolocator.getPositionStream().listen((Position? p) => me = p)
+    _me_stream = Geolocator.getPositionStream().listen((Position? p) => me = p)
       ..onError((e) => print("No location received!"));
   }
 
   @override
   void dispose() {
-    me_stream.cancel();
+    _me_stream.cancel();
     super.dispose();
   }
 

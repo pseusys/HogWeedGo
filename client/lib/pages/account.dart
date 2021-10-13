@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'main_drawer.dart';
+import 'package:client/views/main_drawer.dart';
 
 
 class AccountPage extends StatefulWidget {

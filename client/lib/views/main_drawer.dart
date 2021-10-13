@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'extensions.dart';
-import 'map_page.dart';
-import 'account_page.dart';
-import 'about_page.dart';
-import 'const.dart';
+import 'package:client/pages/fullscreen.dart';
+import 'package:client/pages/auth.dart';
+import 'package:client/misc/extensions.dart';
+import 'package:client/pages/map.dart';
+import 'package:client/pages/account.dart';
+import 'package:client/pages/about.dart';
+import 'package:client/misc/const.dart';
 
 
 class MainDrawer extends StatelessWidget {
@@ -23,7 +25,7 @@ class MainDrawer extends StatelessWidget {
                       children: [
                         const CircleAvatar(
                             radius: picture,
-                            backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                            backgroundImage: NetworkImage('https://i.imgur.com/koOENqs.jpeg')
                         ),
                         Text('Drawer Header', style: Theme.of(context).primaryTextTheme.headline6)
                       ]
@@ -54,9 +56,10 @@ class MainDrawer extends StatelessWidget {
                   onTap: () => Navigator.pop(context)
               ),
 
-              const ListTile(
+              ListTile(
                   title: Center(child: Text("version...")),
-                  // onTap: () => Navigator.of(context).popAndPushNamed("ita" + 'https://via.placeholder.com/140x100')
+                  //onTap: () => Navigator.of(context).popAllAndPushNamed(AuthPage.route)
+                  onTap: () => Navigator.of(context).pushNamed(FullscreenPage.route + 'https://i.imgur.com/VuDy0D9.jpg')
               )
             ]
         )

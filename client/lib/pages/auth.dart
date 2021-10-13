@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'const.dart';
+import 'package:client/misc/const.dart';
 
 
 class AuthPage extends StatefulWidget {
@@ -36,9 +36,8 @@ class _AuthPageState extends State<AuthPage> {
 
                   TextFormField(
                       decoration: const InputDecoration(hintText: 'Email'),
-                      obscureText: true,
-                      enableSuggestions: false,
                       autocorrect: false,
+                      initialValue: email,
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter valid email!';
@@ -51,6 +50,8 @@ class _AuthPageState extends State<AuthPage> {
                   TextFormField(
                       controller: _passwordController,
                       decoration: const InputDecoration(hintText: 'Password'),
+                      obscureText: true,
+                      enableSuggestions: false,
                       autocorrect: false,
                       validator: (String? value) {
                         if (value == null || value.isEmpty) {
