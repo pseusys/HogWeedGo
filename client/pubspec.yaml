@@ -32,8 +32,10 @@ dependencies:
 
   flutter_map: any
   geolocator: any
+
   cached_network_image: any
-  path_provider: any
+
+  image_gallery_saver: any
   images_picker: any
 
 dev_dependencies:

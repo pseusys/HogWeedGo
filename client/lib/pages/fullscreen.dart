@@ -6,7 +6,9 @@ import 'package:flutter/services.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:client/io/io.dart';
+import 'package:client/io/none.dart'
+  if (dart.library.io) 'package:client/io/mobile.dart'
+  if (dart.library.html) 'package:client/io/web.dart';
 
 
 class FullscreenPage extends StatefulWidget {
@@ -84,7 +86,7 @@ class _FullscreenPageState extends State<FullscreenPage> {
         ),
 
         floatingActionButton: FloatingActionButton(
-            onPressed: () => IO().saveFileFromUri(widget.link, _link),
+            onPressed: () => saveFileFromUri(widget.link, _link),
             tooltip: "Save",
             child: const Icon(Icons.save)
         )
