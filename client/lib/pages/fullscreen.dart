@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:client/io/none.dart'
-  if (dart.library.io) 'package:client/io/mobile.dart'
-  if (dart.library.html) 'package:client/io/web.dart';
+import 'package:client/download_image/none.dart'
+  if (dart.library.io) 'package:client/download_image/mobile.dart'
+  if (dart.library.html) 'package:client/download_image/web.dart';
 
 
 class FullscreenPage extends StatefulWidget {
