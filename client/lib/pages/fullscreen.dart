@@ -46,11 +46,11 @@ class _FullscreenPageState extends State<FullscreenPage> {
   void _zoom() {
     _scale = (_scale + 1) % 3;
     switch (_scale.round()) {
-      case 0: { _trans = Offset.zero; }
+      case 0: _trans = Offset.zero;
       break;
-      case 1: { _trans = Offset(-_position.dx, -_position.dy); }
+      case 1: _trans = Offset(-_position.dx, -_position.dy);
       break;
-      case 2: { _trans = Offset(-_position.dx, -_position.dy) * 3; }
+      case 2: _trans = Offset(-_position.dx, -_position.dy) * 3;
       break;
     }
   }

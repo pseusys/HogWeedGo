@@ -35,7 +35,7 @@ dependencies:
 
   cached_network_image: any
 
-  image_gallery_saver: any
+  gallery_saver: any
   images_picker: any
 
 dev_dependencies:
