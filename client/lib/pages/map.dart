@@ -11,7 +11,7 @@ import 'package:client/pages/report.dart';
 import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
 
-const marker = picture * 2/3;
+const marker = picture * 2 / 3;
 
 
 class MapPage extends StatefulWidget {
