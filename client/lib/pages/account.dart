@@ -17,11 +17,11 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(title: Text(widget.title)),
 
-        body: const Center(),
+      body: const Center(),
 
-        drawer: const MainDrawer()
+      drawer: const MainDrawer(),
     );
   }
 }

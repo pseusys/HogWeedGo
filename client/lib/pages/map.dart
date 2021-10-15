@@ -45,70 +45,68 @@ class _MapPageState extends State<MapPage> {
   }
 
   Marker _generateMarker(BuildContext context) => Marker(
-      width: marker,
-      height: marker,
-      point: LatLng(59.937500, 30.308611),
-      builder: (ctx) => MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-              onTap: () => showModalBottomSheet<void>(
-                  context: context,
-                  builder: (BuildContext context) => const ReportView(),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                  isScrollControlled: true
-              ),
-              child: const FlutterLogo(textColor: Colors.green)
-          )
-      )
+    width: marker,
+    height: marker,
+    point: LatLng(59.937500, 30.308611),
+    builder: (ctx) => MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => showModalBottomSheet<void>(
+          context: context,
+          builder: (BuildContext context) => const ReportView(),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          isScrollControlled: true,
+        ),
+        child: const FlutterLogo(textColor: Colors.green),
+      ),
+    ),
   );
 
   Scaffold _showMap(BuildContext context) {
     return Scaffold(
-        body: FlutterMap(
-            options: MapOptions(
-                center: LatLng(59.937500, 30.308611),
-                zoom: 9.0,
-                minZoom: 1.0
-            ),
-
-            layers: [
-              TileLayerOptions(
-                  urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-              ),
-
-              MarkerLayerOptions(
-                  markers: [
-                    _generateMarker(context),
-
-                    if (_me != null) Marker(
-                        width: marker,
-                        height: marker,
-                        point: _me!,
-                        builder: (ctx) => const FlutterLogo()
-                    )
-                  ]
-              )
-            ]
+      body: FlutterMap(
+        options: MapOptions(
+          center: LatLng(59.937500, 30.308611),
+          zoom: 9.0,
+          minZoom: 1.0,
         ),
 
-        floatingActionButton: FloatingActionButton(
-            onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route),
-            tooltip: "Report!",
-            child: const Icon(Icons.add)
-        )
+        layers: [
+          TileLayerOptions(urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
+
+          MarkerLayerOptions(
+            markers: [
+              _generateMarker(context),
+
+              if (_me != null) Marker(
+                width: marker,
+                height: marker,
+                point: _me!,
+                builder: (ctx) => const FlutterLogo(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route),
+        tooltip: "Report!",
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(title: Text(widget.title)),
 
-        body: Navigator(
-            onGenerateRoute: (RouteSettings s) => MaterialPageRoute(builder: (BuildContext c) => _showMap(c), settings: s)
-        ),
+      body: Navigator(
+        onGenerateRoute: (RouteSettings s) => MaterialPageRoute(builder: (BuildContext c) => _showMap(c), settings: s),
+      ),
 
-        drawer: const MainDrawer()
+      drawer: const MainDrawer(),
     );
   }
 }

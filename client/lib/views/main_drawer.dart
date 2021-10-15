@@ -34,69 +34,71 @@ class _MainDrawerState extends State<MainDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-        child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const SizedBox(height: margins / 2),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              const CircleAvatar(
-                                  radius: picture,
-                                  backgroundImage: NetworkImage('https://i.imgur.com/koOENqs.jpeg')
-                              ),
-                              Text('Drawer Header', style: Theme.of(context).primaryTextTheme.headline6)
-                            ]
-                        ),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(
-                                  _connected == null ? '⚪ Connecting...' : _connected == true ? '🟢 Online' : '🔴 Offline',
-                                  style: Theme.of(context).primaryTextTheme.bodyText1
-                              )
-                            ]
-                        )
-                      ]
-                  )
-              ),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(height: margins / 2),
 
-              ListTile(
-                  leading: const Icon(Icons.map),
-                  title: const Text("Map"),
-                  onTap: () => Navigator.of(context).popAllAndPushNamed(MapPage.route)
-              ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    const CircleAvatar(
+                      radius: picture,
+                      backgroundImage: NetworkImage('https://i.imgur.com/koOENqs.jpeg'),
+                    ),
+                    Text('Drawer Header', style: Theme.of(context).primaryTextTheme.headline6),
+                  ],
+                ),
 
-              ListTile(
-                  leading: const Icon(Icons.account_circle),
-                  title: const Text("Account"),
-                  onTap: () => Navigator.of(context).popAllAndPushNamed(AccountPage.route)
-              ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      _connected == null ? '⚪ Connecting...' : _connected == true ? '🟢 Online' : '🔴 Offline',
+                      style: Theme.of(context).primaryTextTheme.bodyText1,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
 
-              ListTile(
-                  leading: const Icon(Icons.info),
-                  title: const Text("About"),
-                  onTap: () => Navigator.of(context).popAllAndPushNamed(AboutPage.route)
-              ),
+          ListTile(
+            leading: const Icon(Icons.map),
+            title: const Text("Map"),
+            onTap: () => Navigator.of(context).popAllAndPushNamed(MapPage.route),
+          ),
 
-              ListTile(
-                  leading: const Icon(Icons.feedback),
-                  title: const Text("Feedback"),
-                  onTap: () => Navigator.pop(context)
-              ),
+          ListTile(
+            leading: const Icon(Icons.account_circle),
+            title: const Text("Account"),
+            onTap: () => Navigator.of(context).popAllAndPushNamed(AccountPage.route),
+          ),
 
-              ListTile(
-                  title: Center(child: Text("version...")),
-                  //onTap: () => Navigator.of(context).popAllAndPushNamed(AuthPage.route)
-                  onTap: () => Navigator.of(context).pushNamed(FullscreenPage.route + 'https://i.imgur.com/VuDy0D9.jpg')
-              )
-            ]
-        )
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text("About"),
+            onTap: () => Navigator.of(context).popAllAndPushNamed(AboutPage.route),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.feedback),
+            title: const Text("Feedback"),
+            onTap: () => Navigator.pop(context),
+          ),
+
+          ListTile(
+            title: Center(child: Text("version...")),
+            //onTap: () => Navigator.of(context).popAllAndPushNamed(AuthPage.route)
+            onTap: () => Navigator.of(context).pushNamed(FullscreenPage.route + 'https://i.imgur.com/VuDy0D9.jpg'),
+          ),
+        ],
+      ),
     );
   }
 }

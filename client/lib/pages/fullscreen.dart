@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -92,48 +91,52 @@ class _FullscreenPageState extends State<FullscreenPage> {
   Widget build(BuildContext context) {
     _screen = Offset(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
     return Scaffold(
-        backgroundColor: Colors.black87,
+      backgroundColor: Colors.black87,
 
-        appBar: AppBar(title: Text(_link), backgroundColor: const Color.fromARGB(50, 1, 1, 1), shadowColor: Colors.transparent),
-        extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(_link),
+        backgroundColor: const Color.fromARGB(50, 1, 1, 1),
+        shadowColor: Colors.transparent,
+      ),
+      extendBodyBehindAppBar: true,
 
-        body: Center(
-            child: Image(
-                image: CachedNetworkImageProvider(_link),
-                fit: BoxFit.cover,
-                errorBuilder: (_, Object exception, StackTrace? stackTrace) => const Icon(Icons.error),
-                loadingBuilder: (_, Widget child, ImageChunkEvent? p) {
-                  if (p == null) {
-                    return Transform(
-                        transform: Matrix4.identity()..translate(_trans.dx, _trans.dy)..scale(pow(2, _scale)),
-                        child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                                onPanUpdate: (DragUpdateDetails details) => setState(() => _pan(details.delta)),
-                                onDoubleTapDown: (TapDownDetails details) => _position = details.localPosition,
-                                onDoubleTap: () => setState(() => _zoom()),
-                                child: child
-                            )
-                        )
-                    );
-                  } else { return CircularProgressIndicator(value: _bytes(p)); }
-                }
-            )
+      body: Center(
+        child: Image(
+          image: CachedNetworkImageProvider(_link),
+          fit: BoxFit.cover,
+          errorBuilder: (_, Object exception, StackTrace? stackTrace) => const Icon(Icons.error),
+          loadingBuilder: (_, Widget child, ImageChunkEvent? p) {
+            if (p == null) {
+              return Transform(
+                transform: Matrix4.identity()..translate(_trans.dx, _trans.dy)..scale(pow(2, _scale)),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onPanUpdate: (DragUpdateDetails details) => setState(() => _pan(details.delta)),
+                    onDoubleTapDown: (TapDownDetails details) => _position = details.localPosition,
+                    onDoubleTap: () => setState(() => _zoom()),
+                    child: child,
+                  ),
+                ),
+              );
+            } else { return CircularProgressIndicator(value: _bytes(p)); }
+          },
+        )
 
-              ..image.resolve(const ImageConfiguration()).addListener(
-                  ImageStreamListener((ImageInfo image, bool synchronousCall) {
-                    final imageSize = Offset(image.image.width.toDouble(), image.image.height.toDouble());
-                    final verticalCentered = _screen.dx / _screen.dy < imageSize.dx / imageSize.dy;
-                    _imageSize = imageSize * (verticalCentered ? _screen.dx / imageSize.dx : _screen.dy / imageSize.dy);
-                  })
-              )
+          ..image.resolve(const ImageConfiguration()).addListener(
+            ImageStreamListener((ImageInfo image, bool synchronousCall) {
+              final imageSize = Offset(image.image.width.toDouble(), image.image.height.toDouble());
+              final verticalCentered = _screen.dx / _screen.dy < imageSize.dx / imageSize.dy;
+              _imageSize = imageSize * (verticalCentered ? _screen.dx / imageSize.dx : _screen.dy / imageSize.dy);
+            }),
+          ),
         ),
 
         floatingActionButton: FloatingActionButton(
-            onPressed: () => saveFileFromUri(widget.link, _link),
-            tooltip: "Save",
-            child: const Icon(Icons.save)
-        )
+          onPressed: () => saveFileFromUri(widget.link, _link),
+          tooltip: "Save",
+          child: const Icon(Icons.save),
+        ),
     );
   }
 }

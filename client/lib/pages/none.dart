@@ -12,27 +12,27 @@ class NonePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
+      body: Center(
+        child: Container(
+          margin: const EdgeInsets.only(top: margins, bottom: margins),
+          child: Card(
             child: Container(
-                margin: const EdgeInsets.only(top: margins, bottom: margins),
-                child: Card(
-                    child: Container(
-                        margin: const EdgeInsets.all(margins),
-                        child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text("Shh... just pass by...", style: Theme.of(context).textTheme.headline5),
-                              const SizedBox(height: margins),
-                              ElevatedButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: const Text('Return')
-                              )
-                            ]
-                        )
-                    )
-                )
-            )
-        )
+              margin: const EdgeInsets.all(margins),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Shh... just pass by...", style: Theme.of(context).textTheme.headline5),
+                  const SizedBox(height: margins),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Return'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

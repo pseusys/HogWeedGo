@@ -49,26 +49,26 @@ class HogWeedGo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
-        initialRoute: MapPage.route,
-        theme: ThemeData(),
+      title: 'Flutter Demo',
+      initialRoute: MapPage.route,
+      theme: ThemeData(),
 
-        routes: {
-          route: (_) => const MapPage(),
-          MapPage.route: (_) => const MapPage(),
-          AccountPage.route: (_) => const AccountPage(),
-          AboutPage.route: (_) => const AboutPage(),
+      routes: {
+        route: (_) => const MapPage(),
+        MapPage.route: (_) => const MapPage(),
+        AccountPage.route: (_) => const AccountPage(),
+        AboutPage.route: (_) => const AboutPage(),
 
-          AuthPage.route: (_) => const AuthPage(),
-          ReportPage.route: (_) => const ReportPage(),
-        },
+        AuthPage.route: (_) => const AuthPage(),
+        ReportPage.route: (_) => const ReportPage(),
+      },
 
-        onGenerateRoute: (RouteSettings settings) {
-          if ((settings.name != null) && settings.name!.startsWith(FullscreenPage.route)) {
-            String link = settings.name!.substring(FullscreenPage.route.length);
-            return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
-          } else { return MaterialPageRoute(builder: (_) => const NonePage()); }
-        }
+      onGenerateRoute: (RouteSettings settings) {
+        if ((settings.name != null) && settings.name!.startsWith(FullscreenPage.route)) {
+          String link = settings.name!.substring(FullscreenPage.route.length);
+          return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
+        } else { return MaterialPageRoute(builder: (_) => const NonePage()); }
+      },
     );
   }
 }
