@@ -11,8 +11,7 @@ jobs:
     - name: Checkout 🛎️
       uses: actions/checkout@v2.3.4
       
-    steps:
-    - name: Flutter action
+    - name: Get Flutter 🐦
       uses: subosito/flutter-action@v1
       with:
         flutter-version: '2.5.2'
