@@ -1,9 +1,7 @@
 name: BUILD
 
 on:
-  push:
-    paths:
-      - './**'
+  [ push ]
 
 jobs:
   deploy:
