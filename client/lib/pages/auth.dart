@@ -26,13 +26,13 @@ class _AuthPageState extends State<AuthPage> {
 
   Widget _authForm() {
     return Container(
-      margin: const EdgeInsets.all(margins),
+      margin: const EdgeInsets.all(MARGIN),
       child: Form(
         key: _formKey,
         child: Column(
           children: [
             Text(_noAccount ? "Sign in" : "Log in", style: Theme.of(context).textTheme.headline5),
-            const SizedBox(height: margins / 2),
+            const SizedBox(height: GAP),
 
             TextFormField(
               decoration: const InputDecoration(hintText: 'Email'),
@@ -45,7 +45,7 @@ class _AuthPageState extends State<AuthPage> {
               },
               onSaved: (String? value) => email = value ?? "",
             ),
-            const SizedBox(height: margins / 2),
+            const SizedBox(height: GAP),
 
             TextFormField(
               controller: _passwordController,
@@ -60,7 +60,7 @@ class _AuthPageState extends State<AuthPage> {
               },
               onSaved: (String? value) => password = value ?? "",
             ),
-            const SizedBox(height: margins / 2),
+            const SizedBox(height: GAP),
 
             if (_noAccount) TextFormField(
               decoration: const InputDecoration(hintText: 'Validation'),
@@ -72,7 +72,7 @@ class _AuthPageState extends State<AuthPage> {
                 else { return null; }
               },
             ),
-            SizedBox(height: margins / (_noAccount ? 1 : 2)),
+            SizedBox(height: MARGIN / (_noAccount ? 1 : 2)),
 
             ElevatedButton(
                 onPressed: (!_noAccount || _createAccount) ? () {
@@ -92,10 +92,13 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(widget.title),
+        automaticallyImplyLeading: false,
+      ),
 
       body: Container(
-        margin: const EdgeInsets.symmetric(vertical: margins, horizontal: margins * 2),
+        margin: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
         child: Column(
           children: [
             Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
@@ -109,7 +112,7 @@ class _AuthPageState extends State<AuthPage> {
             ),
 
             Container(
-              margin: const EdgeInsets.only(top: margins, bottom: margins),
+              margin: const EdgeInsets.only(top: MARGIN, bottom: MARGIN),
               child: Card(child: _authForm()),
             ),
 

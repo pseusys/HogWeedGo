@@ -1,17 +1,17 @@
 import 'dart:async';
 
+import 'package:client/main.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:client/views/main_drawer.dart';
 import 'package:client/pages/report.dart';
 import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
-
-const marker = picture * 2 / 3;
+import 'package:client/misc/extensions.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -26,28 +26,31 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   LatLng? _me;
-  set me (Position? p) { if (p != null) setState(() => _me = LatLng(p.latitude, p.longitude)); }
-
-  late final StreamSubscription _meStream;
+  late final StreamSubscription? _meStream;
 
   @override
   void initState() {
     super.initState();
-    Geolocator.getCurrentPosition().then((value) => me = value).catchError((e) => print("No location provided!"));
-    _meStream = Geolocator.getPositionStream().listen((Position? p) => me = p)
-      ..onError((e) => print("No location received!"));
+    HogWeedGo.locationEnabled().then((Location? l) {
+      l?.getLocation().then((LocationData ld) => setState(() {
+        if (ld.getLatLng() != null) _me = ld.getLatLng();
+      }));
+      _meStream = l?.onLocationChanged.listen((LocationData ld) => setState(() {
+        if (ld.getLatLng() != null) _me = ld.getLatLng();
+      }));
+    });
   }
 
   @override
   void dispose() {
-    _meStream.cancel();
+    _meStream?.cancel();
     super.dispose();
   }
 
   Marker _generateMarker(BuildContext context) => Marker(
-    width: marker,
-    height: marker,
-    point: LatLng(59.937500, 30.308611),
+    width: MARKER,
+    height: MARKER,
+    point: STP,
     builder: (ctx) => MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -65,32 +68,24 @@ class _MapPageState extends State<MapPage> {
   Scaffold _showMap(BuildContext context) {
     return Scaffold(
       body: FlutterMap(
-        options: MapOptions(
-          center: LatLng(59.937500, 30.308611),
-          zoom: 9.0,
-          minZoom: 1.0,
-        ),
-
+        options: MapOptions(center: LatLng(59.937500, 30.308611), zoom: 9.0, minZoom: 1.0),
         layers: [
-          TileLayerOptions(urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
-
+          TileLayerOptions(
+            urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+            subdomains: ["a", "b"],
+            attributionBuilder: (_) => const Text("© OpenStreetMap Contributors. Tiles courtesy of Humanitarian OpenStreetMap Team"),
+          ),
           MarkerLayerOptions(
             markers: [
               _generateMarker(context),
-
-              if (_me != null) Marker(
-                width: marker,
-                height: marker,
-                point: _me!,
-                builder: (ctx) => const FlutterLogo(),
-              ),
+              if (_me != null) Marker(width: MARKER, height: MARKER, point: _me!, builder: (c) => const FlutterLogo()),
             ],
           ),
         ],
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me),
         tooltip: "Report!",
         child: const Icon(Icons.add),
       ),
@@ -99,6 +94,9 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: do once!
+    HogWeedGo.ensureLocation(context);
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
 

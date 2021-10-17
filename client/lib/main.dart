@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'package:client/pages/about.dart';
 import 'package:client/pages/fullscreen.dart';
@@ -11,33 +12,6 @@ import 'package:client/pages/none.dart';
 import 'package:client/pages/report.dart';
 
 
-void _check_permissions() async {
-  bool serviceEnabled;
-  LocationPermission permission;
-
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // Location services are not enabled don't continue accessing the position and request users of the App to enable the location services.
-    return Future.error('Location services are disabled.');
-  }
-
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      // Permissions are denied, next time you could try requesting permissions again (this is also where Android's shouldShowRequestPermissionRationale returned true. According to Android guidelines your App should show an explanatory UI now.
-      return Future.error('Location permissions are denied');
-    }
-  }
-
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately.
-    return Future.error('Location permissions are permanently denied, we cannot request permissions.');
-  }
-
-  // When we reach here, permissions are granted and we can continue accessing the position of the device.
-}
-
 void main() => runApp(const HogWeedGo());
 
 class HogWeedGo extends StatelessWidget {
@@ -45,6 +19,40 @@ class HogWeedGo extends StatelessWidget {
 
   static const server = "example.com";
   static const route = "/";
+
+  static final _location = Location();
+
+  static void _askForLocation(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(const SnackBar(
+    content: Text("Location services will stay unavailable until location permission is not granted! :("),
+  ));
+
+  static Future<Location?> ensureLocation(BuildContext context) async {
+    bool _service = await _location.serviceEnabled();
+    if (!_service) {
+      _service = await _location.requestService();
+      if (!_service) {
+        _askForLocation(context);
+        return null;
+      }
+    }
+    PermissionStatus _permission = await _location.hasPermission();
+    if (_permission == PermissionStatus.denied || _permission == PermissionStatus.deniedForever) {
+      _permission = await _location.requestPermission();
+      if (_permission != PermissionStatus.granted) {
+        _askForLocation(context);
+        return null;
+      }
+    }
+    return _location;
+  }
+
+  static Future<Location?> locationEnabled() async {
+    final _service = await _location.serviceEnabled();
+    final _permission = await _location.hasPermission();
+    if (_service && ((_permission == PermissionStatus.denied) || (_permission == PermissionStatus.deniedForever))) {
+      return _location;
+    } else { return null; }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,13 +68,17 @@ class HogWeedGo extends StatelessWidget {
         AboutPage.route: (_) => const AboutPage(),
 
         AuthPage.route: (_) => const AuthPage(),
-        ReportPage.route: (_) => const ReportPage(),
       },
 
       onGenerateRoute: (RouteSettings settings) {
-        if ((settings.name != null) && settings.name!.startsWith(FullscreenPage.route)) {
-          String link = settings.name!.substring(FullscreenPage.route.length);
+        if (settings.name == FullscreenPage.route) {
+          var link = settings.arguments as String;
           return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
+
+        } else if (settings.name == ReportPage.route) {
+          var me = settings.arguments as LatLng?;
+          return MaterialPageRoute(builder: (_) => ReportPage(me), fullscreenDialog: true);
+
         } else { return MaterialPageRoute(builder: (_) => const NonePage()); }
       },
     );

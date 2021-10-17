@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:client/misc/const.dart';
+import 'package:flutter/services.dart';
 
 
 class NonePage extends StatelessWidget {
@@ -14,17 +15,17 @@ class NonePage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
-          margin: const EdgeInsets.only(top: margins, bottom: margins),
+          margin: const EdgeInsets.only(top: MARGIN, bottom: MARGIN),
           child: Card(
             child: Container(
-              margin: const EdgeInsets.all(margins),
+              margin: const EdgeInsets.all(MARGIN),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text("Shh... just pass by...", style: Theme.of(context).textTheme.headline5),
-                  const SizedBox(height: margins),
+                  const SizedBox(height: MARGIN),
                   ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => SystemNavigator.pop(),
                     child: const Text('Return'),
                   ),
                 ],

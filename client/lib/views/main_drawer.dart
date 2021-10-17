@@ -42,13 +42,13 @@ class _MainDrawerState extends State<MainDrawer> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: margins / 2),
+                const SizedBox(height: GAP),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     const CircleAvatar(
-                      radius: picture,
+                      radius: OFFSET,
                       backgroundImage: NetworkImage('https://i.imgur.com/koOENqs.jpeg'),
                     ),
                     Text('Drawer Header', style: Theme.of(context).primaryTextTheme.headline6),
@@ -93,9 +93,13 @@ class _MainDrawerState extends State<MainDrawer> {
           ),
 
           ListTile(
-            title: Center(child: Text("version...")),
-            //onTap: () => Navigator.of(context).popAllAndPushNamed(AuthPage.route)
-            onTap: () => Navigator.of(context).pushNamed(FullscreenPage.route + 'https://i.imgur.com/VuDy0D9.jpg'),
+            title: const Center(child: Text("fullscreen...")),
+            onTap: () => Navigator.of(context).pushNamed(FullscreenPage.route, arguments: 'https://i.imgur.com/VuDy0D9.jpg'),
+          ),
+
+          ListTile(
+            title: const Center(child: Text("auth...")),
+            onTap: () => Navigator.of(context).popAllAndPushNamed(AuthPage.route),
           ),
         ],
       ),
