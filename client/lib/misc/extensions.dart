@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:location/location.dart';
@@ -11,6 +13,11 @@ extension NavigatorStateExtension on NavigatorState {
   }
 }
 
-extension LatLongExtension on LocationData {
+extension _LatLongExtension on LocationData {
   LatLng? getLatLng() => ((latitude != null) && (longitude != null)) ? LatLng(latitude!, longitude!) : null;
+}
+
+extension LatLongExtension on Location {
+  Future<LatLng?> getLatLng() async => (await getLocation()).getLatLng();
+  Stream<LatLng?> getLatLngStream() => onLocationChanged.map((LocationData ld) => ld.getLatLng());
 }

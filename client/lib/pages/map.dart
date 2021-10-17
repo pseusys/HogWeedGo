@@ -31,13 +31,11 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    HogWeedGo.locationEnabled().then((Location? l) {
-      l?.getLocation().then((LocationData ld) => setState(() {
-        if (ld.getLatLng() != null) _me = ld.getLatLng();
-      }));
-      _meStream = l?.onLocationChanged.listen((LocationData ld) => setState(() {
-        if (ld.getLatLng() != null) _me = ld.getLatLng();
-      }));
+    print("object0");
+    HogWeedGo.locationEnabled().then((Location? loc) {
+      print("object1");
+      loc?.getLatLng().then((LatLng? l) => setState(() { print("object2"); if (l != null) _me = l; }));
+      _meStream = loc?.getLatLngStream().listen((LatLng? l) => setState(() { if (l != null) _me = l; }));
     });
   }
 
@@ -73,7 +71,7 @@ class _MapPageState extends State<MapPage> {
           TileLayerOptions(
             urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
             subdomains: ["a", "b"],
-            attributionBuilder: (_) => const Text("© OpenStreetMap Contributors. Tiles courtesy of Humanitarian OpenStreetMap Team"),
+            attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
           ),
           MarkerLayerOptions(
             markers: [

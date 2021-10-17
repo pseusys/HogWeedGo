@@ -76,7 +76,11 @@ class _ReportPageState extends State<ReportPage> {
                     onTap: (_, LatLng point) => setState(() => _me = point),
                   ),
                   layers: [
-                    TileLayerOptions(urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
+                    TileLayerOptions(
+                      urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                      subdomains: ["a", "b"],
+                      attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
+                    ),
                     MarkerLayerOptions(
                       markers: [
                         Marker(width: MARKER, height: MARKER, point: _me ?? STP, builder: (c) => const FlutterLogo())
@@ -86,12 +90,9 @@ class _ReportPageState extends State<ReportPage> {
                 ),
               ),
               ElevatedButton(
-                  onPressed: () {
-                    HogWeedGo.ensureLocation(context).then((Location? l) {
-                      l?.getLocation().then((LocationData ld) => setState(() {
-                        if (ld.getLatLng() != null) _me = ld.getLatLng();
-                      }));
-                    });
+                  onPressed: () async {
+                    final ll = await (await HogWeedGo.ensureLocation(context))?.getLatLng();
+                    setState(() { if (ll != null) _me = ll; });
                   },
                   child: Row(
                     children: const [

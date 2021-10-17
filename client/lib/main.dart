@@ -17,7 +17,8 @@ void main() => runApp(const HogWeedGo());
 class HogWeedGo extends StatelessWidget {
   const HogWeedGo({Key? key}) : super(key: key);
 
-  static const server = "example.com";
+  // TODO: replace with "HogWeedGo-server" hosting url, ahoy-domain.
+  static const server = "http://neverssl.com/";
   static const route = "/";
 
   static final _location = Location();
@@ -49,7 +50,7 @@ class HogWeedGo extends StatelessWidget {
   static Future<Location?> locationEnabled() async {
     final _service = await _location.serviceEnabled();
     final _permission = await _location.hasPermission();
-    if (_service && ((_permission == PermissionStatus.denied) || (_permission == PermissionStatus.deniedForever))) {
+    if (_service && ((_permission == PermissionStatus.granted) || (_permission == PermissionStatus.grantedLimited))) {
       return _location;
     } else { return null; }
   }

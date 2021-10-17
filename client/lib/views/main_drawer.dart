@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:client/main.dart';
 import 'package:flutter/material.dart';
 
@@ -20,15 +22,21 @@ class MainDrawer extends StatefulWidget {
 }
 
 class _MainDrawerState extends State<MainDrawer> {
+  StreamSubscription? _connection;
   bool? _connected;
 
   @override
   void initState() {
     super.initState();
-
-    get(Uri.parse(HogWeedGo.server)).timeout(const Duration(seconds: 5)).then((Response value) {
-      setState(() => _connected = value.statusCode == 200);
+    _connection = get(Uri.parse(HogWeedGo.server)).timeout(const Duration(seconds: 5)).asStream().listen((Response r) {
+      setState(() => _connected = r.statusCode == 200);
     }, onError: (error) => setState(() => _connected = false));
+  }
+
+  @override
+  void dispose() {
+    _connection?.cancel();
+    super.dispose();
   }
 
   @override
