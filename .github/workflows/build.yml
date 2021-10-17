@@ -27,7 +27,7 @@ jobs:
       working-directory: ./client/
       run: |
         flutter pub get
-        flutter build web --base-href "./"
+        flutter build web --base-href "/HogWeedGo/"
         
     - name: NoJekyll ❌
       run: touch ./client/build/web/.nojekyll
