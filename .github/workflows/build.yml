@@ -16,14 +16,13 @@ jobs:
       uses: subosito/flutter-action@v1
       with:
         flutter-version: '2.5.2'
+
+    - name: Build 🛠
+      working-directory: ./client/
       run: |
         flutter pub get
         flutter test
         flutter build web
-
-    - name: Build 🛠
-      working-directory: ./client/
-      run: flutter build web
         
     - name: NoJekyll ❌
       run: touch ./client/build/web/.nojekyll
