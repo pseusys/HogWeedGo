@@ -1,7 +1,9 @@
 name: BUILD
 
 on:
-  [ push ]
+  push:
+    paths:
+      - './client/**'
 
 jobs:
   deploy:
@@ -15,12 +17,16 @@ jobs:
       uses: subosito/flutter-action@v1
       with:
         flutter-version: '2.5.2'
+        
+    - name: Verify with Doctor ⚕
+      working-directory: ./client/
+      run: |
+        flutter doctor
 
     - name: Build 🛠
       working-directory: ./client/
       run: |
         flutter pub get
-        flutter test
         flutter build web
         
     - name: NoJekyll ❌
