@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:client/main.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:client/main.dart';
 import 'package:client/views/main_drawer.dart';
 import 'package:client/pages/report.dart';
 import 'package:client/views/report_view.dart';
@@ -31,10 +32,8 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    print("object0");
-    HogWeedGo.locationEnabled().then((Location? loc) {
-      print("object1");
-      loc?.getLatLng().then((LatLng? l) => setState(() { print("object2"); if (l != null) _me = l; }));
+    HogWeedGo.ensureLocation(context).then((Location? loc) {
+      loc?.getLatLng().then((LatLng? l) => setState(() { if (l != null) _me = l; }));
       _meStream = loc?.getLatLngStream().listen((LatLng? l) => setState(() { if (l != null) _me = l; }));
     });
   }
@@ -66,7 +65,11 @@ class _MapPageState extends State<MapPage> {
   Scaffold _showMap(BuildContext context) {
     return Scaffold(
       body: FlutterMap(
-        options: MapOptions(center: LatLng(59.937500, 30.308611), zoom: 9.0, minZoom: 1.0),
+        options: MapOptions(
+          center: STP,
+          zoom: 9.0,
+          minZoom: 1.0,
+        ),
         layers: [
           TileLayerOptions(
             urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
@@ -93,7 +96,13 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: do once!
-    HogWeedGo.ensureLocation(context);
+    HogWeedGo.ensureLocation(context).then((_) {
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Warning! Location services on WEB platform may suffer from unexpected issues!"),
+        ));
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
