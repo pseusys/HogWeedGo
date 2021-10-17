@@ -10,7 +10,17 @@ jobs:
     steps:
     - name: Checkout 🛎️
       uses: actions/checkout@v2.3.4
-    
+      
+    steps:
+    - name: Flutter action
+      uses: subosito/flutter-action@v1
+      with:
+        flutter-version: '2.5.2'
+      run: |
+        flutter pub get
+        flutter test
+        flutter build web
+
     - name: Build 🛠
       working-directory: ./client/
       run: flutter build web
