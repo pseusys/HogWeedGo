@@ -58,6 +58,7 @@ class HogWeedGo extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HogWeedGo',
+
       initialRoute: MapPage.route,
       theme: ThemeData(),
 
