@@ -3,7 +3,7 @@ name: BUILD
 on:
   push:
     paths:
-      - './client/**'
+      - './**'
 
 jobs:
   deploy:
