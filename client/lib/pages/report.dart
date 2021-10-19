@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_map/flutter_map.dart';
-import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'package:client/main.dart';
 import 'package:client/misc/helpers.dart';
 import 'package:client/misc/const.dart';
-import 'package:client/misc/extensions.dart';
 
 
 class ReportPage extends StatefulWidget {
@@ -90,10 +87,7 @@ class _ReportPageState extends State<ReportPage> {
                 ),
               ),
               ElevatedButton(
-                  onPressed: () async {
-                    final ll = await (await HogWeedGo.ensureLocation(context))?.getLatLng();
-                    setState(() { if (ll != null) _me = ll; });
-                  },
+                  onPressed: () => setState(() { if (widget._me != null) _me = widget._me; }),
                   child: Row(
                     children: const [
                       Text('Use my location'),

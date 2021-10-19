@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:client/navigate/fast_route.dart';
 import 'package:client/pages/about.dart';
 import 'package:client/pages/fullscreen.dart';
 import 'package:client/pages/map.dart';
@@ -21,40 +21,6 @@ class HogWeedGo extends StatelessWidget {
   static const server = "http://neverssl.com/";
   static const route = "/";
 
-  static final _location = Location();
-
-  static void _askForLocation(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(const SnackBar(
-    content: Text("Location services will stay unavailable until location permission is not granted! :("),
-  ));
-
-  static Future<Location?> ensureLocation(BuildContext context) async {
-    bool _service = await _location.serviceEnabled();
-    if (!_service) {
-      _service = await _location.requestService();
-      if (!_service) {
-        _askForLocation(context);
-        return null;
-      }
-    }
-    PermissionStatus _permission = await _location.hasPermission();
-    if (_permission == PermissionStatus.denied || _permission == PermissionStatus.deniedForever) {
-      _permission = await _location.requestPermission();
-      if (_permission != PermissionStatus.granted) {
-        _askForLocation(context);
-        return null;
-      }
-    }
-    return _location;
-  }
-
-  static Future<Location?> locationEnabled() async {
-    final _service = await _location.serviceEnabled();
-    final _permission = await _location.hasPermission();
-    if (_service && ((_permission == PermissionStatus.granted) || (_permission == PermissionStatus.grantedLimited))) {
-      return _location;
-    } else { return null; }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -63,17 +29,23 @@ class HogWeedGo extends StatelessWidget {
       initialRoute: MapPage.route,
       theme: ThemeData(),
 
-      routes: {
-        route: (_) => const MapPage(),
-        MapPage.route: (_) => const MapPage(),
-        AccountPage.route: (_) => const AccountPage(),
-        AboutPage.route: (_) => const AboutPage(),
-
-        AuthPage.route: (_) => const AuthPage(),
-      },
-
       onGenerateRoute: (RouteSettings settings) {
-        if (settings.name == FullscreenPage.route) {
+        if (settings.name == route) {
+          return FastRoute((_) => const NonePage(), settings);
+
+        } else if (settings.name == MapPage.route) {
+          return FastRoute((_) => const MapPage(), settings);
+
+        } else if (settings.name == AccountPage.route) {
+          return FastRoute((_) => const AccountPage(), settings);
+
+        } else if (settings.name == AboutPage.route) {
+          return FastRoute((_) => const AboutPage(), settings);
+
+        } else if (settings.name == AuthPage.route) {
+          return FastRoute((_) => const AuthPage(), settings);
+
+        } else if (settings.name == FullscreenPage.route) {
           var link = settings.arguments as String;
           return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
 

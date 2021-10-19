@@ -7,12 +7,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'package:client/main.dart';
 import 'package:client/views/main_drawer.dart';
 import 'package:client/pages/report.dart';
 import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
-import 'package:client/misc/extensions.dart';
+import 'package:client/misc/helpers.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -26,21 +25,37 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  LatLng? _me;
-  late final StreamSubscription? _meStream;
+  final LatLng _me = LatLng(0, 0);
+  StreamSubscription? _meStream;
+
+  Future _setupStream() async {
+    final loc = await ensureLocation(context);
+
+    final l = await loc?.getLocation();
+    setState(() {
+      _me.latitude = l?.latitude ?? _me.latitude;
+      _me.longitude = l?.longitude ?? _me.longitude;
+    });
+
+    _meStream = loc?.onLocationChanged.handleError((dynamic err) {
+      _meStream?.cancel();
+      _meStream = null;
+    }).listen((LocationData l) => setState(() {
+      _me.latitude = l.latitude ?? _me.latitude;
+      _me.longitude = l.longitude ?? _me.longitude;
+    }));
+  }
 
   @override
   void initState() {
     super.initState();
-    HogWeedGo.ensureLocation(context).then((Location? loc) {
-      loc?.getLatLng().then((LatLng? l) => setState(() { if (l != null) _me = l; }));
-      _meStream = loc?.getLatLngStream().listen((LatLng? l) => setState(() { if (l != null) _me = l; }));
-    });
+    _setupStream();
   }
 
   @override
   void dispose() {
     _meStream?.cancel();
+    _meStream = null;
     super.dispose();
   }
 
@@ -79,7 +94,7 @@ class _MapPageState extends State<MapPage> {
           MarkerLayerOptions(
             markers: [
               _generateMarker(context),
-              if (_me != null) Marker(width: MARKER, height: MARKER, point: _me!, builder: (c) => const FlutterLogo()),
+              Marker(width: MARKER, height: MARKER, point: _me, builder: (c) => const FlutterLogo()),
             ],
           ),
         ],
@@ -96,13 +111,7 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: do once!
-    HogWeedGo.ensureLocation(context).then((_) {
-      if (kIsWeb) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Warning! Location services on WEB platform may suffer from unexpected issues!"),
-        ));
-      }
-    });
+    ensureLocation(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
