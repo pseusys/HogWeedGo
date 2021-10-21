@@ -1,3 +1,4 @@
+import 'package:client/views/photo_gallery.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_map/flutter_map.dart';
@@ -23,7 +24,11 @@ class _ReportPageState extends State<ReportPage> {
 
   var description = "";
   var location = "";
+  var comment = "";
+  var date = DateTime.now();
+  var time = TimeOfDay.now();
 
+  final MapController _mapController = MapController();
   final TextEditingController _addressController = TextEditingController();
 
   @override
@@ -34,6 +39,28 @@ class _ReportPageState extends State<ReportPage> {
       getAddress(_me!).then((String? value) => setState(() {
         if ((value != null) && (_addressController.text == "")) { _addressController.text = value; }
       }));
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: date,
+        firstDate: DateTime(2020),
+        lastDate: DateTime(3000)
+    );
+    if (picked != null) {
+      setState(() { date = picked; });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: time,
+    );
+    if (picked != null) {
+      setState(() { time = picked; });
     }
   }
 
@@ -66,6 +93,7 @@ class _ReportPageState extends State<ReportPage> {
               SizedBox(
                 height: OFFSET * 5,
                 child: FlutterMap(
+                  mapController: _mapController,
                   options: MapOptions(
                     center: _me ?? STP,
                     zoom: _me == null ? 10.0 : 14.0,
@@ -86,18 +114,58 @@ class _ReportPageState extends State<ReportPage> {
                   ],
                 ),
               ),
-              ElevatedButton(
-                  onPressed: () => setState(() { if (widget._me != null) _me = widget._me; }),
-                  child: Row(
-                    children: const [
-                      Text('Use my location'),
-                      SizedBox(height: GAP),
-                      Icon(Icons.gps_fixed),
-                    ],
-                  )
+              OutlinedButton(
+                onPressed: () => setState(() {
+                  if (widget._me != null) {
+                    _me = widget._me;
+                    _mapController.move(_me!, _mapController.zoom);
+                  }
+                }),
+                child: Row(
+                  children: const [
+                    Text("Use my location"),
+                    SizedBox(width: GAP),
+                    Icon(Icons.gps_fixed),
+                  ],
+                ),
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all(Theme.of(context).textTheme.bodyText1?.color),
+                ),
               ),
 
+              const Text("Photos"),
+              const PhotoGallery(true),
 
+              const Text("Date and Time"),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => _selectDate(context),
+                    tooltip: "Select date",
+                    icon: const Icon(Icons.calendar_today),
+                  ),
+                  IconButton(
+                    onPressed: () => _selectTime(context),
+                    tooltip: "Select time",
+                    icon: const Icon(Icons.access_time),
+                  ),
+                  Text("${date} ${time}")
+                ],
+              ),
+
+              const Text("Initial comment"),
+              TextFormField(
+                maxLines: 2,
+                decoration: const InputDecoration(hintText: "Initial comment: what else do you want to add to your report?"),
+                onSaved: (String? value) => comment = value ?? "",
+              ),
+
+              ElevatedButton(
+                  onPressed: () {
+                    //TODO: send report!
+                  },
+                  child: const Text("Send!"),
+              ),
             ],
           ),
         ),

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_map/flutter_map.dart';
@@ -25,24 +24,25 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final LatLng _me = LatLng(0, 0);
+  LatLng? _me;
   StreamSubscription? _meStream;
 
   Future _setupStream() async {
     final loc = await ensureLocation(context);
+    _me = _me ?? LatLng(0, 0);
 
     final l = await loc?.getLocation();
     setState(() {
-      _me.latitude = l?.latitude ?? _me.latitude;
-      _me.longitude = l?.longitude ?? _me.longitude;
+      _me!.latitude = l?.latitude ?? _me!.latitude;
+      _me!.longitude = l?.longitude ?? _me!.longitude;
     });
 
     _meStream = loc?.onLocationChanged.handleError((dynamic err) {
       _meStream?.cancel();
       _meStream = null;
     }).listen((LocationData l) => setState(() {
-      _me.latitude = l.latitude ?? _me.latitude;
-      _me.longitude = l.longitude ?? _me.longitude;
+      _me!.latitude = l.latitude ?? _me!.latitude;
+      _me!.longitude = l.longitude ?? _me!.longitude;
     }));
   }
 
@@ -94,7 +94,7 @@ class _MapPageState extends State<MapPage> {
           MarkerLayerOptions(
             markers: [
               _generateMarker(context),
-              Marker(width: MARKER, height: MARKER, point: _me, builder: (c) => const FlutterLogo()),
+              if (_me != null) Marker(width: MARKER, height: MARKER, point: _me!, builder: (c) => const FlutterLogo()),
             ],
           ),
         ],
