@@ -66,11 +66,13 @@ class _MapPageState extends State<MapPage> {
     builder: (ctx) => MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () => showModalBottomSheet<void>(
+        onTap: () => showModalBottomSheet(
           context: context,
-          builder: (BuildContext context) => const ReportView(),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
           isScrollControlled: true,
+          builder: (_) => const ReportView(),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(GAP))
+          ),
         ),
         child: const FlutterLogo(textColor: Colors.green),
       ),
