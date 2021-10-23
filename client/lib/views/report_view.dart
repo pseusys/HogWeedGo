@@ -7,18 +7,24 @@ import 'package:client/misc/const.dart';
 class ReportView extends StatelessWidget {
   const ReportView({Key? key}): super(key: key);
 
-  Widget _comment(String body, { String username = "Anonymous", String? photoURL }) {
-    return Row(
+  Widget _comment(String body, BuildContext context, { String username = "Anonymous", String? photoURL }) {
+    return Column(
       children: [
-        CircleAvatar(
-          child: photoURL == null ? Text(username[0]) : Image.network(photoURL),
-        ),
-        Column(
+        Row(
           children: [
-            Text(username),
-            Text(body),
+            CircleAvatar(
+              child: photoURL == null ? Text(username[0]) : Image.network(photoURL),
+            ),
+            const SizedBox(width: MARGIN),
+            Column(
+              children: [
+                Text(username, style: Theme.of(context).textTheme.headline6),
+                Text(body),
+              ],
+            ),
           ],
         ),
+        const SizedBox(height: MARGIN),
       ],
     );
   }
@@ -45,12 +51,15 @@ class ReportView extends StatelessWidget {
 
             Expanded(
               child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: OFFSET),
                 controller: scrollController,
                 children: [
                   Row(
-                    children: const [
-                      Text('type'),
-                      Chip(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('type', style: Theme.of(context).textTheme.headline4),
+                      const Chip(
                         avatar: CircleAvatar(
                           child: Text('ST'),
                         ),
@@ -58,45 +67,53 @@ class ReportView extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: MARGIN),
 
                   Row(
                     children: [
                       const Icon(Icons.location_on),
+                      const SizedBox(width: MARGIN),
                       Column(
-                        children: const [
-                          Text('address'),
-                          Text('coords'),
+                        children: [
+                          Text('address', style: Theme.of(context).textTheme.headline6),
+                          const Text('coords'),
                         ],
                       ),
                     ],
                   ),
+                  const SizedBox(height: MARGIN),
 
                   Row(
-                    children: const [
-                      Icon(Icons.access_time),
-                      Text('time'),
+                    children: [
+                      const Icon(Icons.access_time),
+                      const SizedBox(width: MARGIN),
+                      Text('time', style: Theme.of(context).textTheme.headline6),
                     ],
                   ),
+                  const SizedBox(height: MARGIN),
 
                   const PhotoGallery(false),
+                  const SizedBox(height: MARGIN),
 
                   Row(
                     children: const [
                       Icon(Icons.description),
+                      SizedBox(width: MARGIN),
                       Text('description'),
                     ],
                   ),
+                  const SizedBox(height: MARGIN),
 
-                  _comment("initial comment", username: "report sender"),
+                  _comment("initial comment", context, username: "report sender"),
 
                   const Divider(
-                    height: 20,
                     thickness: 5,
                     indent: 20,
                     endIndent: 20,
                   ),
+                  const SizedBox(height: MARGIN),
 
-                  for (var i = 0; i < 5; i++) _comment("body $i")
+                  for (var i = 0; i < 5; i++) _comment("body $i", context)
                 ],
               ),
             ),
