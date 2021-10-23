@@ -1,4 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:client/misc/const.dart';
 
@@ -119,7 +122,26 @@ class _AuthPageState extends State<AuthPage> {
             if (_noAccount) Align(
               alignment: Alignment.centerRight,
               child: CheckboxListTile(
-                title: const Text('Animate Slowly'),
+                title: RichText(
+                  text: TextSpan(
+                    children: [
+                      const TextSpan(text: 'Agree to '),
+                      TextSpan(
+                        text: 'terms',
+                        style: const TextStyle(color: Colors.blue),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                      ),
+                      const TextSpan(text: ' and '),
+                      TextSpan(
+                        text: 'conditions',
+                        style: const TextStyle(color: Colors.blue),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                      ),
+                    ],
+                  ),
+                ),
                 value: _createAccount,
                 onChanged: (bool? value) => setState(() => _createAccount = value ?? false),
                 controlAffinity: ListTileControlAffinity.leading,

@@ -38,7 +38,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             alignment: Alignment.topRight,
             child: FloatingActionButton(
               mini: true,
-              onPressed: () => setState(() => _photos.add('https://i.imgur.com/koOENqs.jpeg')),
+              onPressed: () => setState(() => isFinal ? _photos.add('https://i.imgur.com/koOENqs.jpeg') : _photos.removeAt(index)),
               child: Icon(isFinal ? Icons.add : Icons.close),
             ),
           ),
