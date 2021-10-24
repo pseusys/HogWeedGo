@@ -112,9 +112,6 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: do once!
-    ensureLocation(context);
-
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
 

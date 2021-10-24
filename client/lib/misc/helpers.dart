@@ -6,11 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
-void _askForLocation(BuildContext c) => ScaffoldMessenger.of(c).showSnackBar(const SnackBar(
-  content: Text("Location services will stay unavailable until location permission is not granted! :("),
-));
+void _askForLocation(BuildContext c, bool serviceUnavailable) {
+  const service = "Location services will stay unavailable until GPS is not enabled :(";
+  const permission = "Location services will stay unavailable until location permission is not granted! :(";
+  ScaffoldMessenger.of(c).showSnackBar(SnackBar(
+    content: Text(serviceUnavailable ? service : permission),
+    action: SnackBarAction(
+      label: 'Enable!',
+      onPressed: () {
+        // TODO: call support if called once.
+        if (kIsWeb) {
+          launch("https://docs.buddypunch.com/en/articles/919258-how-to-enable-location-services-for-chrome-safari-edge-and-android-ios-devices-gps-setting");
+        } else if (Theme.of(c).platform == TargetPlatform.iOS) {
+          launch(serviceUnavailable ? "https://support.google.com/accounts/answer/6179507?hl=en&ref_topic=7189122" : "https://support.google.com/accounts/answer/6179507?hl=en&ref_topic=7189122");
+        } else if (Theme.of(c).platform == TargetPlatform.android) {
+          launch("https://support.apple.com/en-us/HT207092");
+        }
+      },
+    ),
+  ));
+}
 
 Future<Location?> ensureLocation(BuildContext context) async {
   Location location = Location();
@@ -18,7 +36,7 @@ Future<Location?> ensureLocation(BuildContext context) async {
   if (!service) {
     service = await location.requestService();
     if (!service) {
-      _askForLocation(context);
+      _askForLocation(context, true);
       return null;
     }
   }
@@ -26,7 +44,7 @@ Future<Location?> ensureLocation(BuildContext context) async {
   if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
     permission = await location.requestPermission();
     if (permission != PermissionStatus.granted) {
-      _askForLocation(context);
+      _askForLocation(context, false);
       return null;
     }
   }

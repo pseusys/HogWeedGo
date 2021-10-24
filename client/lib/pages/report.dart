@@ -118,7 +118,8 @@ class _ReportPageState extends State<ReportPage> {
             ),
             const SizedBox(height: GAP),
             OutlinedButton(
-              onPressed: () => setState(() {
+              onPressed: () => setState(() async {
+                await ensureLocation(context);
                 if (widget._me != null) {
                   _me = widget._me;
                   _mapController.move(_me!, _mapController.zoom);
