@@ -113,7 +113,18 @@ class ReportView extends StatelessWidget {
                   ),
                   const SizedBox(height: MARGIN),
 
-                  for (var i = 0; i < 5; i++) _comment("body $i", context)
+                  for (var i = 0; i < 5; i++) _comment("body $i", context),
+
+                  const Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        border: UnderlineInputBorder(),
+                        hintText: 'Comment',
+                      ),
+                      textInputAction: TextInputAction.send,
+                    ),
+                  ),
+                  const SizedBox(height: MARGIN),
                 ],
               ),
             ),
