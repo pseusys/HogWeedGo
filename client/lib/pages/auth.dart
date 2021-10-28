@@ -129,14 +129,20 @@ class _AuthPageState extends State<AuthPage> {
                   title: RichText(
                     text: TextSpan(
                       children: [
-                        const TextSpan(text: 'Agree to '),
+                        TextSpan(
+                          text: 'Agree to ',
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
                         TextSpan(
                           text: 'terms',
                           style: const TextStyle(color: Colors.blue),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
                         ),
-                        const TextSpan(text: ' and '),
+                        TextSpan(
+                          text: ' and ',
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
                         TextSpan(
                           text: 'conditions',
                           style: const TextStyle(color: Colors.blue),
