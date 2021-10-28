@@ -74,10 +74,3 @@ Future<String?> getAddress(LatLng point) async {
   final result = "${address["road"] ?? ""}${houseNumber ?? ""}${houseName ?? ""}";
   return result != "" ? "$result (by OSM Nominatim)" : null;
 }
-
-
-
-void retainFocus(BuildContext context) {
-  FocusScopeNode currentFocus = FocusScope.of(context);
-  if (!currentFocus.hasPrimaryFocus) { currentFocus.unfocus(); }
-}

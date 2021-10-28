@@ -68,7 +68,7 @@ class _ReportPageState extends State<ReportPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => retainFocus(context),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         appBar: AppBar(title: Text(widget.title)),
 
@@ -102,7 +102,10 @@ class _ReportPageState extends State<ReportPage> {
                     center: _me ?? STP,
                     zoom: _me == null ? 10.0 : 14.0,
                     minZoom: 10.0,
-                    onTap: (_, LatLng point) => setState(() => _me = point),
+                    onTap: (_, LatLng point) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      setState(() => _me = point);
+                    },
                   ),
                   layers: [
                     TileLayerOptions(
@@ -121,6 +124,7 @@ class _ReportPageState extends State<ReportPage> {
               const SizedBox(height: GAP),
               OutlinedButton(
                 onPressed: () async {
+                  FocusManager.instance.primaryFocus?.unfocus();
                   await ensureLocation(context);
                   setState(() {
                     if (widget._me != null) {
@@ -150,13 +154,19 @@ class _ReportPageState extends State<ReportPage> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: () => _selectDate(context),
+                    onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      _selectDate(context);
+                      },
                     tooltip: "Select date",
                     icon: const Icon(Icons.calendar_today),
                   ),
                   const SizedBox(width: GAP),
                   IconButton(
-                    onPressed: () => _selectTime(context),
+                    onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      _selectTime(context);
+                    },
                     tooltip: "Select time",
                     icon: const Icon(Icons.access_time),
                   ),
@@ -176,6 +186,7 @@ class _ReportPageState extends State<ReportPage> {
 
               ElevatedButton(
                 onPressed: () {
+                  FocusManager.instance.primaryFocus?.unfocus();
                   //TODO: send report!
                 },
                 child: const Text("Send!"),

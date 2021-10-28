@@ -18,7 +18,7 @@ class _AboutPageState extends State<AboutPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => retainFocus(context),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         appBar: AppBar(title: Text(widget.title)),
         drawer: const MainDrawer(),

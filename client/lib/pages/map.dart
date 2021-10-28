@@ -81,7 +81,7 @@ class _MapPageState extends State<MapPage> {
 
   Widget _showMap(BuildContext context) {
     return GestureDetector(
-      onTap: () => retainFocus(context),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         body: FlutterMap(
           options: MapOptions(
@@ -116,7 +116,7 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => retainFocus(context),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         appBar: AppBar(title: Text(widget.title)),
 

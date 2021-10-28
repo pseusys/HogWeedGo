@@ -92,7 +92,7 @@ class _FullscreenPageState extends State<FullscreenPage> {
   Widget build(BuildContext context) {
     _screen = Offset(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
     return GestureDetector(
-      onTap: () => retainFocus(context),
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         backgroundColor: Colors.black87,
 
