@@ -79,5 +79,5 @@ Future<String?> getAddress(LatLng point) async {
 
 void retainFocus(BuildContext context) {
   FocusScopeNode currentFocus = FocusScope.of(context);
-  if (!currentFocus.hasPrimaryFocus) { currentFocus.focusedChild?.unfocus(); }
+  if (!currentFocus.hasPrimaryFocus) { currentFocus.unfocus(); }
 }
