@@ -79,47 +79,53 @@ class _MapPageState extends State<MapPage> {
     ),
   );
 
-  Scaffold _showMap(BuildContext context) {
-    return Scaffold(
-      body: FlutterMap(
-        options: MapOptions(
-          center: STP,
-          zoom: 9.0,
-          minZoom: 1.0,
+  Widget _showMap(BuildContext context) {
+    return GestureDetector(
+      onTap: () => retainFocus(context),
+      child: Scaffold(
+        body: FlutterMap(
+          options: MapOptions(
+            center: STP,
+            zoom: 9.0,
+            minZoom: 1.0,
+          ),
+          layers: [
+            TileLayerOptions(
+              urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+              subdomains: ["a", "b"],
+              attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
+            ),
+            MarkerLayerOptions(
+              markers: [
+                _generateMarker(context),
+                if (_me != null) Marker(width: MARKER, height: MARKER, point: _me!, builder: (c) => const FlutterLogo()),
+              ],
+            ),
+          ],
         ),
-        layers: [
-          TileLayerOptions(
-            urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-            subdomains: ["a", "b"],
-            attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
-          ),
-          MarkerLayerOptions(
-            markers: [
-              _generateMarker(context),
-              if (_me != null) Marker(width: MARKER, height: MARKER, point: _me!, builder: (c) => const FlutterLogo()),
-            ],
-          ),
-        ],
-      ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me),
-        tooltip: "Report!",
-        child: const Icon(Icons.add),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me),
+          tooltip: "Report!",
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+    return GestureDetector(
+      onTap: () => retainFocus(context),
+      child: Scaffold(
+        appBar: AppBar(title: Text(widget.title)),
 
-      body: Navigator(
-        onGenerateRoute: (RouteSettings s) => MaterialPageRoute(builder: (BuildContext c) => _showMap(c), settings: s),
+        body: Navigator(
+          onGenerateRoute: (RouteSettings s) => MaterialPageRoute(builder: (BuildContext c) => _showMap(c), settings: s),
+        ),
+
+        drawer: const MainDrawer(),
       ),
-
-      drawer: const MainDrawer(),
     );
   }
 }

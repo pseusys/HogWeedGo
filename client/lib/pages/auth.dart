@@ -1,3 +1,4 @@
+import 'package:client/misc/helpers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -94,60 +95,63 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        automaticallyImplyLeading: false,
-      ),
+    return GestureDetector(
+      onTap: () => retainFocus(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          automaticallyImplyLeading: false,
+        ),
 
-      body: Container(
-        margin: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
-        child: Column(
-          children: [
-            Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
+        body: Container(
+          margin: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
+          child: Column(
+            children: [
+              Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
 
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => setState(() => _noAccount = !_noAccount),
-                child: Text(_noAccount ? 'Already have account?' : 'New to HogWeedGo?'),
-              ),
-            ),
-
-            Container(
-              margin: const EdgeInsets.only(top: MARGIN, bottom: MARGIN),
-              child: Card(child: _authForm()),
-            ),
-
-            if (_noAccount) Align(
-              alignment: Alignment.centerRight,
-              child: CheckboxListTile(
-                title: RichText(
-                  text: TextSpan(
-                    children: [
-                      const TextSpan(text: 'Agree to '),
-                      TextSpan(
-                        text: 'terms',
-                        style: const TextStyle(color: Colors.blue),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
-                      ),
-                      const TextSpan(text: ' and '),
-                      TextSpan(
-                        text: 'conditions',
-                        style: const TextStyle(color: Colors.blue),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
-                      ),
-                    ],
-                  ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => setState(() => _noAccount = !_noAccount),
+                  child: Text(_noAccount ? 'Already have account?' : 'New to HogWeedGo?'),
                 ),
-                value: _createAccount,
-                onChanged: (bool? value) => setState(() => _createAccount = value ?? false),
-                controlAffinity: ListTileControlAffinity.leading,
               ),
-            ),
-          ],
+
+              Container(
+                margin: const EdgeInsets.only(top: MARGIN, bottom: MARGIN),
+                child: Card(child: _authForm()),
+              ),
+
+              if (_noAccount) Align(
+                alignment: Alignment.centerRight,
+                child: CheckboxListTile(
+                  title: RichText(
+                    text: TextSpan(
+                      children: [
+                        const TextSpan(text: 'Agree to '),
+                        TextSpan(
+                          text: 'terms',
+                          style: const TextStyle(color: Colors.blue),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                        ),
+                        const TextSpan(text: ' and '),
+                        TextSpan(
+                          text: 'conditions',
+                          style: const TextStyle(color: Colors.blue),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  value: _createAccount,
+                  onChanged: (bool? value) => setState(() => _createAccount = value ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

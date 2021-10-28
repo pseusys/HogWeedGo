@@ -1,3 +1,4 @@
+import 'package:client/misc/helpers.dart';
 import 'package:flutter/material.dart';
 
 import 'package:client/views/main_drawer.dart';
@@ -16,9 +17,12 @@ class AboutPage extends StatefulWidget {
 class _AboutPageState extends State<AboutPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      drawer: const MainDrawer(),
+    return GestureDetector(
+      onTap: () => retainFocus(context),
+      child: Scaffold(
+        appBar: AppBar(title: Text(widget.title)),
+        drawer: const MainDrawer(),
+      ),
     );
   }
 }
