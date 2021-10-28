@@ -1,6 +1,7 @@
-import 'package:client/misc/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 
 import 'package:client/misc/const.dart';
 
@@ -13,9 +14,9 @@ class NonePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+    return FocusWatcher(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: Center(
           child: Container(
             margin: const EdgeInsets.only(top: MARGIN, bottom: MARGIN),

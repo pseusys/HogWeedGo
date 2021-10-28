@@ -1,10 +1,10 @@
-import 'package:client/views/photo_gallery.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:client/views/photo_gallery.dart';
 import 'package:client/misc/helpers.dart';
 import 'package:client/misc/const.dart';
 
@@ -67,9 +67,10 @@ class _ReportPageState extends State<ReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+    return FocusWatcher(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
+
         appBar: AppBar(title: Text(widget.title)),
 
         body: Form(
@@ -102,10 +103,7 @@ class _ReportPageState extends State<ReportPage> {
                     center: _me ?? STP,
                     zoom: _me == null ? 10.0 : 14.0,
                     minZoom: 10.0,
-                    onTap: (_, LatLng point) {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      setState(() => _me = point);
-                    },
+                    onTap: (_, LatLng point) => setState(() => _me = point),
                   ),
                   layers: [
                     TileLayerOptions(
@@ -124,7 +122,6 @@ class _ReportPageState extends State<ReportPage> {
               const SizedBox(height: GAP),
               OutlinedButton(
                 onPressed: () async {
-                  FocusManager.instance.primaryFocus?.unfocus();
                   await ensureLocation(context);
                   setState(() {
                     if (widget._me != null) {
@@ -154,19 +151,13 @@ class _ReportPageState extends State<ReportPage> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      _selectDate(context);
-                      },
+                    onPressed: () => _selectDate(context),
                     tooltip: "Select date",
                     icon: const Icon(Icons.calendar_today),
                   ),
                   const SizedBox(width: GAP),
                   IconButton(
-                    onPressed: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      _selectTime(context);
-                    },
+                    onPressed: () => _selectTime(context),
                     tooltip: "Select time",
                     icon: const Icon(Icons.access_time),
                   ),
@@ -186,7 +177,6 @@ class _ReportPageState extends State<ReportPage> {
 
               ElevatedButton(
                 onPressed: () {
-                  FocusManager.instance.primaryFocus?.unfocus();
                   //TODO: send report!
                 },
                 child: const Text("Send!"),

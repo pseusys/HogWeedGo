@@ -1,5 +1,6 @@
-import 'package:client/misc/helpers.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 
 import 'package:client/views/main_drawer.dart';
 import 'package:client/misc/const.dart';
@@ -18,9 +19,10 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+    return FocusWatcher(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
+
         appBar: AppBar(title: Text(widget.title)),
 
         body: ListView(

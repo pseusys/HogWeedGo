@@ -1,7 +1,7 @@
-import 'package:client/misc/helpers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:client/misc/const.dart';
@@ -95,9 +95,10 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+    return FocusWatcher(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
+
         appBar: AppBar(
           title: Text(widget.title),
           automaticallyImplyLeading: false,

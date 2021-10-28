@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:client/misc/helpers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:client/download_image/none.dart'
@@ -91,9 +91,10 @@ class _FullscreenPageState extends State<FullscreenPage> {
   @override
   Widget build(BuildContext context) {
     _screen = Offset(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+    return FocusWatcher(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
+
         backgroundColor: Colors.black87,
 
         appBar: AppBar(
