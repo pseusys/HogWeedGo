@@ -125,7 +125,11 @@ class _AuthPageState extends State<AuthPage> {
 
               if (_noAccount) Align(
                 alignment: Alignment.centerRight,
-                child: CheckboxListTile(
+                child: ListTile(
+                  leading: Checkbox(
+                    value: _createAccount,
+                    onChanged: (bool? value) => setState(() => _createAccount = value ?? false),
+                  ),
                   title: RichText(
                     text: TextSpan(
                       children: [
@@ -149,12 +153,13 @@ class _AuthPageState extends State<AuthPage> {
                           recognizer: TapGestureRecognizer()
                             ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
                         ),
+                        TextSpan(
+                          text: '.',
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
                       ],
                     ),
                   ),
-                  value: _createAccount,
-                  onChanged: (bool? value) => setState(() => _createAccount = value ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
                 ),
               ),
             ],
