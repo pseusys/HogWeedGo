@@ -12,6 +12,7 @@ import 'package:client/pages/report.dart';
 import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
 import 'package:client/misc/helpers.dart';
+import 'package:client/utils/cached_provider.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -89,12 +90,14 @@ class _MapPageState extends State<MapPage> {
             center: STP,
             zoom: 9.0,
             minZoom: 1.0,
+            interactiveFlags: InteractiveFlag.drag | InteractiveFlag.flingAnimation | InteractiveFlag.doubleTapZoom,
           ),
           layers: [
             TileLayerOptions(
               urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
               subdomains: ["a", "b"],
               attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
+              tileProvider: const CachedTileProvider(),
             ),
             MarkerLayerOptions(
               markers: [

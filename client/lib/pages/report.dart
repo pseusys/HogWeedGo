@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:client/views/photo_gallery.dart';
 import 'package:client/misc/helpers.dart';
 import 'package:client/misc/const.dart';
+import 'package:client/utils/cached_provider.dart';
 
 
 class ReportPage extends StatefulWidget {
@@ -103,6 +104,7 @@ class _ReportPageState extends State<ReportPage> {
                     center: _me ?? STP,
                     zoom: _me == null ? 10.0 : 14.0,
                     minZoom: 10.0,
+                    interactiveFlags: InteractiveFlag.drag | InteractiveFlag.flingAnimation | InteractiveFlag.doubleTapZoom,
                     onTap: (_, LatLng point) => setState(() => _me = point),
                   ),
                   layers: [
@@ -110,6 +112,7 @@ class _ReportPageState extends State<ReportPage> {
                       urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
                       subdomains: ["a", "b"],
                       attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
+                      tileProvider: const CachedTileProvider(),
                     ),
                     MarkerLayerOptions(
                       markers: [
