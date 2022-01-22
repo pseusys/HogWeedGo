@@ -5,3 +5,5 @@ data
 drive
 model
 datasets
+
+!datasets/validation.csv

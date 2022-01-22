@@ -1,3 +1,5 @@
 * text=auto
 *.ipynb filter=nbstripout
 *.ipynb diff=ipynb
+
+datasets/validation.csv binary
