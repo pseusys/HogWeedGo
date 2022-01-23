@@ -1,6 +1,7 @@
 venv
 .idea
 data
+.ipynb_checkpoints
 
 drive
 model
