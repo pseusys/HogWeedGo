@@ -4,9 +4,10 @@ data
 .ipynb_checkpoints
 
 drive
-models
-
 ./~**
 
 datasets/*
 !datasets/test.csv
+
+models/*
+!models/hogweed-detector.tflite
