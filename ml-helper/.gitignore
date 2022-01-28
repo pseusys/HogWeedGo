@@ -8,4 +8,4 @@ models
 datasets
 
 ./~**
-!datasets/validation.csv
+!datasets/test.csv
