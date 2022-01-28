@@ -26,4 +26,6 @@ jobs:
         nbstripout --install
 
     - name: Test Detector 
-      run: python3 ./ml-helper/test.py -n ./hogweed-detector.tflite -s ./ml-helper/datasets/test.csv
+      run: |
+        cat ./ml-helper/datasets/test.csv
+        python3 ./ml-helper/test.py -n ./hogweed-detector.tflite -s ./ml-helper/datasets/test.csv
