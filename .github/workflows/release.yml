@@ -21,8 +21,7 @@ jobs:
     - name: Install Dependencies
       run: |
         pip3 install --user pipenv
-        python3 -m pipenv install --skip-lock
-        python3 -m pipenv shell
+        pipenv install --skip-lock --system
         nbstripout --install
 
     - name: Test Detector 
