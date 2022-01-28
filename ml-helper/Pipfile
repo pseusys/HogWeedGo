@@ -15,8 +15,6 @@ tensorflow = "~=2.7.0"
 Pillow = "~=9.0.0"
 ipython = "~=8.0.0"
 imagehash = "~=4.2.1"
-nvidia-pyindex = "~=1.0.9"
-nvidia-cuda-runtime-cu11 = "~=0.0.1.dev5"
 
 [requires]
 python_version = "3.9"
