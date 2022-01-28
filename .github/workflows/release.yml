@@ -20,9 +20,10 @@ jobs:
         
     - name: Install Dependencies
       run: |
+        cd ./ml-helper
         pip3 install --user pipenv
         pipenv install --skip-lock --system
         nbstripout --install
 
     - name: Test Detector 
-      run: python3 ./ml-helper/test.py -n ./detector.tflite -s ./ml-helper/datasets/test.csv
+      run: python3 ./test.py -n ./detector.tflite -s ./datasets/test.csv
