@@ -5,7 +5,8 @@ data
 
 drive
 models
-datasets
 
 ./~**
+
+datasets/*
 !datasets/test.csv
