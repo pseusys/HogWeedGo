@@ -1,0 +1,30 @@
+name: RELEASE
+
+on:
+  push:
+    paths:
+      - 'ml-helper/**'
+
+jobs:
+  check-detector:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2.3.4 
+    
+    - name: Fetch Github Release Asset
+      uses: dsaltares/fetch-gh-release-asset@0.06
+      with:
+        file: "hogweed-detector.tflite"
+        target: "./hogweed-detector.tflite"
+        
+    - name: Install Dependencies
+      run: |
+        pip install --user pipenv
+        mkdir venv && python3 -m pipenv install --skip-lock venv
+        python3 -m pipenv shell
+        nbstripout --install
+
+    - name: Test Detector 
+      run: python3 ./ml-helper/test.py -n ./detector.tflite -s ./ml-helper/datasets/validation.csv
