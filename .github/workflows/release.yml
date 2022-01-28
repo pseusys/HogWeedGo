@@ -26,4 +26,4 @@ jobs:
         nbstripout --install
 
     - name: Test Detector 
-      run: python3 ./test.py -n ./detector.tflite -s ./datasets/test.csv
+      run: python3 ./ml-helper/test.py -n ./detector.tflite -s ./ml-helper/datasets/test.csv
