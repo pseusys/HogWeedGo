@@ -1,14 +1,12 @@
-name: ML-TEST
+name: ML-HELPER
 
 on:
-  release:
-    types: [ published ]
   push:
     paths:
       - 'ml-helper/**'
 
 jobs:
-  check-detector:
+  test-hogweed-detector:
     runs-on: ubuntu-latest
 
     steps:
