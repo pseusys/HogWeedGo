@@ -20,7 +20,7 @@ jobs:
         
     - name: Install Dependencies
       run: |
-        pip install --user pipenv
+        pip3 install --user pipenv
         mkdir venv && python3 -m pipenv install --skip-lock venv
         python3 -m pipenv shell
         nbstripout --install
