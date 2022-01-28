@@ -14,6 +14,7 @@ def predict(inter, image):
     return softmax(inter.get_tensor(output_details[0]['index']))
 
 
+DESIRED_RESULT = 0.85
 CLASS_NAMES = ['hogweed', 'cetera', 'other']
 
 
@@ -26,7 +27,7 @@ except:
     print("Failed to disable GPUs, testing may be inaccurate")
 
 # Load TFLite model and allocate tensors.
-interpreter = Interpreter(model_path="models/XCeption-0.889.tflite")
+interpreter = Interpreter(model_path="models/detector-0.95487.tflite")
 interpreter.allocate_tensors()
 
 # Get input and output tensors.
@@ -46,4 +47,5 @@ for label, URL in test_data:
         print(f"Test link {URL} invalid, skipping:\n{e}")
 
 # Print testing result.
-print(f"Test probability of model is: {round(sum(matches) / len(matches), 3)}")
+test_prob = sum(matches) / len(matches)
+print(f"Test probability of model is: {round(test_prob, 3)} {'❌' if test_prob < DESIRED_RESULT else '✅'}")

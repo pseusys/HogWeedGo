@@ -7,4 +7,5 @@ drive
 models
 datasets
 
+./~**
 !datasets/validation.csv
