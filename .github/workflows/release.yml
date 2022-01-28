@@ -1,9 +1,7 @@
 name: RELEASE
 
 on:
-  push:
-    paths:
-      - 'ml-helper/**'
+  push
 
 jobs:
   check-detector:
