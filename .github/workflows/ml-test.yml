@@ -4,8 +4,6 @@ on:
   release:
     types: [ published ]
   push:
-    paths:
-      - 'ml-helper/models/*'
 
 jobs:
   check-detector:
