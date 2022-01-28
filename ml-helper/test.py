@@ -16,7 +16,7 @@ def predict(inter, image):
     return softmax(inter.get_tensor(output_details[0]['index']))
 
 
-DESIRED_RESULT = 0.85
+DESIRED_RESULT = 0.9
 CLASS_NAMES = ['hogweed', 'cetera', 'other']
 
 

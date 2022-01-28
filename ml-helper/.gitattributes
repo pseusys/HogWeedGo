@@ -2,4 +2,5 @@
 *.ipynb filter=nbstripout
 *.ipynb diff=ipynb
 
-datasets/validation.csv binary
+datasets/test.csv filter=lfs diff=lfs merge=lfs -text
+models/hogweed-detector.tflite filter=lfs diff=lfs merge=lfs -text
