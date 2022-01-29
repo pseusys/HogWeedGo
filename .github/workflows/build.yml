@@ -33,7 +33,8 @@ jobs:
       run: touch ./client/build/web/.nojekyll
     
     - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+      uses: JamesIves/github-pages-deploy-action@4.2.2
       with:
-        BRANCH: gh-pages
-        FOLDER: ./client/build/web/
+        branch: gh-pages
+        folder: ./client/build/web/
+        single-commit: True
