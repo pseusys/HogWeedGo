@@ -1,0 +1,14 @@
+docker
+docker-volume
+docker-compose.yml
+
+**/__pycache__/*
+HogWeedGo/migrations
+.idea/*
+
+samples
+backup
+
+.dockerignore
+.gitignore
+config.env

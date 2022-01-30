@@ -1,12 +1,11 @@
 **/__pycache__/*
 HogWeedGo/migrations
-venv/*
 .idea/*
 
-sample/*
-!sample/sample_*.json
-!sample/data.schema.json
-
 static
+backup/*
+!backup/backup.schema.json
 
-settings.json
+config.env
+
+docker-volume

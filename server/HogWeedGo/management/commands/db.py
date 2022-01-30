@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("mode", nargs='?', choices=("load", "dump", "clear"), help="LOAD data from archive to db, DUMP data from db to archive or CLEAR db")
-        parser.add_argument("--file", "-f", nargs='?', dest="file", help="File destination for loading and dumping (./sample/data by default)")
+        parser.add_argument("--file", "-f", nargs='?', dest="file", help="File destination for loading and dumping (./backup/data by default)")
         parser.add_argument("--gzip", "-z", action="store_true", dest="gzip", help="Compression of I/O file")
 
     def load(self, json_data):
@@ -65,7 +65,7 @@ class Command(BaseCommand):
             return
 
         if options["file"] is None:
-            options["file"] = f"./sample/data.{ 'json.gzip' if options['gzip'] else 'json' }"
+            options["file"] = f"./backup/data.{ 'json.gzip' if options['gzip'] else 'json' }"
 
         if options["mode"] == "load":
             try:
