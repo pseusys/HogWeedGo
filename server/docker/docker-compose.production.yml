@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  hogweed_server:
+    image: ...
+    restart: always
+
+  file_hosting:
+    restart: always
+
+  postgres:
+    restart: always

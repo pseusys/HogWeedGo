@@ -1,11 +1,13 @@
+docker-volume
+
 **/__pycache__/*
 HogWeedGo/migrations
-.idea/*
+.idea
+.venv
+venv
 
 static
 backup/*
 !backup/backup.schema.json
 
 config.env
-
-docker-volume

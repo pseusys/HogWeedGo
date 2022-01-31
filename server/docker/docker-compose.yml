@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  hogweed_server:
+    container_name: hogweed_server
+    env_file:
+      - ../config.env
+    environment:
+      DOCKER: 'True'
+      ENV: $ENV
+      POSTGRES_PORT: 5432
+      SERVER_PORT: $SERVER_PORT
+    depends_on:
+      - postgres
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+
+  file_hosting:
+    image: nginx
+    container_name: file_hosting
+    environment:
+      NGINX_ENVSUBST_TEMPLATE_DIR: ./docker/nginx
+    ports:
+      - 80:80
+      - 443:443
+
+  postgres:
+    image: postgis/postgis
+    restart: always
+    container_name: postgres
+    env_file:
+      - ../config.env
+    expose:
+      - 5432
+
+networks:
+  default:
+    driver: bridge

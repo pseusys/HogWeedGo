@@ -2,27 +2,25 @@
 Django settings for HogWeedGo project.
 """
 import json
+import os
+from glob import glob
 from pathlib import Path
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-file = open(BASE_DIR / "./settings.json")
-settings = json.loads(file.read())
-file.close()
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = settings["DJANGO_SECRET"]
+SECRET_KEY = os.environ["DJANGO_SECRET"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True if os.environ["ENV"] == 'development' else False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 
 # Application definition
@@ -79,10 +77,11 @@ WSGI_APPLICATION = 'HogWeedGo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': settings["DATABASE_HOST"],
-        'NAME': settings["DATABASE_NAME"],
-        'USER': settings["DATABASE_USER"],
-        'PASSWORD': settings["DATABASE_PASSWORD"]
+        'HOST': 'postgres' if os.environ["DOCKER"] == 'True' else os.environ["POSTGRES_HOST"],
+        'PORT': os.environ["POSTGRES_PORT"],
+        'NAME': os.environ["POSTGRES_DB"],
+        'USER': os.environ["POSTGRES_USER"],
+        'PASSWORD': os.environ["POSTGRES_PASSWORD"]
     }
 }
 
@@ -135,9 +134,14 @@ LEAFLET_CONFIG = {
     'MIN_ZOOM': 1
 }
 
-DEFAULT_FROM_EMAIL = settings["SERVER_EMAIL_ADDRESS"]
-EMAIL_USE_TLS = settings["SERVER_EMAIL_TLS"]
-EMAIL_HOST = settings["SERVER_EMAIL_HOST"]
-EMAIL_PORT = settings["SERVER_EMAIL_PORT"]
-EMAIL_HOST_USER = settings["SERVER_EMAIL_USER"]
-EMAIL_HOST_PASSWORD = settings["SERVER_EMAIL_PASSWORD"]
+DEFAULT_FROM_EMAIL = os.environ["SERVER_EMAIL_ADDRESS"]
+EMAIL_USE_TLS = os.environ["SERVER_EMAIL_TLS"]
+EMAIL_HOST = os.environ["SERVER_EMAIL_HOST"]
+EMAIL_PORT = os.environ["SERVER_EMAIL_PORT"]
+EMAIL_HOST_USER = os.environ["SERVER_EMAIL_USER"]
+EMAIL_HOST_PASSWORD = os.environ["SERVER_EMAIL_PASSWORD"]
+
+
+if os.environ['DOCKER'] == 'True':
+    GDAL_LIBRARY_PATH = glob('/usr/lib/libgdal.so.*')[0]
+    GEOS_LIBRARY_PATH = glob('/usr/lib/libgeos_c.so.*')[0]

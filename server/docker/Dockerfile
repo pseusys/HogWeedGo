@@ -17,6 +17,9 @@ FROM python:3.10.2-alpine as runner
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ARG WORKDIR
+ARG PORT
+
+RUN apk add geos gdal
 
 WORKDIR ./$WORKDIR
 COPY --from=builder ./$WORKDIR/.venv ./.venv
@@ -26,9 +29,6 @@ ENV VIRTUAL_ENV=./.venv
 RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# run server config (./settings.json creation)
+EXPOSE $PORT
 
-EXPOSE 3000
-EXPOSE 9229
-
-CMD python manage.py runserver
+ENTRYPOINT ./docker/start-server.sh

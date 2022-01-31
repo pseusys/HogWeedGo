@@ -1,9 +1,0 @@
-init postgres
-createsuperuser and/or db
-static
-
-db
-test
-
-daphne -b 0.0.0.0 -p 8000 sse_demo.asgi:application or runserver
-navigate to /admin/

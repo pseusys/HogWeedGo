@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  hogweed_server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        WORKDIR: app
+        PORT: $SERVER_PORT
+
+  file_hosting:
+    volumes:
+      - docker-volume:./docker-volume/static
+
+  postgres:
+    volumes:
+      - docker-volume:./docker-volume/db
+
+volumes:
+  docker-volume: {}

@@ -1,10 +1,10 @@
-docker
 docker-volume
-docker-compose.yml
 
 **/__pycache__/*
 HogWeedGo/migrations
-.idea/*
+.idea
+.venv
+venv
 
 samples
 backup
