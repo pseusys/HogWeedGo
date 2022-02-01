@@ -2,9 +2,10 @@
 mkdir bundled-server
 
 # https://github.com/docker/compose/issues/7964
-docker-compose -f docker/docker-compose.yml -f docker/docker-compose.production.yml --env-file=docker/.env.development config | sed 's/\.\./\./' > bundled-server/docker-compose.bundle.yml
+# docker-compose -f docker/docker-compose.yml -f docker/docker-compose.production.yml --env-file=docker/.env.development config | sed 's/\.\./\./' > bundled-server/docker-compose.bundle.yml
+cp docker/docker-compose.bundle.yml bundled-server
 
-cp ./samples/sample_config.env bundled-server
+cp samples/sample_config.env bundled-server
 mv bundled-server/sample_config.env bundled-server/user-config.env
 
 cp docker/.env.development bundled-server
