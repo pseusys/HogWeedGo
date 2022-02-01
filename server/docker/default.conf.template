@@ -1,0 +1,27 @@
+upstream django {
+    server hogweed_server:${HOGWEED_PORT};
+}
+
+server {
+    listen ${NGINX_PORT};
+    server_name hogweed.serv;
+    charset utf-8;
+
+    client_max_body_size 75M;
+
+    location / {
+        proxy_pass http://django;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+    location /media/ {
+        alias /app/media/;
+    }
+
+    location /static/ {
+        alias /app/static/;
+    }
+}

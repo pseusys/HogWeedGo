@@ -7,15 +7,12 @@ services:
       dockerfile: docker/Dockerfile
       args:
         WORKDIR: app
-        PORT: $SERVER_PORT
-
-  file_hosting:
+        HOGWEED_PORT: $HOGWEED_PORT
     volumes:
-      - docker-volume:./docker-volume/static
+      - ../docker-volume/server:/server
+
+  nginx_gateway: {}
 
   postgres:
     volumes:
-      - docker-volume:./docker-volume/db
-
-volumes:
-  docker-volume: {}
+      - ../docker-volume/database:/data/database

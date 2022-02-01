@@ -9,20 +9,33 @@ services:
       DOCKER: 'True'
       ENV: $ENV
       POSTGRES_PORT: 5432
+      HOGWEED_PORT: $HOGWEED_PORT
       SERVER_PORT: $SERVER_PORT
     depends_on:
       - postgres
-    ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
+    expose:
+      - $HOGWEED_PORT
+    volumes:
+      - ../docker-volume/static:/app/static
+      - ../docker-volume/media:/app/media
 
-  file_hosting:
+  nginx_gateway:
     image: nginx
-    container_name: file_hosting
+    container_name: nginx_gateway
     environment:
-      NGINX_ENVSUBST_TEMPLATE_DIR: ./docker/nginx
+      NGINX_ENVSUBST_TEMPLATE_DIR: /run/secrets
+      NGINX_PORT: $NGINX_PORT
+      HOGWEED_PORT: $HOGWEED_PORT
+    depends_on:
+      - hogweed_server
     ports:
-      - 80:80
-      - 443:443
+      - ${SERVER_PORT}:${NGINX_PORT}
+    secrets:
+      - source: nginx-config
+        target: default.conf.template
+    volumes:
+      - ../docker-volume/static:/app/static
+      - ../docker-volume/media:/app/media
 
   postgres:
     image: postgis/postgis
@@ -33,6 +46,13 @@ services:
     expose:
       - 5432
 
+secrets:
+  nginx-config:
+    file: ./default.conf.template
+
 networks:
   default:
     driver: bridge
+
+volumes:
+  docker-volume: {}

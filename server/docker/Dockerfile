@@ -6,7 +6,7 @@ ARG WORKDIR
 WORKDIR ./$WORKDIR
 COPY ./Pipfile ./
 
-RUN apk add gcc python3-dev musl-dev jpeg-dev zlib-dev libjpeg
+RUN apk add gcc python3-dev musl-dev jpeg-dev zlib-dev libjpeg libffi libffi-dev
 
 RUN mkdir ./.venv
 RUN pip install pipenv
@@ -17,7 +17,7 @@ FROM python:3.10.2-alpine as runner
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ARG WORKDIR
-ARG PORT
+ARG HOGWEED_PORT
 
 RUN apk add geos gdal
 
@@ -29,6 +29,6 @@ ENV VIRTUAL_ENV=./.venv
 RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-EXPOSE $PORT
+EXPOSE $HOGWEED_PORT
 
 ENTRYPOINT ./docker/start-server.sh
