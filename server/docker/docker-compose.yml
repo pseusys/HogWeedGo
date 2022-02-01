@@ -6,11 +6,11 @@ services:
     env_file:
       - ../config.env
     environment:
-      DOCKER: 'True'
-      ENV: $ENV
-      POSTGRES_PORT: 5432
-      HOGWEED_PORT: $HOGWEED_PORT
-      SERVER_PORT: $SERVER_PORT
+      - DOCKER=True
+      - ENV
+      - POSTGRES_PORT=5432
+      - HOGWEED_PORT
+      - SERVER_PORT
     depends_on:
       - postgres
     expose:
@@ -25,16 +25,16 @@ services:
     image: nginx
     container_name: nginx_gateway
     environment:
-      NGINX_ENVSUBST_TEMPLATE_DIR: /run/secrets
-      NGINX_PORT: $NGINX_PORT
-      HOGWEED_PORT: $HOGWEED_PORT
+      - NGINX_ENVSUBST_TEMPLATE_DIR=/configs
+      - NGINX_PORT
+      - HOGWEED_PORT
     depends_on:
       - hogweed_server
     ports:
       - ${SERVER_PORT}:${NGINX_PORT}
-    secrets:
+    configs:
       - source: nginx-config
-        target: default.conf.template
+        target: /configs/default.conf.template
     volumes:
       - ../docker-volume/static:/app/static
       - ../docker-volume/media:/app/media
@@ -48,9 +48,13 @@ services:
     expose:
       - 5432
 
-secrets:
+configs:
   nginx-config:
     file: ./default.conf.template
+
+secrets:
+  ssl-config:
+    file: ...
 
 networks:
   default:

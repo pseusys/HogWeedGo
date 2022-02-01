@@ -6,8 +6,8 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       args:
-        WORKDIR: app
-        HOGWEED_PORT: $HOGWEED_PORT
+        - WORKDIR=app
+        - HOGWEED_PORT
     volumes:
       - ../docker-volume/server:/server
 
