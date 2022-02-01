@@ -18,6 +18,8 @@ services:
     volumes:
       - ../docker-volume/static:/app/static
       - ../docker-volume/media:/app/media
+      - ../docker-volume/backup:/app/backup
+      - ../docker-volume/logs:/app/logs
 
   nginx_gateway:
     image: nginx
