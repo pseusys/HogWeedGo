@@ -1,6 +1,7 @@
 import asyncio
 import secrets
 import time
+from functools import wraps
 
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
@@ -24,11 +25,42 @@ class HttpResponseUnauthorized(HttpResponse):
         super().__init__(content if content else "Authentication required!", *args, **kwargs)
 
 
-def verify_request(request, *params):
-    for param in params:
-        if param not in request:
-            return HttpResponseBadRequest(f"{ param } was not in request.")
-    return None
+def verify_post_params(*args):
+    def decorator(func):
+        @wraps(func)
+        def inner(request):
+            for arg in args:
+                if arg not in request:
+                    return HttpResponseBadRequest(f"{arg} was not in request.")
+            return func(request)
+        return inner
+    return decorator
+
+
+def verify_authenticated(func):
+    def decorator(request):
+        if not request.user.is_authenticated:
+            return HttpResponseUnauthorized()
+        return func(request)
+    return decorator
+
+
+def verify_resent_actors(func):
+    def decorator(request):
+        if request.user.email in recent_actors:
+            return HttpResponseForbidden("Commenting too fast!")
+        return func(request)
+    return decorator
+
+
+# TODO: echeck type and ext before uploading
+def verify_file_size(func):
+    def decorator(request):
+        for file in request.FILES:
+            if file.size > 1000000000:
+                return HttpResponseBadRequest("Too large files included (over 1GB)!")
+        return func(request)
+    return decorator
 
 
 # Should NOT be awaited!
@@ -45,11 +77,8 @@ proved_emails = {}
 
 @csrf_exempt
 @require_POST
+@verify_post_params("email")
 def prove_email(request):
-    response = verify_request(request.POST, "email")
-    if response:
-        return response
-
     email = request.POST["email"]
     code = secrets.token_urlsafe()
     delay = 10
@@ -68,11 +97,8 @@ def prove_email(request):
 
 @csrf_exempt
 @require_POST
+@verify_post_params("email", "code", "password")
 def auth(request):
-    response = verify_request(request.POST, "email", "code", "password")
-    if response:
-        return response
-
     email = request.POST["email"]
 
     if proved_emails[email] != request.POST["code"]:
@@ -88,11 +114,8 @@ def auth(request):
 
 @csrf_exempt
 @require_POST
+@verify_post_params("email", "password")
 def log_in(request):
-    response = verify_request(request.POST, "email", "password")
-    if response:
-        return response
-
     user = authenticate(request, email=request.POST["email"], password=request.POST["password"])
 
     if user is not None:
@@ -103,14 +126,9 @@ def log_in(request):
 
 
 @require_POST
+@verify_post_params("email", "code")
+@verify_authenticated
 def change_email(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
-    response = verify_request(request.POST, "email", "code")
-    if response:
-        return response
-
     email = request.POST["email"]
     existing = User.objects.get(email=email)
 
@@ -127,32 +145,23 @@ def change_email(request):
 
 
 @require_POST
+@verify_post_params("password")
+@verify_authenticated
 def change_password(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
-    response = verify_request(request.POST, "password")
-    if response:
-        return response
-
     request.user.set_password(request.POST["password"])
     return HttpResponse("Password successfully changed!")
 
 
 @require_POST
+@verify_authenticated
 def log_out(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
     logout(request)
     return HttpResponse("Logged out successfully!")
 
 
 @require_POST
+@verify_authenticated
 def leave(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
     request.user.delete()
     logout(request)
     return HttpResponse("User deleted out successfully!")
@@ -173,37 +182,29 @@ def _event_stream():
 
 @csrf_exempt
 @require_GET
+@verify_authenticated
 def poll_reports(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
     return StreamingHttpResponse(_event_stream(), content_type="text/event-stream")
 
 
 @csrf_exempt
 @require_GET
+@verify_authenticated
 def get_reports(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
     return JsonResponse([ReportSerializer.encode(x) for x in Report.objects.all()])
 
 
 @csrf_exempt
 @require_GET
+@verify_authenticated
 def get_report(request, report_id):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
     return JsonResponse(ReportSerializer.encode(get_object_or_404(Report, pk=report_id)))
 
 
 @csrf_exempt
 @require_GET
+@verify_authenticated
 def get_user(request, user_id):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
     return JsonResponse(UserSerializer.encode(get_object_or_404(User, pk=user_id)))
 
 
@@ -214,70 +215,39 @@ recent_actors = []
 
 
 @require_POST
+@verify_post_params("report")
+@verify_authenticated
+@verify_resent_actors
+@verify_file_size
 def set_report(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
-    if request.user.email in recent_actors:
-        return HttpResponseForbidden("Reporting too fast!")
-
-    response = verify_request(request.POST, "report")
-    if response:
-        return response
-
-    photos = []
-    for file in request.FILES:
-        if file.size > 1000000000:
-            return HttpResponseBadRequest("Too large files included (over 1GB)!")
-        else:
-            photos.append(file)
-
-    asyncio.run(async_timer(60, lambda: recent_actors.append(request.user.email)))
-    ReportSerializer.parse(request.POST["report"], photos, request.user)
+    asyncio.run(async_timer(20, lambda: recent_actors.append(request.user.email)))
+    ReportSerializer.parse(request.POST["report"], request.FILES, request.user)
     return HttpResponse("Report sent!")
 
 
 @require_POST
+@verify_post_params("comment")
+@verify_authenticated
+@verify_resent_actors
 def set_comment(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
-    if request.user.email in recent_actors:
-        return HttpResponseForbidden("Commenting too fast!")
-
-    response = verify_request(request.POST, "comment")
-    if response:
-        return response
-
-    asyncio.run(async_timer(60, lambda: recent_actors.append(request.user.email)))
+    asyncio.run(async_timer(20, lambda: recent_actors.append(request.user.email)))
     CommentSerializer.parse(request.POST["comment"], request.user)
     return HttpResponse("Comment sent!")
 
 
 @require_POST
+@verify_post_params("name")
+@verify_authenticated
 def update_name(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
-    response = verify_request(request.POST, "name")
-    if response:
-        return response
-
     request.user.first_name = request.POST["name"]
     request.user.save()
     return HttpResponse("Name updated!")
 
 
 @require_POST
+@verify_authenticated
+@verify_file_size
 def update_photo(request):
-    if not request.user.is_authenticated:
-        return HttpResponseUnauthorized()
-
-    if request.FILES[0].size > 1000000000:
-        return HttpResponseBadRequest("Too large files included (over 1GB)!")
-    else:
-        file = request.FILES[0]
-
-    set_photo(request.user.photo, file.read())
+    set_photo(request.user.photo, request.FILES[0].read())
     request.user.save()
     return HttpResponse("Name updated!")

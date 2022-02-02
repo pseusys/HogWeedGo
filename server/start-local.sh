@@ -1,6 +1,6 @@
 #!/bin/bash
 
-env $(cat config.env | xargs) rails
+export $(grep -v '^#' .env | xargs)
 
 env DOCKER=False
 env ENV=development
@@ -26,3 +26,5 @@ env POSTGRES_HOST=localhost
 
 #daphne -b 0.0.0.0 -p 8000 sse_demo.asgi:application or runserver
 #navigate to /admin/
+
+unset $(grep -v '^#' .env | sed -E 's/(.*)=.*/\1/' | xargs)

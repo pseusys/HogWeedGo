@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import path
+from django.views.generic import TemplateView
 
 from HogWeedGo.models import Report
 
@@ -13,6 +15,18 @@ class SiteAdmin(admin.AdminSite):
     empty_value_display = "null"
     site_url = None
 
+    def get_urls(self):
+        urls = super().get_urls()
+        urls = [path('settings/', self.admin_view(self.settings), name='settings')] + urls
+        return urls
+
+    def settings(self, request, extra_context=None):
+        defaults = {
+            'extra_context': {**self.each_context(request), **(extra_context or {})}
+        }
+        request.current_app = self.name
+        return SettingsView.as_view(**defaults)(request)
+
     def get_app_list(self, request):
         return list(filter(lambda app: app["app_label"] == "HogWeedGo", super().get_app_list(request)))
 
@@ -22,3 +36,8 @@ class SiteAdmin(admin.AdminSite):
 
     def index(self, request, extra_context=None):
         return super().index(request, extra_context or {"markers": list(map(self.extractor, Report.objects.all()))})
+
+
+class SettingsView(TemplateView):
+    template_name = 'admin/settings.html'
+    extra_context = None

@@ -6,7 +6,6 @@ HogWeedGo/migrations
 .venv
 venv
 
-static
 backup/*
 !backup/backup.schema.json
 
