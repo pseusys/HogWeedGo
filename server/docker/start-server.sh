@@ -1,18 +1,24 @@
 #!/bin/sh
+set -e
 
-echo "Collect static files"
-python manage.py collectstatic --noinput
+if [ "$#" -ne 1 ]; then
+  echo "Collect static files"
+  python manage.py collectstatic --noinput
 
-echo "Create database migrations"
-python manage.py makemigrations HogWeedGo
+  echo "Create database migrations"
+  python manage.py makemigrations HogWeedGo
 
-echo "Apply database migrations"
-python manage.py migrate
+  echo "Apply database migrations"
+  python manage.py migrate
 
-echo "Create superuser"
-python manage.py admin -e "$DJANGO_SUPERUSER_EMAIL" -p "$DJANGO_SUPERUSER_PASSWORD"
+  echo "Create superuser"
+  python manage.py admin -e "$DJANGO_SUPERUSER_EMAIL" -p "$DJANGO_SUPERUSER_PASSWORD"
 
-echo "Start server"
-daphne -b 0.0.0.0 -p "$HOGWEED_PORT" HogWeedGo.asgi:application
+  echo "Check deployment environment"
+  python manage.py check --deploy
 
-python manage.py check --deploy
+  echo "Start server"
+  daphne -b 0.0.0.0 -p "$HOGWEED_PORT" HogWeedGo.asgi:application
+fi
+
+exec "$@"

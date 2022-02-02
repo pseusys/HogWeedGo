@@ -1,4 +1,5 @@
 #!/bin/bash
+
 mkdir bundled-server
 
 # https://github.com/docker/compose/issues/7964

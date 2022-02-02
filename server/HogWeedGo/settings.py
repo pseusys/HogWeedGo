@@ -20,7 +20,7 @@ SECRET_KEY = os.environ["DJANGO_SECRET"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ["ENV"] == 'development' else False
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'] + os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 CSRF_TRUSTED_ORIGINS = [f'http://{host}:{os.environ["SERVER_PORT"]}' for host in ALLOWED_HOSTS]
 
 

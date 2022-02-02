@@ -12,7 +12,8 @@ services:
       - HOGWEED_PORT
       - SERVER_PORT
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     expose:
       - $HOGWEED_PORT
     volumes:
@@ -20,16 +21,22 @@ services:
       - ../docker-volume/media:/app/media
       - ../docker-volume/backup:/app/backup
       - ../docker-volume/logs:/app/logs
+    healthcheck:
+      test: wget -qO- http://localhost:$HOGWEED_PORT/healthcheck/
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   nginx_gateway:
-    image: nginx
+    image: nginx:1.21.6-alpine
     container_name: nginx_gateway
     environment:
       - NGINX_ENVSUBST_TEMPLATE_DIR=/configs
       - NGINX_PORT
       - HOGWEED_PORT
     depends_on:
-      - hogweed_server
+      hogweed_server:
+        condition: service_healthy
     ports:
       - ${SERVER_PORT}:${NGINX_PORT}
     configs:
@@ -38,15 +45,24 @@ services:
     volumes:
       - ../docker-volume/static:/app/static
       - ../docker-volume/media:/app/media
+    healthcheck:
+      test: service nginx status
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   postgres:
-    image: postgis/postgis
-    restart: always
+    image: postgis/postgis:14-3.2-alpine
     container_name: postgres
     env_file:
       - ../config.env
     expose:
       - 5432
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 configs:
   nginx-config:

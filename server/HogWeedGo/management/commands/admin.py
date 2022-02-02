@@ -11,8 +11,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if User.objects.count() == 0:
-            email = options["mode"]
-            password = options["mode"]
+            email = options["email"]
+            password = options["password"]
             print(f"Created superuser with email: {email}, password: {password}")
             admin = User.objects.create_superuser(email=email, password=password)
             admin.is_superuser = True

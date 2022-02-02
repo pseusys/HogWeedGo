@@ -251,3 +251,9 @@ def update_photo(request):
     set_photo(request.user.photo, request.FILES[0].read())
     request.user.save()
     return HttpResponse("Name updated!")
+
+
+@csrf_exempt
+@require_GET
+def healthcheck(request):
+    return HttpResponse('healthy')

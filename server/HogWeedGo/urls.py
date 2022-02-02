@@ -37,5 +37,7 @@ urlpatterns = [
     path('update_name', api.update_name),
     path('update_photo', api.update_photo),
 
+    path('healthcheck', api.healthcheck),
+
     path('', admin.site.urls)
 ]

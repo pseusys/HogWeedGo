@@ -1,0 +1,60 @@
+openapi: 3.0.3
+
+info:
+  title: HogWeedGo
+  description: HogWeedGo openapi specification
+  version: 1.0.0
+  license:
+    name: MIT
+
+servers:
+  - url: localhost:3000
+  - url: 'INSERT YOUR SERVER URL'
+
+paths:
+  /prove_email:
+    post:
+      tags:
+      - Users
+      - Auth
+      summary: Proves provided user e-mail by sending special unique code from e-mail.
+      description: ...
+      operationId: proveEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+              additionalProperties: false
+      responses:
+        200:
+
+  /auth:
+  /log_in:
+  /change_email:
+  /change_password:
+  /log_out:
+  /leave:
+
+  /poll_reports:
+  /get_reports:
+  /get_report/{report_id}:
+  /users/{user_id}:
+
+  /set_report:
+  /set_comment:
+  /update_name:
+  /update_photo:
+
+components:
+  schemas:
+
+"security":
+  - ...
