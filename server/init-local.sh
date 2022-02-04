@@ -70,5 +70,5 @@ if [ $# -eq 1 ]; then
   echo "Server initialized successfully, use: './init-local.sh CONFIG COMMANDS' to run server."
 
 else
-  pipenv run python3 ./manage.py "${*:2}"
+  pipenv run python3 ./manage.py "${@:2}"
 fi

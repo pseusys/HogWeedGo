@@ -3,13 +3,14 @@ import secrets
 import time
 from functools import wraps
 
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.http import JsonResponse, StreamingHttpResponse, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
+from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from HogWeedGo.models import User, Report, set_photo
 from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer
@@ -29,19 +30,12 @@ def verify_post_params(*args):
     def decorator(func):
         @wraps(func)
         def inner(request):
+            print(request.__dict__)
             for arg in args:
                 if arg not in request:
                     return HttpResponseBadRequest(f"{arg} was not in request.")
             return func(request)
         return inner
-    return decorator
-
-
-def verify_authenticated(func):
-    def decorator(request):
-        if not request.user.is_authenticated:
-            return HttpResponseUnauthorized()
-        return func(request)
     return decorator
 
 
@@ -75,8 +69,8 @@ async def async_timer(secs, func):
 proved_emails = {}
 
 
-@csrf_exempt
-@require_POST
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @verify_post_params("email")
 def prove_email(request):
     email = request.POST["email"]
@@ -95,11 +89,11 @@ def prove_email(request):
     return HttpResponse("Code was sent.")
 
 
-@csrf_exempt
-@require_POST
-@verify_post_params("email", "code", "password")
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@verify_post_params("username", "code", "password")
 def auth(request):
-    email = request.POST["email"]
+    email = request.POST["username"]
 
     if proved_emails[email] != request.POST["code"]:
         return HttpResponseUnauthorized("Wrong or expired code!")
@@ -109,25 +103,12 @@ def auth(request):
             User.objects.create_user(email, request.POST["password"])
         except IntegrityError:
             return HttpResponseForbidden("User already exists!")
-        return log_in(request)
+        return obtain_auth_token(request)
 
 
-@csrf_exempt
-@require_POST
-@verify_post_params("email", "password")
-def log_in(request):
-    user = authenticate(request, email=request.POST["email"], password=request.POST["password"])
-
-    if user is not None:
-        login(request, user)
-        return HttpResponse("Logged in successfully!")
-    else:
-        return HttpResponseUnauthorized("Can not log in!")
-
-
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @verify_post_params("email", "code")
-@verify_authenticated
 def change_email(request):
     email = request.POST["email"]
     existing = User.objects.get(email=email)
@@ -144,23 +125,23 @@ def change_email(request):
         return HttpResponseForbidden("User with given email already exists!")
 
 
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @verify_post_params("password")
-@verify_authenticated
 def change_password(request):
     request.user.set_password(request.POST["password"])
     return HttpResponse("Password successfully changed!")
 
 
-@require_POST
-@verify_authenticated
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def log_out(request):
     logout(request)
     return HttpResponse("Logged out successfully!")
 
 
-@require_POST
-@verify_authenticated
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def leave(request):
     request.user.delete()
     logout(request)
@@ -180,30 +161,26 @@ def _event_stream():
         time.sleep(5)
 
 
-@csrf_exempt
-@require_GET
-@verify_authenticated
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def poll_reports(request):
     return StreamingHttpResponse(_event_stream(), content_type="text/event-stream")
 
 
-@csrf_exempt
-@require_GET
-@verify_authenticated
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_reports(request):
     return JsonResponse([ReportSerializer.encode(x) for x in Report.objects.all()])
 
 
-@csrf_exempt
-@require_GET
-@verify_authenticated
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_report(request, report_id):
     return JsonResponse(ReportSerializer.encode(get_object_or_404(Report, pk=report_id)))
 
 
-@csrf_exempt
-@require_GET
-@verify_authenticated
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_user(request, user_id):
     return JsonResponse(UserSerializer.encode(get_object_or_404(User, pk=user_id)))
 
@@ -214,9 +191,9 @@ def get_user(request, user_id):
 recent_actors = []
 
 
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @verify_post_params("report")
-@verify_authenticated
 @verify_resent_actors
 @verify_file_size
 def set_report(request):
@@ -225,9 +202,9 @@ def set_report(request):
     return HttpResponse("Report sent!")
 
 
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @verify_post_params("comment")
-@verify_authenticated
 @verify_resent_actors
 def set_comment(request):
     asyncio.run(async_timer(20, lambda: recent_actors.append(request.user.email)))
@@ -235,17 +212,17 @@ def set_comment(request):
     return HttpResponse("Comment sent!")
 
 
-@require_POST
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @verify_post_params("name")
-@verify_authenticated
 def update_name(request):
     request.user.first_name = request.POST["name"]
     request.user.save()
     return HttpResponse("Name updated!")
 
 
-@require_POST
-@verify_authenticated
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @verify_file_size
 def update_photo(request):
     set_photo(request.user.photo, request.FILES[0].read())
@@ -253,7 +230,7 @@ def update_photo(request):
     return HttpResponse("Name updated!")
 
 
-@csrf_exempt
-@require_GET
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def healthcheck(request):
     return HttpResponse('healthy')

@@ -58,7 +58,7 @@
     },
 
     {
-      "address": "Lake in Australia",
+      "address": null,
       "init_comment": "It may dry out any time now...",
       "date": 1621007572862,
       "place": { "lng": 128.7851058, "lat": -24.2239476 },
@@ -97,7 +97,7 @@
     },
 
     {
-      "address": "Something was here",
+      "address": null,
       "init_comment": "Some place in water",
       "date": 1622113996022,
       "place": { "lng": -88.992143, "lat": 62.468677 },

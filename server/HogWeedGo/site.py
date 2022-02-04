@@ -28,14 +28,14 @@ class SiteAdmin(admin.AdminSite):
         return SettingsView.as_view(**defaults)(request)
 
     def get_app_list(self, request):
-        return list(filter(lambda app: app["app_label"] == "HogWeedGo", super().get_app_list(request)))
+        return [app for app in super().get_app_list(request) if app["app_label"] == "HogWeedGo"]
 
     @staticmethod
     def extractor(report):
         return {"coords": [report.place[1], report.place[0]], "id": report.id}
 
     def index(self, request, extra_context=None):
-        return super().index(request, extra_context or {"markers": list(map(self.extractor, Report.objects.all()))})
+        return super().index(request, extra_context or {"markers": [self.extractor(report) for report in Report.objects.all()]})
 
 
 class SettingsView(TemplateView):

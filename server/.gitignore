@@ -10,3 +10,5 @@ backup/*
 !backup/backup.schema.json
 
 config.env
+
+Pipfile.lock

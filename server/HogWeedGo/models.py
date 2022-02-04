@@ -5,9 +5,13 @@ from django.contrib import admin
 from django.contrib.gis.db import models
 from django.core.files import File
 from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from rest_framework.authtoken.models import Token
 
+from HogWeedGo import settings
 from HogWeedGo.managers import UserManager
 
 
@@ -46,6 +50,12 @@ class User(AbstractUser):
         return f"User { self.email } with id { self.id }"
 
 
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
+
+
 # Class representing report status
 class ReportStatuses(models.TextChoices):
     RECEIVED = "RECEIVED"
@@ -58,7 +68,7 @@ class Report(models.Model):
         unique_together = [["subs", "date"]]
         verbose_name = "Report"
 
-    address = models.CharField(max_length=128, help_text=_("Address defined by user. May be just a geo-related recommendation."))
+    address = models.CharField(max_length=128, null=True, help_text=_("Address defined by user. May be just a geo-related recommendation."))
     init_comment = models.TextField(max_length=2048, help_text=_("User comment about the report."))
     date = models.DateTimeField(help_text=_("Date specified by user for his observation."))
     place = models.PointField()

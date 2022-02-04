@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.forms',
+    'rest_framework',
+    'rest_framework.authtoken',
     'leaflet'
 ]
 
@@ -134,6 +136,16 @@ LEAFLET_CONFIG = {
     'DEFAULT_CENTER': (59.937500, 30.308611),
     'DEFAULT_ZOOM': 9,
     'MIN_ZOOM': 1
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
+    ]
 }
 
 DEFAULT_FROM_EMAIL = os.environ["SERVER_EMAIL_ADDRESS"]

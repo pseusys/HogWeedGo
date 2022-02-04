@@ -8,7 +8,7 @@ info:
     name: MIT
 
 servers:
-  - url: localhost:3000
+  - url: localhost:80
   - url: 'INSERT YOUR SERVER URL'
 
 paths:
@@ -53,8 +53,10 @@ paths:
   /update_name:
   /update_photo:
 
+  /healthcheck:
+
 components:
   schemas:
 
-"security":
+security:
   - ...

@@ -12,3 +12,5 @@ backup
 .dockerignore
 .gitignore
 config.env
+
+Pipfile.lock
