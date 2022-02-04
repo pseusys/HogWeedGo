@@ -5,13 +5,10 @@ from django.contrib import admin
 from django.contrib.gis.db import models
 from django.core.files import File
 from django.contrib.auth.models import AbstractUser
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
-from HogWeedGo import settings
 from HogWeedGo.managers import UserManager
 
 
@@ -30,7 +27,7 @@ class User(AbstractUser):
     last_name = None
     groups = None
     user_permissions = None
-    photo = models.ImageField(upload_to="static/user_photos", null=True)
+    photo = models.ImageField(upload_to="user_photos", null=True)
 
     REQUIRED_FIELDS = []
     USERNAME_FIELD = "email"
@@ -48,12 +45,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"User { self.email } with id { self.id }"
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
 
 
 # Class representing report status
@@ -94,7 +85,7 @@ class ReportPhoto(models.Model):
         verbose_name = "Photo"
 
     report = models.ForeignKey(Report, on_delete=models.CASCADE, help_text="Report this photo is attached to")
-    photo = models.ImageField(upload_to="static/report_photos", help_text="The photo itself")
+    photo = models.ImageField(upload_to="report_photos", help_text="The photo itself")
 
     def delete(self, using=None, keep_parents=False):
         os.remove(self.photo.name)

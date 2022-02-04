@@ -7,9 +7,11 @@ from json import JSONDecodeError
 from django.core import management
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
+from rest_framework.exceptions import ValidationError
 
 from HogWeedGo.models import Report, User
-from HogWeedGo.serializers import UserSerializer, ReportSerializer
+from HogWeedGo.serializers import UserSerializer, ReportSerializer, ReportPhotoSerializer, CommentSerializer
+from HogWeedGo.settings import MEDIA_ROOT
 
 
 class Command(BaseCommand):
@@ -21,47 +23,63 @@ class Command(BaseCommand):
         parser.add_argument("--gzip", "-z", action="store_true", dest="gzip", help="Compression of I/O file")
 
     def load(self, json_data):
+        def serialize(serializer, data, data_type, **serializer_args):
+            res = None
+            try:
+                ser = serializer(data=data, **serializer_args)
+                if ser.is_valid(raise_exception=True):
+                    res = ser.save()
+                    self.stdout.write(self.style.SUCCESS(f"{data_type} {res} saved!"))
+            except ValidationError as error:
+                self.stdout.write(self.style.NOTICE(f"{data_type} serializer data invalid:\n{error}"))
+            return res
+
         try:
             if "users" in json_data:
                 for user in json_data["users"]:
-                    try:
-                        self.stdout.write(self.style.SUCCESS(f"{ UserSerializer.parse(user) } saved!"))
-                    except IntegrityError:
-                        self.stdout.write(self.style.NOTICE("Integrity problem, some of the users already present!"))
+                    serialize(UserSerializer, user, "User", bundle_photo=True)
 
             if "reports" in json_data:
                 for report in json_data["reports"]:
-                    try:
-                        self.stdout.write(self.style.SUCCESS(f"{ ReportSerializer.parse(report) } saved!"))
-                    except IntegrityError:
-                        self.stdout.write(self.style.NOTICE("Integrity problem, some of the reports already present!"))
+                    photos = report.pop('photos', [])
+                    comments = report.pop('comments', [])
+                    saved = serialize(ReportSerializer, report, "Report")
+                    if saved:
+                        for photo in photos:
+                            serialize(ReportPhotoSerializer, photo | {'report': saved.pk}, "    Photo", bundle_photo=True)
+                        for comment in comments:
+                            serialize(CommentSerializer, comment | {'report': saved.pk}, "    Comment")
 
         except KeyError:
             raise CommandError(f"JSON data is malformed! Validate the data with ./data/data.schema.json schema.")
         except ValueError as e:
-            raise CommandError(f"{ e }\nValidate the data with ./data/_data.schema.json schema.")
+            raise CommandError(f"Validate the data with ./data/_data.schema.json schema.\n{e}")
 
     def dump(self):
         self.stdout.write(self.style.WARNING(f"Dumping { User.objects.count() } users and { Report.objects.count() } reports."))
         return json.dumps({
-            "users": [UserSerializer.encode(user, bundle_photo=True) for user in User.objects.all()],
-            "reports": [ReportSerializer.encode(report, bundle_photos=True, subscribe_email=True) for report in Report.objects.all()]
+            "users": [UserSerializer(user, bundle_photo=True).data for user in User.objects.all()],
+            "reports": [ReportSerializer(report, bundle_photos=True, subscribe_email=True).data for report in Report.objects.all()]
         }, indent=2)
+
+    def clear(self):
+        management.call_command('flush', interactive=False)
+        self.stdout.write(self.style.SUCCESS("Database cleared."))
+        try:
+            shutil.rmtree(f"{MEDIA_ROOT}/report_photos")
+            self.stdout.write(self.style.SUCCESS("Report photos folder deleted."))
+        except FileNotFoundError:
+            self.stdout.write(self.style.WARNING("Report photos folder deletion skipped - folder not present."))
+        try:
+            shutil.rmtree(f"{MEDIA_ROOT}/user_photos")
+            self.stdout.write(self.style.SUCCESS("User photos folders deleted."))
+        except FileNotFoundError:
+            self.stdout.write(self.style.WARNING("User photos folders deletion skipped - folder not present."))
 
     def handle(self, *args, **options):
         if options["mode"] == "clear":
-            management.call_command('flush', interactive=False)
-            self.stdout.write(self.style.SUCCESS("Database cleared."))
-            try:
-                shutil.rmtree("static/report_photos")
-                self.stdout.write(self.style.SUCCESS("Report photos folder deleted."))
-            except FileNotFoundError:
-                self.stdout.write(self.style.WARNING("Report photos folder deletion skipped - folder not present."))
-            try:
-                shutil.rmtree("static/user_photos")
-                self.stdout.write(self.style.SUCCESS("User photos folders deleted."))
-            except FileNotFoundError:
-                self.stdout.write(self.style.WARNING("User photos folders deletion skipped - folder not present."))
+            self.stdout.write(self.style.WARNING("Clearing data..."))
+            self.clear()
             return
 
         if options["file"] is None:

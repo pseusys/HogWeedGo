@@ -10,6 +10,7 @@ psycopg2-binary = "~=2.9.3"
 django-leaflet = "~=0.28.2"
 daphne = "~=3.0.2"
 djangorestframework = "~=3.13.1"
+drf-extra-fields = "~=3.2.1"
 
 [requires]
 python_version = "3.10"

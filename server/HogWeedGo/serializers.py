@@ -1,21 +1,15 @@
-import base64
+import uuid
+from base64 import b64encode, b64decode
+from datetime import datetime
 from io import BytesIO
 
 from django.contrib.gis.geos import Point
-from django.utils.datetime_safe import datetime
+from django.core.files import File
 from django.utils.timezone import make_aware
+from rest_framework.serializers import ModelSerializer
+from rest_framework.fields import empty
 
-from HogWeedGo.models import User, ReportPhoto, Report, set_photo, Comment
-
-
-class Serializer:
-    @staticmethod
-    def encode(model):
-        raise NotImplementedError('subclasses of Serializer must provide an encode() method')
-
-    @staticmethod
-    def parse(data):
-        raise NotImplementedError('subclasses of Serializer must provide an parse() method')
+from HogWeedGo.models import Report, User, Comment, ReportPhoto
 
 
 def _to_datetime(timestamp):
@@ -27,134 +21,119 @@ def _from_datetime(dt):
 
 
 def _to_base64(data):
-    return base64.b64encode(data).decode("utf-8")
+    return b64encode(data).decode('utf-8')
 
 
 def _from_base64(base):
-    return base64.b64decode(base.encode("utf-8"))
+    return b64decode(base.encode('utf-8'))
 
 
-class UserSerializer(Serializer):
-    @staticmethod
-    def encode(model, bundle_photo=False):
-        photo = None
+# Serializers:
 
-        if model.photo.name:
-            if bundle_photo:
-                photo = _to_base64(model.photo.read())
-            else:
-                photo = model.photo.name.split('/', 1)[1]
 
-        return {
-            "password": model.password,
-            "last_login": _from_datetime(model.last_login) if model.last_login else None,
-            "is_superuser": model.is_superuser,
-            "email": model.email,
-            "first_name": model.first_name,
-            "is_staff": model.is_staff,
-            "is_active": model.is_active,
-            "date_joined": _from_datetime(model.date_joined),
-            "photo": photo
-        }
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['password', 'last_login', 'is_superuser', 'email', 'first_name', 'is_staff', 'is_active', 'date_joined', 'photo']
 
-    @staticmethod
-    def parse(data):
-        password = data.pop("password")
-        photo = data.pop("photo")
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self.bundle_photo = kwargs.pop('bundle_photo', False)
+        super(UserSerializer, self).__init__(instance, data, **kwargs)
 
-        data["last_login"] = _to_datetime(data["last_login"]) if data["last_login"] else None
-        data["date_joined"] = _to_datetime(data["date_joined"])
+    def to_representation(self, instance):
+        rep = super(UserSerializer, self).to_representation(instance)
+        rep['last_login'] = _from_datetime(instance.last_login) if instance.last_login else None
+        rep['date_joined'] = _from_datetime(instance.date_joined)
+        if instance.photo:
+            if self.bundle_photo:
+                rep['photo'] = _to_base64(instance.photo.read())
+        return rep
 
-        user = User.objects.create(**data)
-        user.password = password
+    def to_internal_value(self, data):
+        data['last_login'] = _to_datetime(data['last_login']) if data['last_login'] else None
+        data['date_joined'] = _to_datetime(data['date_joined'])
+        if self.bundle_photo and data['photo']:
+            data['photo'] = File(BytesIO(_from_base64(data['photo'])), f'{str(uuid.uuid4())}.png')
+        return super(UserSerializer, self).to_internal_value(data)
 
-        if photo:
-            set_photo(user.photo, BytesIO(_from_base64(photo)))
+
+class ReportSerializer(ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['address', 'init_comment', 'date', 'status', 'subs', 'type', 'place']
+
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self.subscribe_email = kwargs.pop('subscribe_email', False)
+        self.bundle_photos = kwargs.pop('bundle_photos', False)
+        self.trim = kwargs.pop('trim', False)
+        self.assigned = kwargs.pop('assigned', None)
+        super(ReportSerializer, self).__init__(instance, data, **kwargs)
+
+    def to_representation(self, instance):
+        rep = super(ReportSerializer, self).to_representation(instance)
+        rep['date'] = _from_datetime(instance.date)
+        rep['subs'] = (instance.subs.email if self.subscribe_email else instance.subs.id) if instance.subs else None
+        if self.trim:
+            rep.longitude = instance.place[0]
+            rep.latitude = instance.place[1]
         else:
-            user.photo = None
+            rep['place'] = {'lng': instance.place[0], 'lat': instance.place[1]}
+            rep['photos'] = [ReportPhotoSerializer(photo, bundle_photo=True).data for photo in ReportPhoto.objects.filter(report=instance)]
+            rep['comments'] = [CommentSerializer(comment, subscribe_email=self.subscribe_email).data for comment in Comment.objects.filter(report=instance)]
+        return rep
 
-        user.save()
-        return user
-
-
-class ReportPhotoSerializer(Serializer):
-    @staticmethod
-    def encode(model, bundle_photo=False):
-        return _to_base64(model.photo.read()) if bundle_photo else model.photo.name.split('/', 1)[1]
-
-    @staticmethod
-    def parse(data):
-        photo = ReportPhoto(report=data["report"])
-        if data["photo"]:
-            set_photo(photo.photo, data["photo"])
-            photo.save()
-        return photo
+    def to_internal_value(self, data):
+        data['date'] = _to_datetime(data['date'])
+        data['place'] = Point(data['place']['lng'], data['place']['lat'])
+        if self.assigned:
+            data['subs'] = self.assigned
+        elif data['subs']:
+            data['subs'] = User.objects.get(email=data.pop('subs')).pk
+        return super(ReportSerializer, self).to_internal_value(data)
 
 
-class CommentSerializer(Serializer):
-    @staticmethod
-    def encode(model, subscribe_email=False):
-        return {
-            "text": model.text,
-            "subs": (model.subs.email if subscribe_email else model.subs.id) if model.subs else None
-        }
+class ReportPhotoSerializer(ModelSerializer):
+    class Meta:
+        model = ReportPhoto
+        fields = ['report', 'photo']
 
-    @staticmethod
-    def parse(data, assigned=None):
-        if assigned:
-            data["subs"] = assigned
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self.bundle_photo = kwargs.pop('bundle_photo', False)
+        super(ReportPhotoSerializer, self).__init__(instance, data, **kwargs)
+
+    def to_representation(self, instance):
+        rep = super(ReportPhotoSerializer, self).to_representation(instance)
+        del rep['report']
+        if self.bundle_photo:
+            rep['photo'] = _to_base64(instance.photo.read())
+        return rep
+
+    def to_internal_value(self, data):
+        if self.bundle_photo:
+            data['photo'] = File(BytesIO(_from_base64(data['photo'])), f'{str(uuid.uuid4())}.png')
+        return super(ReportPhotoSerializer, self).to_internal_value(data)
+
+
+class CommentSerializer(ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['report', 'text', 'subs']
+
+    def __init__(self, instance=None, data=empty, **kwargs):
+        self.subscribe_email = kwargs.pop('subscribe_email', False)
+        self.assigned = kwargs.pop('assigned', False)
+        super(CommentSerializer, self).__init__(instance, data, **kwargs)
+
+    def to_representation(self, instance):
+        rep = super(CommentSerializer, self).to_representation(instance)
+        del rep['report']
+        rep['subs'] = (instance.subs.email if self.subscribe_email else instance.subs.id) if instance.subs else None
+        return rep
+
+    def to_internal_value(self, data):
+        if self.assigned:
+            data['subs'] = self.assigned
         else:
-            data["subs"] = User.objects.get(email=data.pop("subs"))
-        return Comment.objects.create(**data)
-
-
-class ReportSerializer(Serializer):
-    @staticmethod
-    def encode(model, subscribe_email=False, bundle_photos=False, trim=False):
-        data = {
-            "address": model.address,
-            "init_comment": model.init_comment,
-            "date": _from_datetime(model.date),
-            "status": model.status,
-            "subs": (model.subs.email if subscribe_email else model.subs.id) if model.subs else None,
-            "type": model.type
-        }
-        if trim:
-            return data | {
-                "longitude": model.place[0],
-                "latitude": model.place[1]
-            }
-        else:
-            return data | {
-                "place": {"lng": model.place[0], "lat": model.place[1]},
-                "photos": [ReportPhotoSerializer.encode(photo, bundle_photo=bundle_photos) for photo in ReportPhoto.objects.filter(report=model)],
-                "comments": [CommentSerializer.encode(comment, subscribe_email) for comment in Comment.objects.filter(report=model)]
-            }
-
-    @staticmethod
-    def parse(data, loaded_photos=None, assigned=None):
-        photos = data.pop("photos")
-        comments = data.pop("comments")
-
-        data["date"] = _to_datetime(data["date"])
-        data["place"] = Point(data["place"]["lng"], data["place"]["lat"])
-        if assigned:
-            data["subs"] = assigned
-        elif data["subs"]:
-            data["subs"] = User.objects.get(email=data.pop("subs"))
-
-        report = Report.objects.create(**data)
-
-        # TODO: NEURO API ENTRY
-
-        for photo in photos:
-            ReportPhotoSerializer.parse({"report": report, "photo": BytesIO(_from_base64(photo))})
-
-        if loaded_photos:
-            for photo in photos:
-                ReportPhotoSerializer.parse({"report": report, "photo": photo})
-
-        for comment in comments:
-            CommentSerializer.parse(comment | {"report": report}, assigned)
-
-        return report
+            data['subs'] = User.objects.get(email=data.pop('subs')).pk
+        inter = super(CommentSerializer, self).to_internal_value(data)
+        return inter

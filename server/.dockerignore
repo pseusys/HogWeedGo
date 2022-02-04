@@ -1,4 +1,6 @@
 docker-volume
+media
+static
 
 **/__pycache__/*
 HogWeedGo/migrations
