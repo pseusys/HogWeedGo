@@ -15,13 +15,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ["DJANGO_SECRET"]
+SECRET_KEY = os.environ['DJANGO_SECRET']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if os.environ["ENV"] == 'development' else False
+DEBUG = True if os.getenv('ENV', 'development') == 'development' else False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'] + os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-CSRF_TRUSTED_ORIGINS = [f'http://{host}:{os.environ["SERVER_PORT"]}' for host in ALLOWED_HOSTS]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'] + os.getenv('DJANGO_ALLOWED_HOSTS', "").split(" ")
+CSRF_TRUSTED_ORIGINS = [f"http://{host}:{os.getenv('SERVER_PORT', 3000)}'"for host in ALLOWED_HOSTS]
 
 
 # Application definition
@@ -78,8 +78,8 @@ WSGI_APPLICATION = 'HogWeedGo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': 'postgres' if os.environ["DOCKER"] == 'True' else os.environ["POSTGRES_HOST"],
-        'PORT': os.environ["POSTGRES_PORT"],
+        'HOST': 'postgres' if os.getenv('DOCKER', 'False') == 'True' else os.environ["POSTGRES_HOST"],
+        'PORT': os.getenv('POSTGRES_PORT', 5432),
         'NAME': os.environ["POSTGRES_DB"],
         'USER': os.environ["POSTGRES_USER"],
         'PASSWORD': os.environ["POSTGRES_PASSWORD"]
@@ -144,6 +144,6 @@ EMAIL_HOST_USER = os.environ["SERVER_EMAIL_USER"]
 EMAIL_HOST_PASSWORD = os.environ["SERVER_EMAIL_PASSWORD"]
 
 
-if os.environ['DOCKER'] == 'True':
+if os.getenv('DOCKER', 'False') == 'True':
     GDAL_LIBRARY_PATH = glob('/usr/lib/libgdal.so.*')[0]
     GEOS_LIBRARY_PATH = glob('/usr/lib/libgeos_c.so.*')[0]

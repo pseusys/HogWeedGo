@@ -1,0 +1,47 @@
+name: SERVER
+
+on:
+  push:
+    paths:
+      - 'server/**'
+
+jobs:
+  test-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.4
+        with:
+          lfs: true
+
+      - name: Create user config file 🛠
+        run: |
+          echo "
+          DJANGO_SECRET==&b-^f)8qb72-m=memnkw@jnf@1g44=ahs^j=3=v%#i1u03nua
+          DJANGO_ALLOWED_HOSTS=
+
+          DJANGO_SUPERUSER_EMAIL=admin@site.com
+          DJANGO_SUPERUSER_PASSWORD=12345
+
+          POSTGRES_HOST=localhost
+          POSTGRES_DB=hogweedgo
+          POSTGRES_USER=admin
+          POSTGRES_PASSWORD=12345
+
+          SERVER_EMAIL_ADDRESS=admin@site.com
+          SERVER_EMAIL_TLS=True
+          SERVER_EMAIL_HOST=localhost
+          SERVER_EMAIL_PORT=3030
+          SERVER_EMAIL_USER=admin
+          SERVER_EMAIL_PASSWORD=12345
+          " > ./server/config.env
+
+
+      - name: Install Newman for API testing 🧑‍🚀
+        run: npm install -g newman
+
+      - name: Run API tests 🌐
+        run: |
+          ...
+          newman run examples/sample-collection.json

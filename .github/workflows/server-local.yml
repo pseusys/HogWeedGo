@@ -1,0 +1,57 @@
+name: SERVER-LOCAL
+
+on:
+  push:
+    paths:
+      - 'server/init-local.sh'
+
+jobs:
+  test-server-local:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.4
+        with:
+          lfs: true
+
+      - name: Create user config file 🛠
+        run: |
+          echo "
+          DJANGO_SECRET==&b-^f)8qb72-m=memnkw@jnf@1g44=ahs^j=3=v%#i1u03nua
+          DJANGO_ALLOWED_HOSTS=
+
+          DJANGO_SUPERUSER_EMAIL=admin@site.com
+          DJANGO_SUPERUSER_PASSWORD=12345
+
+          POSTGRES_HOST=localhost
+          POSTGRES_DB=hogweedgo
+          POSTGRES_USER=admin
+          POSTGRES_PASSWORD=12345
+
+          SERVER_EMAIL_ADDRESS=admin@site.com
+          SERVER_EMAIL_TLS=True
+          SERVER_EMAIL_HOST=localhost
+          SERVER_EMAIL_PORT=3030
+          SERVER_EMAIL_USER=admin
+          SERVER_EMAIL_PASSWORD=12345
+          " > ./server/config.env
+
+      - name: Install Python 3.10 🐍
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install PostgreSQL 🐘
+        run: |
+          apt install wget ca-certificates
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+          echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
+          apt update && apt install -y postgresql-13 postgresql-client-13 postgis postgresql-13-postgis-3 gdal-bin
+          pg_ctlcluster 13 main start
+
+      - name: Run initializing script 📜
+        run: cd ./server && POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
+
+      - name: Run server tests 🧪
+        run: cd ./server && ./init-local.sh ./config.env test

@@ -13,7 +13,7 @@ class Command(BaseCommand):
         if User.objects.count() == 0:
             email = options["email"]
             password = options["password"]
-            print(f"Created superuser with email: {email}, password: {password}")
+            print(f"Created superuser with email: {email}")
             admin = User.objects.create_superuser(email=email, password=password)
             admin.is_superuser = True
             admin.is_active = True
