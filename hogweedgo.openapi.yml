@@ -1,0 +1,288 @@
+openapi: 3.0.2
+info:
+  title: ''
+  version: ''
+paths:
+  /healthcheck:
+    get:
+      operationId: listHealths
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+          description: ''
+      tags: health
+  /api/me/auth:
+    get:
+      operationId: authMe
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: ''
+      tags:
+      - me
+  /api/me/log_in:
+    get:
+      operationId: logInMe
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: ''
+      tags:
+      - me
+  /api/me/prove_email:
+    get:
+      operationId: proveEmailMe
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: ''
+      tags:
+      - me
+  /api/reports:
+    get:
+      operationId: listReports
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+          description: ''
+      tags:
+      - api
+    post:
+      operationId: createReport
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Report'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+      tags:
+      - api
+  /api/reports/{id}:
+    get:
+      operationId: retrieveReport
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this Report.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+      tags:
+      - api
+  /api/users/{id}:
+    get:
+      operationId: retrieveUser
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this User.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+      tags:
+      - user
+  /api/me/setup:
+    post:
+      operationId: setupMe
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: {}
+          description: ''
+      tags:
+      - me
+  /api/comments:
+    post:
+      operationId: createComment
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+      tags:
+      - comment
+  /api/me/leave:
+    delete:
+      operationId: leaveMe
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - me
+  /api/me/log_out:
+    delete:
+      operationId: logOutMe
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - me
+components:
+  schemas:
+    Const: null
+    Report:
+      type: object
+      properties:
+        address:
+          type: string
+          nullable: true
+          description: Address defined by user. May be just a geo-related recommendation.
+          maxLength: 128
+        init_comment:
+          type: string
+          description: User comment about the report.
+          maxLength: 2048
+        date:
+          type: string
+          format: date-time
+          description: Date specified by user for his observation.
+        status:
+          enum:
+          - RECEIVED
+          - APPROVED
+          - INVALID
+          type: string
+          description: Report status.
+        subs:
+          type: integer
+          nullable: true
+          description: The sender of the report, subscription.
+        type:
+          type: string
+          description: Staff reply for the report. NB! Auto type check appends ' |
+            NN%' to guessed type, thus everything after '|' is omitted by filtering.
+          maxLength: 64
+        place:
+          type: string
+      required:
+      - init_comment
+      - date
+      - status
+      - subs
+      - type
+      - place
+    User:
+      type: object
+      properties:
+        password:
+          type: string
+          maxLength: 128
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        is_superuser:
+          type: boolean
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        is_staff:
+          type: boolean
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+        photo:
+          type: string
+          format: binary
+          nullable: true
+      required:
+      - password
+      - email
+    Results: null
+    Comment:
+      type: object
+      properties:
+        report:
+          type: integer
+          description: Report this comment is attached to
+        text:
+          type: string
+          description: A comment, added to a report by another user.
+          maxLength: 2048
+        subs:
+          type: integer
+          nullable: true
+          description: Author of the comment
+      required:
+      - report
+      - text
