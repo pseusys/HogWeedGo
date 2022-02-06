@@ -1,0 +1,297 @@
+{
+	"info": {
+		"_postman_id": "3303d313-2dce-4917-a06e-18511aff6ad8",
+		"name": "HogWeedGoAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Healthcheck",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Server is healthy\", function () {",
+							"    pm.expect(pm.response.text()).to.be.equal(\"healthy\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/healthcheck",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Log out",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"AUTH_TOKEN\", null);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/me/log_out",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"me",
+						"log_out"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Log in",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"AUTH_TOKEN\", pm.response.text());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"AUTH_TOKEN\", null);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/me/log_in?email=staff@site.com&password=12345",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"me",
+						"log_in"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "staff@site.com"
+						},
+						{
+							"key": "password",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Report",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"REPORT_ID\", pm.response.json()['id']);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"address\": \"Pupishevo\",\n    \"init_comment\": \"Wish I could visit Pupishevo instead of testing\",\n    \"place\": {\n        \"lng\": 32.0945622,\n        \"lat\": 59.905243\n    },\n    \"type\": \"Best Place | 45%\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/reports",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"reports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Reports",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/reports",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"reports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Comment",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text\": \"Why have you reported about this??\",\n    \"report\": {{REPORT_ID}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/comments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"AUTH_TOKEN\", null);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/me/leave",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"me",
+						"leave"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{AUTH_TOKEN}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Status code is successful\", function () {",
+					"    pm.expect(pm.response.code).to.be.above(200);",
+					"    pm.expect(pm.response.code).to.be.below(400);",
+					"});"
+				]
+			}
+		}
+	]
+}

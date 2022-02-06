@@ -43,12 +43,12 @@ class Command(BaseCommand):
                 for report in json_data["reports"]:
                     photos = report.pop('photos', [])
                     comments = report.pop('comments', [])
-                    saved = serialize(ReportSerializer, report, "Report")
+                    saved = serialize(ReportSerializer, report, "Report", from_user_input=False)
                     if saved:
                         for photo in photos:
                             serialize(ReportPhotoSerializer, photo | {'report': saved.pk}, "    Photo", bundle_photo=True)
                         for comment in comments:
-                            serialize(CommentSerializer, comment | {'report': saved.pk}, "    Comment")
+                            serialize(CommentSerializer, comment | {'report': saved.pk}, "    Comment", from_user_input=False)
 
         except KeyError:
             raise CommandError(f"JSON data is malformed! Validate the data with ./data/data.schema.json schema.")
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING(f"Dumping { User.objects.count() } users and { Report.objects.count() } reports."))
         return json.dumps({
             "users": [UserSerializer(user, bundle_photo=True).data for user in User.objects.all()],
-            "reports": [ReportSerializer(report, bundle_photos=True, subscribe_email=True).data for report in Report.objects.all()]
+            "reports": [ReportSerializer(report, bundle_photos=True, subscribe_email=True, to_include_index=False).data for report in Report.objects.all()]
         }, indent=2)
 
     def clear(self):

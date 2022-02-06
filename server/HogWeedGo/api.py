@@ -1,14 +1,8 @@
-import random
-import time
-from functools import wraps
-from string import ascii_letters
-
-from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes, action, schema
+from rest_framework.decorators import api_view, permission_classes, action, schema, renderer_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -16,41 +10,13 @@ from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import ViewSet, ReadOnlyModelViewSet, GenericViewSet
 
-from HogWeedGo import settings
 from HogWeedGo.api_schema import MeSchema, ReportsSchema
+from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth
 from HogWeedGo.models import User, Report, Comment
 from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer
 
 
 # TODO: make async with Django async support.
-
-
-def verify_params(method, *args):
-    def decorator(func):
-        @wraps(func)
-        def inner(self, request):
-            data = request.data if method.lower() in ('post', 'put', 'patch') else request.query_params
-            for arg in args:
-                if arg not in data:
-                    return Response(f"Argument {arg} was not in request!", status.HTTP_400_BAD_REQUEST)
-            return func(self, request)
-        return inner
-    return decorator
-
-
-# TODO: check type and ext before uploading
-def verify_photos(func):
-    def decorator(self, request):
-        for file in request.FILES:
-            if file.size > 1000000000:
-                return Response("Too large files included (over 1GB)!", status.HTTP_400_BAD_REQUEST)
-        return func(self, request)
-    return decorator
-
-
-def random_token(size=8, email='', delay_minutes=10):
-    random.seed(f'{settings.SECRET_KEY}{email}{time.time() // delay_minutes // 60}')
-    return ''.join(random.choice(ascii_letters) for _ in range(size))
 
 
 # ViewSets
@@ -59,7 +25,7 @@ def random_token(size=8, email='', delay_minutes=10):
 class MeViewSet(ViewSet):
     schema = MeSchema(tags=['me'], operation_id_base='Me')
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email")
     def prove_email(self, request):
         email = request.query_params.get('email')
@@ -72,7 +38,7 @@ class MeViewSet(ViewSet):
         )
         return Response("Code was sent")
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email", "code", "password")
     def auth(self, request):
         email = request.query_params.get('email')
@@ -83,17 +49,12 @@ class MeViewSet(ViewSet):
             User.objects.create_user(email, request.data["password"])
         except IntegrityError:
             return Response("User already exists!", status.HTTP_403_FORBIDDEN)
-        password = request.query_params.get('password')
-        token, _ = Token.objects.get_or_create(user=authenticate(request, email=email, password=password))
-        return Response(f'Token {str(token)}')
+        return auth(request, email, request.query_params.get('password'))
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email", "password")
     def log_in(self, request):
-        email = request.query_params.get('email')
-        password = request.query_params.get('password')
-        token, _ = Token.objects.get_or_create(user=authenticate(request, email=email, password=password))
-        return Response(f'Token {str(token)}')
+        return auth(request, request.query_params.get('email'), request.query_params.get('password'))
 
     @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated])
     def setup(self, request):
@@ -122,12 +83,12 @@ class MeViewSet(ViewSet):
         request.user.save()
         return Response(results)
 
-    @action(methods=['DELETE'], detail=False, permission_classes=[IsAuthenticated])
+    @action(methods=['DELETE'], detail=False, permission_classes=[IsAuthenticated], renderer_classes=[PlainTextRenderer])
     def log_out(self, request):
         request.user.auth_token.delete()
         return Response("Logged out successfully")
 
-    @action(methods=['DELETE'], detail=False, permission_classes=[IsAuthenticated])
+    @action(methods=['DELETE'], detail=False, permission_classes=[IsAuthenticated], renderer_classes=[PlainTextRenderer])
     def leave(self, request):
         request.user.auth_token.delete()
         request.user.delete()
@@ -142,12 +103,15 @@ class ReportViewSet(CreateModelMixin, ReadOnlyModelViewSet):
     def get_throttles(self):
         if self.action == 'create':
             return [UserRateThrottle()]
-        else:
-            return []
+        return super(ReportViewSet, self).get_throttles()
 
     def create(self, request, *args, **kwargs):
         # TODO: set photos
-        return super().create(request, *args, **kwargs)
+        request.data['photos'] = []
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValidationError as e:
+            return Response(e.detail, status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(RetrieveModelMixin, GenericViewSet):
@@ -162,9 +126,16 @@ class CommentViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
 
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValidationError as e:
+            return Response(e.detail, status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@renderer_classes([PlainTextRenderer])
 @schema(AutoSchema(tags='health', operation_id_base='Health'))
 def healthcheck(request):
-    return Response('healthy')
+    return Response('healthy', content_type='text/plain')

@@ -40,8 +40,12 @@ jobs:
 
       - name: Install Newman for API testing 🧑‍🚀
         run: npm install -g newman
+        
+      - name: Run server in Docker
+        run: ...
 
       - name: Run API tests 🌐
-        run: |
-          ...
-          newman run examples/sample-collection.json
+        run: newman run ./server/tests/api.postman.json
+        
+      - name: Stop server container
+        run: ...

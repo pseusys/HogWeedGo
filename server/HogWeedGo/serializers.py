@@ -9,7 +9,8 @@ from django.utils.timezone import make_aware
 from rest_framework.serializers import ModelSerializer
 from rest_framework.fields import empty
 
-from HogWeedGo.models import Report, User, Comment, ReportPhoto
+from HogWeedGo import settings
+from HogWeedGo.models import Report, User, Comment, ReportPhoto, ReportStatuses
 
 
 def _to_datetime(timestamp):
@@ -65,30 +66,35 @@ class ReportSerializer(ModelSerializer):
     def __init__(self, instance=None, data=empty, **kwargs):
         self.subscribe_email = kwargs.pop('subscribe_email', False)
         self.bundle_photos = kwargs.pop('bundle_photos', False)
-        self.trim = kwargs.pop('trim', False)
-        self.assigned = kwargs.pop('assigned', None)
+        self.collapse = kwargs.pop('trim', False)
+        self.to_include_index = kwargs.pop('to_include_index', True)
+        self.from_user_input = kwargs.pop('from_user_input', True)
         super(ReportSerializer, self).__init__(instance, data, **kwargs)
 
     def to_representation(self, instance):
         rep = super(ReportSerializer, self).to_representation(instance)
         rep['date'] = _from_datetime(instance.date)
         rep['subs'] = (instance.subs.email if self.subscribe_email else instance.subs.id) if instance.subs else None
-        if self.trim:
+        if self.collapse:
             rep.longitude = instance.place[0]
             rep.latitude = instance.place[1]
         else:
             rep['place'] = {'lng': instance.place[0], 'lat': instance.place[1]}
-            rep['photos'] = [ReportPhotoSerializer(photo, bundle_photo=True).data for photo in ReportPhoto.objects.filter(report=instance)]
+            rep['photos'] = [ReportPhotoSerializer(photo, bundle_photo=self.bundle_photos).data for photo in ReportPhoto.objects.filter(report=instance)]
             rep['comments'] = [CommentSerializer(comment, subscribe_email=self.subscribe_email).data for comment in Comment.objects.filter(report=instance)]
+        if self.to_include_index:
+            rep['id'] = instance.pk
         return rep
 
     def to_internal_value(self, data):
-        data['date'] = _to_datetime(data['date'])
-        data['place'] = Point(data['place']['lng'], data['place']['lat'])
-        if self.assigned:
-            data['subs'] = self.assigned
-        elif data['subs']:
+        if self.from_user_input:
+            data['date'] = datetime.now()
+            data['status'] = ReportStatuses.RECEIVED
+            data['subs'] = self.context['request'].user.pk
+        else:
+            data['date'] = _to_datetime(data['date'])
             data['subs'] = User.objects.get(email=data.pop('subs')).pk
+        data['place'] = Point(data['place']['lng'], data['place']['lat'])
         return super(ReportSerializer, self).to_internal_value(data)
 
 
@@ -106,6 +112,8 @@ class ReportPhotoSerializer(ModelSerializer):
         del rep['report']
         if self.bundle_photo:
             rep['photo'] = _to_base64(instance.photo.read())
+        else:
+            rep['photo'] = f'{settings.MEDIA_URL}{instance.photo.name}'
         return rep
 
     def to_internal_value(self, data):
@@ -121,7 +129,7 @@ class CommentSerializer(ModelSerializer):
 
     def __init__(self, instance=None, data=empty, **kwargs):
         self.subscribe_email = kwargs.pop('subscribe_email', False)
-        self.assigned = kwargs.pop('assigned', False)
+        self.from_user_input = kwargs.pop('from_user_input', True)
         super(CommentSerializer, self).__init__(instance, data, **kwargs)
 
     def to_representation(self, instance):
@@ -131,9 +139,8 @@ class CommentSerializer(ModelSerializer):
         return rep
 
     def to_internal_value(self, data):
-        if self.assigned:
-            data['subs'] = self.assigned
+        if self.from_user_input:
+            data['subs'] = self.context['request'].user.pk
         else:
             data['subs'] = User.objects.get(email=data.pop('subs')).pk
-        inter = super(CommentSerializer, self).to_internal_value(data)
-        return inter
+        return super(CommentSerializer, self).to_internal_value(data)

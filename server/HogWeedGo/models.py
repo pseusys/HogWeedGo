@@ -1,20 +1,13 @@
 import os
-import uuid
-
 from django.contrib import admin
 from django.contrib.gis.db import models
-from django.core.files import File
 from django.contrib.auth.models import AbstractUser
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
+from HogWeedGo import settings
 from HogWeedGo.managers import UserManager
-
-
-def set_photo(image, raw):
-    image.save(f"{str(uuid.uuid4())}.png", File(raw), False)
-    image.flush()
 
 
 class User(AbstractUser):
@@ -36,7 +29,7 @@ class User(AbstractUser):
 
     def delete(self, using=None, keep_parents=False):
         if self.photo.name:
-            os.remove(self.photo.name)
+            os.remove(str(settings.MEDIA_ROOT / self.photo.name))
         super().delete(using, keep_parents)
 
     @admin.display(description="User photo")

@@ -188,7 +188,8 @@ paths:
       - me
 components:
   schemas:
-    Const: null
+    Email: Email
+    Code: Code
     Report:
       type: object
       properties:
@@ -268,7 +269,6 @@ components:
       required:
       - password
       - email
-    Results: null
     Comment:
       type: object
       properties:
