@@ -19,7 +19,7 @@ jobs:
         run: |
           echo "
           DJANGO_SECRET==&b-^f)8qb72-m=memnkw@jnf@1g44=ahs^j=3=v%#i1u03nua
-          DJANGO_ALLOWED_HOSTS=
+          DJANGO_ALLOWED_HOSTS=localhost
 
           DJANGO_SUPERUSER_EMAIL=admin@site.com
           DJANGO_SUPERUSER_PASSWORD=12345
@@ -28,24 +28,16 @@ jobs:
           POSTGRES_DB=hogweedgo
           POSTGRES_USER=admin
           POSTGRES_PASSWORD=12345
-
-          SERVER_EMAIL_ADDRESS=admin@site.com
-          SERVER_EMAIL_TLS=True
-          SERVER_EMAIL_HOST=localhost
-          SERVER_EMAIL_PORT=3030
-          SERVER_EMAIL_USER=admin
-          SERVER_EMAIL_PASSWORD=12345
           " > ./server/config.env
-
 
       - name: Install Newman for API testing 🧑‍🚀
         run: npm install -g newman
         
       - name: Run server in Docker
-        run: ...
+        run: docker-compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.development.yml --env-file=./docker/.env.development up --build
 
       - name: Run API tests 🌐
         run: newman run ./server/tests/api.postman.json
         
       - name: Stop server container
-        run: ...
+        run: docker-compose stop -t 30

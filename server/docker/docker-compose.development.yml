@@ -8,11 +8,11 @@ services:
       args:
         - WORKDIR=app
         - HOGWEED_PORT
-    volumes:
-      - ../docker-volume/server:/server
 
   nginx_gateway: {}
 
+  mail-agent: {}
+
   postgres:
     volumes:
-      - ../docker-volume/database:/data/database
+      - ../docker-volume/database:/data/db

@@ -28,13 +28,6 @@ jobs:
           POSTGRES_DB=hogweedgo
           POSTGRES_USER=admin
           POSTGRES_PASSWORD=12345
-
-          SERVER_EMAIL_ADDRESS=admin@site.com
-          SERVER_EMAIL_TLS=True
-          SERVER_EMAIL_HOST=localhost
-          SERVER_EMAIL_PORT=3030
-          SERVER_EMAIL_USER=admin
-          SERVER_EMAIL_PASSWORD=12345
           " > ./server/config.env
 
       - name: Install Python 3.10 🐍

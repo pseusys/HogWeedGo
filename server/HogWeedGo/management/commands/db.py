@@ -6,7 +6,6 @@ from json import JSONDecodeError
 
 from django.core import management
 from django.core.management.base import BaseCommand, CommandError
-from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from HogWeedGo.models import Report, User
@@ -37,18 +36,18 @@ class Command(BaseCommand):
         try:
             if "users" in json_data:
                 for user in json_data["users"]:
-                    serialize(UserSerializer, user, "User", bundle_photo=True)
+                    serialize(UserSerializer, user, "User", mode='backup')
 
             if "reports" in json_data:
                 for report in json_data["reports"]:
                     photos = report.pop('photos', [])
                     comments = report.pop('comments', [])
-                    saved = serialize(ReportSerializer, report, "Report", from_user_input=False)
+                    saved = serialize(ReportSerializer, report, "Report", mode='backup')
                     if saved:
                         for photo in photos:
-                            serialize(ReportPhotoSerializer, photo | {'report': saved.pk}, "    Photo", bundle_photo=True)
+                            serialize(ReportPhotoSerializer, photo | {'report': saved.pk}, "    Photo", mode='backup')
                         for comment in comments:
-                            serialize(CommentSerializer, comment | {'report': saved.pk}, "    Comment", from_user_input=False)
+                            serialize(CommentSerializer, comment | {'report': saved.pk}, "    Comment", mode='backup')
 
         except KeyError:
             raise CommandError(f"JSON data is malformed! Validate the data with ./data/data.schema.json schema.")
@@ -58,8 +57,8 @@ class Command(BaseCommand):
     def dump(self):
         self.stdout.write(self.style.WARNING(f"Dumping { User.objects.count() } users and { Report.objects.count() } reports."))
         return json.dumps({
-            "users": [UserSerializer(user, bundle_photo=True).data for user in User.objects.all()],
-            "reports": [ReportSerializer(report, bundle_photos=True, subscribe_email=True, to_include_index=False).data for report in Report.objects.all()]
+            "users": [UserSerializer(user, mode='backup').data for user in User.objects.all()],
+            "reports": [ReportSerializer(report, mode='backup').data for report in Report.objects.all()]
         }, indent=2)
 
     def clear(self):

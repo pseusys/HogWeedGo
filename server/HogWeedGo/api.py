@@ -1,17 +1,17 @@
-from django.core.mail import send_mail
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action, schema, renderer_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import ViewSet, ReadOnlyModelViewSet, GenericViewSet
 
 from HogWeedGo.api_schema import MeSchema, ReportsSchema
-from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth
+from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth, send_email
 from HogWeedGo.models import User, Report, Comment
 from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer
 
@@ -25,28 +25,22 @@ from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSeria
 class MeViewSet(ViewSet):
     schema = MeSchema(tags=['me'], operation_id_base='Me')
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], renderer_classes=[PlainTextRenderer])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], renderer_classes=[JSONRenderer, PlainTextRenderer])
     @verify_params('GET', "email")
     def prove_email(self, request):
         email = request.query_params.get('email')
         token = random_token(email=email)
-        send_mail(
-            "HogWeedGo authentication",
-            f"Your confirmation code is: <bold>{token}</bold>\nIt will be valid for 10 minutes.",
-            None,
-            recipient_list=[email]
-        )
-        return Response("Code was sent")
+        return send_email("HogWeedGo authentication", f"Your confirmation code is: '{token}'\nIt will be valid for 10 minutes.", None, recipient_list=[email])
 
     @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email", "code", "password")
     def auth(self, request):
         email = request.query_params.get('email')
         token = random_token(email=email)
-        if token != request.data["code"]:
+        if token != request.query_params.get('code'):
             return Response("Wrong or expired code!", status.HTTP_401_UNAUTHORIZED)
         try:
-            User.objects.create_user(email, request.data["password"])
+            User.objects.create_user(email, request.query_params.get('password'))
         except IntegrityError:
             return Response("User already exists!", status.HTTP_403_FORBIDDEN)
         return auth(request, email, request.query_params.get('password'))
@@ -81,7 +75,7 @@ class MeViewSet(ViewSet):
             results |= {'photo': "TODO: implement!"}
             # TODO: update user photo
         request.user.save()
-        return Response(results)
+        return Response(results, status=200 if [1 if mess != 'Saved!' else 0 for mess in results.values()].count(0) > 0 else 400)
 
     @action(methods=['DELETE'], detail=False, permission_classes=[IsAuthenticated], renderer_classes=[PlainTextRenderer])
     def log_out(self, request):

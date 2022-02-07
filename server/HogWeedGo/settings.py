@@ -19,9 +19,10 @@ SECRET_KEY = os.environ['DJANGO_SECRET']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv('ENV', 'development') == 'development' else False
+DOCKER = True if os.getenv('DOCKER', 'False') == 'True' else False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'] + os.getenv('DJANGO_ALLOWED_HOSTS', "").split(" ")
-CSRF_TRUSTED_ORIGINS = [f"http://{host}:{os.getenv('SERVER_PORT', 3000)}'"for host in ALLOWED_HOSTS]
+ALLOWED_HOSTS = ['::1', '127.0.0.1', 'localhost'] + os.getenv('DJANGO_HOST', "").split(" ")
+CSRF_TRUSTED_ORIGINS = [f"http://{host}:{os.getenv('SERVER_PORT', 3000)}" for host in ALLOWED_HOSTS]
 
 
 # Application definition
@@ -80,7 +81,7 @@ WSGI_APPLICATION = 'HogWeedGo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': 'postgres' if os.getenv('DOCKER', 'False') == 'True' else os.environ["POSTGRES_HOST"],
+        'HOST': 'postgres' if DOCKER else os.environ["POSTGRES_HOST"],
         'PORT': os.getenv('POSTGRES_PORT', 5432),
         'NAME': os.environ["POSTGRES_DB"],
         'USER': os.environ["POSTGRES_USER"],
@@ -149,22 +150,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser'
     ],
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.UserRateThrottle'
-    ],
     'DEFAULT_THROTTLE_RATES': {
         'user': '4/minute'
     }
 }
 
-DEFAULT_FROM_EMAIL = os.environ["SERVER_EMAIL_ADDRESS"]
-EMAIL_USE_TLS = os.environ["SERVER_EMAIL_TLS"]
-EMAIL_HOST = os.environ["SERVER_EMAIL_HOST"]
-EMAIL_PORT = os.environ["SERVER_EMAIL_PORT"]
-EMAIL_HOST_USER = os.environ["SERVER_EMAIL_USER"]
-EMAIL_HOST_PASSWORD = os.environ["SERVER_EMAIL_PASSWORD"]
+DEFAULT_FROM_EMAIL = f'no-reply@{ALLOWED_HOSTS[-1]}'
+EMAIL_HOST = 'mail-agent'
+EMAIL_PORT = 25
 
 
-if os.getenv('DOCKER', 'False') == 'True':
+if DOCKER:
     GDAL_LIBRARY_PATH = glob('/usr/lib/libgdal.so.*')[0]
     GEOS_LIBRARY_PATH = glob('/usr/lib/libgeos_c.so.*')[0]

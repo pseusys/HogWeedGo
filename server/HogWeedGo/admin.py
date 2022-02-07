@@ -63,7 +63,7 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.action(description="Dump selected Reports as .CSV")
 def dump(model_admin, request, queryset):
-    data = [ReportSerializer(report, collapse=True).data for report in queryset]
+    data = [ReportSerializer(report, mode='table').data for report in queryset]
     with tempfile.SpooledTemporaryFile(mode="w", newline="") as tmp:
         fc = csv.DictWriter(tmp, fieldnames=data[0].keys())
         fc.writeheader()

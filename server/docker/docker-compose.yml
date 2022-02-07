@@ -11,8 +11,11 @@ services:
       - POSTGRES_PORT=5432
       - HOGWEED_PORT
       - SERVER_PORT
+      - MOCK_SMTP_SERVER
     depends_on:
       postgres:
+        condition: service_healthy
+      mail-agent:
         condition: service_healthy
     expose:
       - $HOGWEED_PORT
@@ -22,7 +25,7 @@ services:
       - ../docker-volume/backup:/app/backup
       - ../docker-volume/logs:/app/logs
     healthcheck:
-      test: wget -q -O - localhost:$HOGWEED_PORT/healthcheck/
+      test: wget -q -O - localhost:$HOGWEED_PORT/healthcheck
       interval: 10s
       timeout: 5s
       retries: 3
@@ -47,6 +50,17 @@ services:
       - ../docker-volume/media:/app/media
     healthcheck:
       test: service nginx status
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  mail-agent:
+    container_name: mail-agent
+    image: ixdotai/smtp
+    expose:
+      - 25
+    healthcheck:
+      test: exim -bV
       interval: 10s
       timeout: 5s
       retries: 3

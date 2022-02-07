@@ -1,9 +1,11 @@
+import os
 import random
 import time
 from functools import wraps
 from string import ascii_letters
 
 from django.contrib.auth import authenticate
+from django.core.mail import send_mail
 from django.utils.encoding import smart_str
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -56,3 +58,12 @@ def auth(request, email, password):
         return Response(f'Token {str(token)}')
     else:
         return Response(f'Can not authenticate user with email:{email}, password:{password}', status.HTTP_400_BAD_REQUEST)
+
+
+# FD: when other auth methods added, transfer this to user model.
+def send_email(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None, connection=None, html_message=None):
+    if os.getenv('MOCK_SMTP_SERVER', 'False') == 'True':
+        return Response({'subject': subject, 'message': message, 'recipients': recipient_list})
+    else:
+        send_mail(subject, message, from_email, recipient_list, fail_silently, auth_user, auth_password, connection, html_message)
+        return Response("Code was sent")

@@ -8,5 +8,8 @@ services:
   nginx_gateway:
     restart: always
 
+  mail-agent:
+    restart: always
+
   postgres:
     restart: always
