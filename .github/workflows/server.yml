@@ -34,7 +34,7 @@ jobs:
         run: npm install -g newman
         
       - name: Run server in Docker
-        run: docker-compose -f ./docker/docker-compose.yml -f ./docker/docker-compose.development.yml --env-file=./docker/.env.development up --build
+        run: docker-compose -f ./server/docker/docker-compose.yml -f ./server/docker/docker-compose.development.yml --env-file=./server/docker/.env.development up --build
 
       - name: Run API tests 🌐
         run: newman run ./server/tests/api.postman.json
