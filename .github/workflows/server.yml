@@ -16,28 +16,19 @@ jobs:
           lfs: true
 
       - name: Create user config file 🛠
-        run: |
-          echo "
-          DJANGO_SECRET==&b-^f)8qb72-m=memnkw@jnf@1g44=ahs^j=3=v%#i1u03nua
-          DJANGO_ALLOWED_HOSTS=localhost
-
-          DJANGO_SUPERUSER_EMAIL=admin@site.com
-          DJANGO_SUPERUSER_PASSWORD=12345
-
-          POSTGRES_HOST=localhost
-          POSTGRES_DB=hogweedgo
-          POSTGRES_USER=admin
-          POSTGRES_PASSWORD=12345
-          " > ./server/config.env
+        run: ./server/config-generator.sh localhost
 
       - name: Install Newman for API testing 🧑‍🚀
         run: npm install -g newman
         
-      - name: Run server in Docker
-        run: docker-compose -f ./server/docker/docker-compose.yml -f ./server/docker/docker-compose.development.yml --env-file=./server/docker/.env.development up --build
+      - name: Run server in Docker 📥
+        run: docker-compose -f ./server/docker/docker-compose.yml -f ./server/docker/docker-compose.development.yml --env-file=./server/docker/.env.development up -d --build
+        
+      - name: Wait ⏱
+        run: sleep 150
 
       - name: Run API tests 🌐
         run: newman run ./server/tests/api.postman.json
         
-      - name: Stop server container
+      - name: Stop server container 📤
         run: docker-compose stop -t 30

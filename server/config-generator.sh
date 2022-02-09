@@ -5,7 +5,7 @@ GOOD='\u001b[1m\u001b[32m'
 OK='\u001b[0m'
 
 
-function help() {
+function help {
   echo "Run \"./act.sh [KEYS] DOMAIN\" with following keys:"
   echo "    DOMAIN - the domain name this server is running on (example: 'example.com'), required!"
   echo "  KEYS:"
@@ -17,7 +17,7 @@ function help() {
   exit
 }
 
-function random() {
+function random {
   if [ "$PYTHON_AVAILABLE" = true ]; then
     python3 -c "import secrets; print(secrets.token_urlsafe(${1:-100}))"
   else

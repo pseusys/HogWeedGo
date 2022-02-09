@@ -16,19 +16,7 @@ jobs:
           lfs: true
 
       - name: Create user config file 🛠
-        run: |
-          echo "
-          DJANGO_SECRET==&b-^f)8qb72-m=memnkw@jnf@1g44=ahs^j=3=v%#i1u03nua
-          DJANGO_ALLOWED_HOSTS=
-
-          DJANGO_SUPERUSER_EMAIL=admin@site.com
-          DJANGO_SUPERUSER_PASSWORD=12345
-
-          POSTGRES_HOST=localhost
-          POSTGRES_DB=hogweedgo
-          POSTGRES_USER=admin
-          POSTGRES_PASSWORD=12345
-          " > ./server/config.env
+        run: ./server/config-generator.sh localhost
 
       - name: Install Python 3.10 🐍
         uses: actions/setup-python@v2

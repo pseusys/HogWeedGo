@@ -2,7 +2,15 @@ version: "3.9"
 
 services:
   hogweed_server:
+    image: pseusys/hogweedgo:0.0.1
     container_name: hogweed_server
+    restart: always
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+      args:
+        - WORKDIR=app
+        - HOGWEED_PORT
     env_file:
       - ../config.env
     environment:
@@ -13,7 +21,7 @@ services:
       - SERVER_PORT
       - MOCK_SMTP_SERVER
     depends_on:
-      postgres:
+      database:
         condition: service_healthy
       mail-agent:
         condition: service_healthy
@@ -33,6 +41,7 @@ services:
   nginx_gateway:
     image: nginx:1.21.6-alpine
     container_name: nginx_gateway
+    restart: always
     environment:
       - NGINX_ENVSUBST_TEMPLATE_DIR=/configs
       - NGINX_PORT
@@ -55,8 +64,9 @@ services:
       retries: 3
 
   mail-agent:
-    container_name: mail-agent
     image: ixdotai/smtp
+    container_name: mail-agent
+    restart: always
     expose:
       - 25
     healthcheck:
@@ -65,9 +75,10 @@ services:
       timeout: 5s
       retries: 3
 
-  postgres:
+  database:
     image: postgis/postgis:14-3.2-alpine
-    container_name: postgres
+    container_name: database
+    restart: always
     env_file:
       - ../config.env
     expose:

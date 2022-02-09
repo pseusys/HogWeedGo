@@ -12,7 +12,6 @@ RUN mkdir ./.venv
 RUN pip install pipenv
 RUN pipenv install --skip-lock
 
-
 FROM python:3.10.2-alpine as runner
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -31,4 +30,4 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 EXPOSE $HOGWEED_PORT
 
-ENTRYPOINT ./docker/start-server.sh
+ENTRYPOINT ./docker/docker-entrypoint.sh

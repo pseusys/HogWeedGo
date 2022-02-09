@@ -18,8 +18,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['DJANGO_SECRET']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if os.getenv('ENV', 'development') == 'development' else False
-DOCKER = True if os.getenv('DOCKER', 'False') == 'True' else False
+DEBUG = os.getenv('ENV', 'development') == 'development'
+DOCKER = os.getenv('DOCKER', 'False') == 'True'
 
 ALLOWED_HOSTS = ['::1', '127.0.0.1', 'localhost'] + os.getenv('DJANGO_HOST', "").split(" ")
 CSRF_TRUSTED_ORIGINS = [f"http://{host}:{os.getenv('SERVER_PORT', 3000)}" for host in ALLOWED_HOSTS]
@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'HogWeedGo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': 'postgres' if DOCKER else os.environ["POSTGRES_HOST"],
+        'HOST': 'database' if DOCKER else os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', 5432),
         'NAME': os.environ["POSTGRES_DB"],
         'USER': os.environ["POSTGRES_USER"],
@@ -155,6 +155,7 @@ REST_FRAMEWORK = {
     }
 }
 
+MOCK_SMTP_SERVER = os.getenv('MOCK_SMTP_SERVER', 'False') == 'True'
 DEFAULT_FROM_EMAIL = f'no-reply@{ALLOWED_HOSTS[-1]}'
 EMAIL_HOST = 'mail-agent'
 EMAIL_PORT = 25

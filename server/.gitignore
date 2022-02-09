@@ -11,6 +11,6 @@ venv
 backup/*
 !backup/backup.schema.json
 
-config.env
+*.env
 
 Pipfile.lock

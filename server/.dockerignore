@@ -13,6 +13,6 @@ backup
 
 .dockerignore
 .gitignore
-config.env
+*.env
 
 Pipfile.lock

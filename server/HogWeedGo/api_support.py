@@ -1,4 +1,3 @@
-import os
 import random
 import time
 from functools import wraps
@@ -62,7 +61,7 @@ def auth(request, email, password):
 
 # FD: when other auth methods added, transfer this to user model.
 def send_email(subject, message, from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None, connection=None, html_message=None):
-    if os.getenv('MOCK_SMTP_SERVER', 'False') == 'True':
+    if settings.MOCK_SMTP_SERVER:
         return Response({'subject': subject, 'message': message, 'recipients': recipient_list})
     else:
         send_mail(subject, message, from_email, recipient_list, fail_silently, auth_user, auth_password, connection, html_message)

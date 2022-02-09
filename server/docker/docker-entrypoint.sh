@@ -12,7 +12,7 @@ if [ "$#" -ne 1 ]; then
   python manage.py migrate
 
   echo "Create superuser"
-  python manage.py admin -e "$DJANGO_SUPERUSER_EMAIL" -p "$DJANGO_SUPERUSER_PASSWORD"
+  python manage.py admin -e "${DJANGO_SUPERUSER_EMAIL-admin@site.com}" -p "${DJANGO_SUPERUSER_PASSWORD-12345678}"
 
   echo "Check deployment environment"
   python manage.py check --deploy
