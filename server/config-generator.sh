@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 BAD='\u001b[1m\u001b[31m'
 GOOD='\u001b[1m\u001b[32m'
@@ -23,6 +24,10 @@ function random {
   else
     echo '12345678'
   fi
+}
+
+function certificate {
+  openssl req -x509 -newkey rsa:4096 -keyout ./certificates/"$1"_key.pem -out ./certificates/"$1"_cert.pem -sha256 -nodes -days 3650 -subj "/C=RU/ST=Ru/L=Test/O=Test/CN=localhost"
 }
 
 
@@ -51,11 +56,37 @@ DJANGO_HOST="$1"
 # Checking python environment
 
 {
-  python3 -c "import secrets" &> /dev/null && PYTHON_AVAILABLE=true
+  python3 -c "import secrets" &> /dev/null
+  PYTHON_AVAILABLE=true
 } || {
   echo -e "${BAD}Python (>=3.6) is unavailable in current environment, so passwords will be set simple${OK}"
   PYTHON_AVAILABLE=false
 }
+
+
+# Checking OpenSSL availability
+
+{
+  openssl version -v &> /dev/null && echo "Generating SSL and TLS certificates (in ./certificates directory)"
+  SSL_AVAILABLE=true
+} || {
+  echo -e "${BAD}OpenSSL is not available! SSL certificates won't be generated. Consider visiting https://www.openssl.org/source/ in order to get it.${OK}"
+  SSL_AVAILABLE=false
+}
+
+
+# Generating SSL and TLS certificates
+
+if [ $SSL_AVAILABLE ]; then
+  if [ ! -d "./certificates" ]; then
+    mkdir -p "./certificates";
+  else
+    if [ ! -w "./certificates" ]; then echo -e "${BAD}Directory ./certificates is not writable!${OK}"; fi
+  fi
+  certificate "ssl" &> /dev/null
+  certificate "tls" &> /dev/null
+  echo -e "${GOOD}Certificates generated!${OK}"
+fi
 
 
 # Checking specified domain name (first argument)
@@ -97,7 +128,7 @@ echo "Django secret key will be set to '$DJANGO_SECRET'"
 
 echo "Configurations will be written to $OUTPUT_FILE"
 {
-  touch "$OUTPUT_FILE" && echo -e "${GOOD}File is writable!${OK}"
+  touch "$OUTPUT_FILE" &> /dev/null
 } || {
   echo -e "${BAD}File is not writable!${OK}"
   exit

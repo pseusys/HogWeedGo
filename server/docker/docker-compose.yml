@@ -1,24 +1,23 @@
 version: "3.9"
 
 services:
-  hogweed_server:
+  hogweed-server:
     image: pseusys/hogweedgo:0.0.1
-    container_name: hogweed_server
+    container_name: hogweed-server
     restart: always
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
       args:
         - WORKDIR=app
-        - HOGWEED_PORT
+        - HOGWEED_PORT=3000
     env_file:
       - ../config.env
     environment:
       - DOCKER=True
       - ENV
       - POSTGRES_PORT=5432
-      - HOGWEED_PORT
-      - SERVER_PORT
+      - HOGWEED_PORT=3000
       - MOCK_SMTP_SERVER
     depends_on:
       database:
@@ -26,39 +25,44 @@ services:
       mail-agent:
         condition: service_healthy
     expose:
-      - $HOGWEED_PORT
+      - 3000
     volumes:
       - ../docker-volume/static:/app/static
       - ../docker-volume/media:/app/media
       - ../docker-volume/backup:/app/backup
       - ../docker-volume/logs:/app/logs
     healthcheck:
-      test: wget -q -O - localhost:$HOGWEED_PORT/healthcheck
+      test: netstat -an | grep "$$HOGWEED_PORT" > /dev/null
       interval: 10s
       timeout: 5s
       retries: 3
 
-  nginx_gateway:
+  nginx-gateway:
     image: nginx:1.21.6-alpine
-    container_name: nginx_gateway
+    container_name: nginx-gateway
     restart: always
     environment:
       - NGINX_ENVSUBST_TEMPLATE_DIR=/configs
-      - NGINX_PORT
-      - HOGWEED_PORT
+      - NGINX_PORT_HTTP=80
+      - NGINX_PORT_HTTPS=443
+      - HOGWEED_PORT=3000
     depends_on:
-      hogweed_server:
+      hogweed-server:
         condition: service_healthy
     ports:
-      - ${SERVER_PORT}:${NGINX_PORT}
+      - ${SERVER_PORT_HTTP}:80
+      - ${SERVER_PORT_HTTPS}:443
     configs:
       - source: nginx-config
         target: /configs/default.conf.template
+    secrets:
+      - ssl-cert.pem
+      - ssl-key.pem
     volumes:
       - ../docker-volume/static:/app/static
       - ../docker-volume/media:/app/media
     healthcheck:
-      test: service nginx status
+      test: service nginx status > /dev/null
       interval: 10s
       timeout: 5s
       retries: 3
@@ -67,10 +71,16 @@ services:
     image: ixdotai/smtp
     container_name: mail-agent
     restart: always
+    environment:
+      - CERTIFICATE_PATH=/run/secrets/tls-cert.pem
+      - KEY_PATH=/run/secrets/tls-key.pem
     expose:
       - 25
+    secrets:
+      - tls-cert.pem
+      - tls-key.pem
     healthcheck:
-      test: exim -bV
+      test: exim -bV > /dev/null
       interval: 10s
       timeout: 5s
       retries: 3
@@ -84,18 +94,24 @@ services:
     expose:
       - 5432
     healthcheck:
-      test: pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      test: pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" > /dev/null
       interval: 10s
       timeout: 5s
       retries: 3
 
 configs:
   nginx-config:
-    file: ./default.conf.template
+    file: nginx.conf.template
 
 secrets:
-  ssl-config:
-    file: ...
+  ssl-key.pem:
+    file: ../certificates/ssl_key.pem
+  ssl-cert.pem:
+    file: ../certificates/ssl_cert.pem
+  tls-key.pem:
+    file: ../certificates/tls_key.pem
+  tls-cert.pem:
+    file: ../certificates/tls_cert.pem
 
 networks:
   default:

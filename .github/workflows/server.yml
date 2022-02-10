@@ -19,16 +19,19 @@ jobs:
         run: ./server/config-generator.sh localhost
 
       - name: Install Newman for API testing 🧑‍🚀
-        run: npm install -g newman
+        run: npm install newman openapi-to-postmanv2
+        
+      - name: Generate OpenAPI scheme 📝
+        run: openapi2postmanv2 -s ./HogWeedGo.openapi.yml -o ./postman.collection.json
         
       - name: Run server in Docker 📥
         run: docker-compose -f ./server/docker/docker-compose.yml -f ./server/docker/docker-compose.development.yml --env-file=./server/docker/.env.development up -d --build
         
-      - name: Wait ⏱
+      - name: Wait for server to start ⏱
         run: sleep 150
 
       - name: Run API tests 🌐
-        run: newman run ./server/tests/api.postman.json
+        run: newman run ./postman.collection.json
         
       - name: Stop server container 📤
         run: docker-compose stop -t 30

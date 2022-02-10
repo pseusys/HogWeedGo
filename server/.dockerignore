@@ -8,8 +8,8 @@ HogWeedGo/migrations
 .venv
 venv
 
-samples
 backup
+certificates
 
 .dockerignore
 .gitignore

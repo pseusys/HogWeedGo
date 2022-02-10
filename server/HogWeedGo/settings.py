@@ -22,7 +22,19 @@ DEBUG = os.getenv('ENV', 'development') == 'development'
 DOCKER = os.getenv('DOCKER', 'False') == 'True'
 
 ALLOWED_HOSTS = ['::1', '127.0.0.1', 'localhost'] + os.getenv('DJANGO_HOST', "").split(" ")
-CSRF_TRUSTED_ORIGINS = [f"http://{host}:{os.getenv('SERVER_PORT', 3000)}" for host in ALLOWED_HOSTS]
+CSRF_TRUSTED_ORIGINS = [f"https://{host}:{os.getenv('HOGWEED_PORT', 3000)}" for host in ALLOWED_HOSTS]
+
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    SECURE_HSTS_SECONDS = 518400
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition

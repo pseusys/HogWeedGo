@@ -10,6 +10,7 @@ venv
 
 backup/*
 !backup/backup.schema.json
+certificates
 
 *.env
 
