@@ -22,7 +22,7 @@ DEBUG = os.getenv('ENV', 'development') == 'development'
 DOCKER = os.getenv('DOCKER', 'False') == 'True'
 
 ALLOWED_HOSTS = ['::1', '127.0.0.1', 'localhost'] + os.getenv('DJANGO_HOST', "").split(" ")
-CSRF_TRUSTED_ORIGINS = [f"https://{host}:{os.getenv('HOGWEED_PORT', 3000)}" for host in ALLOWED_HOSTS]
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 
 if not DEBUG:
@@ -35,6 +35,9 @@ if not DEBUG:
 
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+else:
+    CSRF_TRUSTED_ORIGINS += [f"http://{host}" for host in ALLOWED_HOSTS]
 
 
 # Application definition
@@ -56,14 +59,17 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
+APPEND_SLASH = True
 ROOT_URLCONF = 'HogWeedGo.urls'
 
 TEMPLATES = [
