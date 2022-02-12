@@ -1,15 +1,12 @@
-import uuid
-from base64 import b64encode, b64decode
 from datetime import datetime
-from io import BytesIO
 
 from django.contrib.gis.geos import Point
-from django.core.files import File
 from django.utils.timezone import make_aware
 from rest_framework.serializers import ModelSerializer
 from rest_framework.fields import empty
 
 from HogWeedGo import settings
+from HogWeedGo.image_utils import store_file, restore_file
 from HogWeedGo.models import Report, User, Comment, ReportPhoto, ReportStatuses
 
 
@@ -19,14 +16,6 @@ def _to_datetime(timestamp):
 
 def _from_datetime(dt):
     return int(dt.timestamp() * 1000)
-
-
-def _to_base64(data):
-    return b64encode(data).decode('utf-8')
-
-
-def _from_base64(base):
-    return b64decode(base.encode('utf-8'))
 
 
 # Serializers:
@@ -44,21 +33,31 @@ class UserSerializer(StateModelSerializer):
     class Meta:
         modes = ['user', 'backup']
         model = User
-        fields = ['password', 'last_login', 'is_superuser', 'email', 'first_name', 'is_staff', 'is_active', 'date_joined', 'photo']
+        fields = ['password', 'last_login', 'is_superuser', 'email', 'first_name', 'is_staff', 'is_active', 'date_joined', 'photo', 'thumbnail']
 
     def to_representation(self, instance):
         rep = super(UserSerializer, self).to_representation(instance)
         rep['last_login'] = _from_datetime(instance.last_login) if instance.last_login else None
         rep['date_joined'] = _from_datetime(instance.date_joined)
-        if instance.photo and self.mode == 'backup':
-            rep['photo'] = _to_base64(instance.photo.read())
+        if self.mode == 'backup':
+            rep.pop('thumbnail', None)
+            if instance.photo:
+                data, name = store_file(instance.photo)
+                rep['photo'] = {'data': data, 'name': name}
+        else:
+            rep.pop('password', None)
+            rep['photo'] = f'{settings.MEDIA_URL}{instance.photo.name}'
+            rep['thumbnail'] = f'{settings.MEDIA_URL}{instance.thumbnail.name}'
         return rep
 
     def to_internal_value(self, data):
         data['last_login'] = _to_datetime(data['last_login']) if data['last_login'] else None
         data['date_joined'] = _to_datetime(data['date_joined'])
-        if self.mode == 'backup' and data['photo']:
-            data['photo'] = File(BytesIO(_from_base64(data['photo'])), f'{str(uuid.uuid4())}.png')
+        if self.mode == 'backup':
+            data.pop('password', None)
+            data.pop('thumbnail', None)
+            if data['photo']:
+                data['photo'] = restore_file(data['photo']['data'], data['photo']['name'])
         return super(UserSerializer, self).to_internal_value(data)
 
 
@@ -99,17 +98,24 @@ class ReportPhotoSerializer(StateModelSerializer):
     class Meta:
         modes = ['user', 'backup']
         model = ReportPhoto
-        fields = ['report', 'photo']
+        fields = ['report', 'photo', 'thumbnail']
 
     def to_representation(self, instance):
         rep = super(ReportPhotoSerializer, self).to_representation(instance)
-        del rep['report']
-        rep['photo'] = _to_base64(instance.photo.read()) if self.mode == 'backup' else f'{settings.MEDIA_URL}{instance.photo.name}'
+        rep.pop('report', None)
+        if self.mode == 'backup':
+            rep.pop('thumbnail', None)
+            data, name = store_file(instance.photo)
+            rep['photo'] = {'data': data, 'name': name}
+        else:
+            rep['photo'] = f'{settings.MEDIA_URL}{instance.photo.name}'
+            rep['thumbnail'] = f'{settings.MEDIA_URL}{instance.thumbnail.name}'
         return rep
 
     def to_internal_value(self, data):
         if self.mode == 'backup':
-            data['photo'] = File(BytesIO(_from_base64(data['photo'])), f'{str(uuid.uuid4())}.png')
+            data.pop('thumbnail', None)
+            data['photo'] = restore_file(data['photo']['data'], data['photo']['name'])
         return super(ReportPhotoSerializer, self).to_internal_value(data)
 
 
@@ -121,7 +127,7 @@ class CommentSerializer(StateModelSerializer):
 
     def to_representation(self, instance):
         rep = super(CommentSerializer, self).to_representation(instance)
-        del rep['report']
+        rep.pop('report', None)
         rep['subs'] = (instance.subs.email if self.mode == 'backup' else instance.subs.id) if instance.subs else None
         return rep
 

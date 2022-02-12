@@ -17,11 +17,11 @@ server {
         proxy_set_header Host $host:$proxy_port;
     }
 
-    location /media/*.(jpg|jpeg|gif|png|svg|ico) {
-        alias /app/media/;
+    location ~ ^/media/(?<filename>.+\.(?:gif|jpe?g|png|svg|ico|GIF|JPE?G|PNG|SVG|ICO))$ {
+        alias /app/media/$filename;
     }
 
     location /static/ {
-        alias /app/static/;
+        root /app;
     }
 }

@@ -18,6 +18,8 @@ services:
       - ENV
       - POSTGRES_PORT=5432
       - HOGWEED_PORT=3000
+      - SERVER_PORT_HTTP
+      - SERVER_PORT_HTTPS
       - MOCK_SMTP_SERVER
     depends_on:
       database:

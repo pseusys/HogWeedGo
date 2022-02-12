@@ -26,6 +26,7 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
 
 
 if not DEBUG:
+    CSRF_TRUSTED_ORIGINS += [f"https://{host}:{os.getenv('SERVER_PORT_HTTPS', 443)}" for host in ALLOWED_HOSTS]
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
     SECURE_HSTS_SECONDS = 518400
@@ -37,7 +38,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
 else:
-    CSRF_TRUSTED_ORIGINS += [f"http://{host}" for host in ALLOWED_HOSTS]
+    CSRF_TRUSTED_ORIGINS += [f"http://{host}:{os.getenv('SERVER_PORT_HTTP', 80)}" for host in ALLOWED_HOSTS]
 
 
 # Application definition
@@ -54,7 +55,8 @@ INSTALLED_APPS = [
     'django.forms',
     'rest_framework',
     'rest_framework.authtoken',
-    'leaflet'
+    'leaflet',
+    'django_cleanup.apps.CleanupConfig'
 ]
 
 MIDDLEWARE = [

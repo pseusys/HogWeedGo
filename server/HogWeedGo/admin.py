@@ -99,20 +99,6 @@ class CommentInline(admin.TabularInline):
         return False
 
 
-class ExactTypeListFilter(admin.SimpleListFilter):
-    title = "Type"
-
-    parameter_name = "type"
-
-    def lookups(self, request, model_admin):
-        v = set([x.exact_type() for x in model_admin.get_queryset(request).all()])
-        return [(x, x) for x in v]
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(type__contains=self.value())
-
-
 # Define a new User admin
 @admin.register(Report)
 class ReportAdmin(LeafletGeoAdmin):
@@ -124,7 +110,7 @@ class ReportAdmin(LeafletGeoAdmin):
 
     list_display = ("date", "user_name", "status")
     list_editable = ["status"]
-    list_filter = ("status", ExactTypeListFilter)
+    list_filter = ["status"]
     actions = [dump]
 
     fieldsets = (

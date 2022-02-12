@@ -1,4 +1,3 @@
-import os
 from django.contrib import admin
 from django.contrib.gis.db import models
 from django.contrib.auth.models import AbstractUser
@@ -7,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
 from HogWeedGo import settings
+from HogWeedGo.image_utils import create_thumbnail
 from HogWeedGo.managers import UserManager
 
 
@@ -20,21 +20,22 @@ class User(AbstractUser):
     last_name = None
     groups = None
     user_permissions = None
-    photo = models.ImageField(upload_to="user_photos", null=True)
+    photo = models.ImageField(upload_to="user_photos", null=True, blank=True, help_text="User profile photo.")
+    thumbnail = models.ImageField(upload_to="thumbnails", null=True, blank=True, help_text="User profile photo thumbnail.")
 
     REQUIRED_FIELDS = []
     USERNAME_FIELD = "email"
 
     objects = UserManager()
 
-    def delete(self, using=None, keep_parents=False):
-        if self.photo.name:
-            os.remove(str(settings.MEDIA_ROOT / self.photo.name))
-        super().delete(using, keep_parents)
+    def save(self, *args, **kwargs):
+        if self.photo:
+            self.thumbnail.save(self.photo.name.split('/')[-1], create_thumbnail(self.photo), save=False)
+        super(User, self).save(*args, **kwargs)
 
     @admin.display(description="User photo")
     def photo_tag(self):
-        return format_html(f'<img src="/{self.photo.name}" alt={str(self)}/>')
+        return format_html(f'<img src="{settings.MEDIA_URL}{self.thumbnail.name}" alt={str(self)}/>')
 
     def __str__(self):
         return f"User { self.email } with id { self.id }"
@@ -58,12 +59,7 @@ class Report(models.Model):
     place = models.PointField()
     status = models.CharField(max_length=8, choices=ReportStatuses.choices, help_text=_("Report status."))
     subs = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, help_text=_("The sender of the report, subscription."))
-    type = models.CharField(max_length=64, help_text=_("Staff reply for the report. NB! Auto type check appends ' | NN%' to guessed type, thus everything after '|' is omitted by filtering."))
-
-    @admin.display(description="Type without probability data")
-    def exact_type(self):
-        delim = self.type.find('|')
-        return self.type[:delim - 1] if delim != -1 else self.type
+    type = models.CharField(max_length=64, help_text=_("Staff reply for the report."))
 
     @admin.display(description="User", ordering="subs__email")
     def user_name(self):
@@ -79,14 +75,15 @@ class ReportPhoto(models.Model):
 
     report = models.ForeignKey(Report, on_delete=models.CASCADE, help_text="Report this photo is attached to")
     photo = models.ImageField(upload_to="report_photos", help_text="The photo itself")
+    thumbnail = models.ImageField(upload_to="thumbnails", help_text="The photo thumbnail")
 
-    def delete(self, using=None, keep_parents=False):
-        os.remove(self.photo.name)
-        super().delete(using, keep_parents)
+    def save(self, *args, **kwargs):
+        self.thumbnail.save(self.photo.name.split('/')[-1], create_thumbnail(self.photo), save=False)
+        super(ReportPhoto, self).save(*args, **kwargs)
 
     @admin.display(description="Report photo")
     def photo_tag(self):
-        return format_html(f'<img src="/{ self.photo.name }" alt={ str(self) }/>')
+        return format_html(f'<img src="{settings.MEDIA_URL}{ self.thumbnail.name }" alt={ str(self) }/>')
 
     def __str__(self):
         return f"ReportPhoto (report { self.report.id }) with id { self.id }"
