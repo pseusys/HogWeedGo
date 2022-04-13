@@ -11,8 +11,8 @@ import 'package:client/views/main_drawer.dart';
 import 'package:client/pages/report.dart';
 import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
-import 'package:client/misc/helpers.dart';
-import 'package:client/utils/cached_provider.dart';
+import 'package:client/access/location.dart';
+import 'package:client/misc/cached_provider.dart';
 
 
 class MapPage extends StatefulWidget {

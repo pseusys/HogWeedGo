@@ -4,7 +4,7 @@ import 'dart:html';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 
-Future<String?> saveFileFromUri(String name, String uri) async {
+void saveFileFromUri(String name, String uri) async {
   final image = await(await DefaultCacheManager().getSingleFile(uri)).readAsBytes();
   AnchorElement(href: Uri.dataFromBytes(image).toString())..setAttribute("download", name)..click();
 }

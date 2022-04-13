@@ -7,7 +7,7 @@ import 'package:http/http.dart';
 
 import 'package:client/pages/fullscreen.dart';
 import 'package:client/pages/auth.dart';
-import 'package:client/misc/extensions.dart';
+import 'package:client/navigate/navigator_extension.dart';
 import 'package:client/pages/map.dart';
 import 'package:client/pages/account.dart';
 import 'package:client/pages/about.dart';
@@ -28,7 +28,7 @@ class _MainDrawerState extends State<MainDrawer> {
   @override
   void initState() {
     super.initState();
-    _connection = get(Uri.parse(HogWeedGo.server)).timeout(const Duration(seconds: 5)).asStream().listen((Response r) {
+    _connection = get(Uri.parse("${HogWeedGo.server}/healthcheck")).timeout(const Duration(seconds: 5)).asStream().listen((Response r) {
       setState(() => _connected = r.statusCode == 200);
     }, onError: (error) => setState(() => _connected = false));
   }

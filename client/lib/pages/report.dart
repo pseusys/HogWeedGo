@@ -5,9 +5,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:client/views/photo_gallery.dart';
-import 'package:client/misc/helpers.dart';
+import 'package:client/access/location.dart';
 import 'package:client/misc/const.dart';
-import 'package:client/utils/cached_provider.dart';
+import 'package:client/misc/cached_provider.dart';
 
 
 class ReportPage extends StatefulWidget {

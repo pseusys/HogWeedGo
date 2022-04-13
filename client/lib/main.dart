@@ -17,8 +17,7 @@ void main() => runApp(const HogWeedGo());
 class HogWeedGo extends StatelessWidget {
   const HogWeedGo({Key? key}) : super(key: key);
 
-  // TODO: replace with "HogWeedGo-server" hosting url, ahoy-domain.
-  static const server = "http://neverssl.com/";
+  static const server = String.fromEnvironment("SERVER", defaultValue: "https://localhost");
   static const route = "/";
 
   @override
