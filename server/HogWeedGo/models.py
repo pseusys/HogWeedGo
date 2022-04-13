@@ -1,11 +1,7 @@
-from django.contrib import admin
 from django.contrib.gis.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from rest_framework.authtoken.models import Token
 
-from HogWeedGo import settings
 from HogWeedGo.image_utils import create_thumbnail
 from HogWeedGo.managers import UserManager
 
@@ -31,11 +27,9 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if self.photo:
             self.thumbnail.save(self.photo.name.split('/')[-1], create_thumbnail(self.photo), save=False)
+        else:
+            self.thumbnail.delete(save=False)
         super(User, self).save(*args, **kwargs)
-
-    @admin.display(description="User photo")
-    def photo_tag(self):
-        return format_html(f'<img src="{settings.MEDIA_URL}{self.thumbnail.name}" alt={str(self)}/>')
 
     def __str__(self):
         return f"User { self.email } with id { self.id }"
@@ -61,10 +55,6 @@ class Report(models.Model):
     subs = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, help_text=_("The sender of the report, subscription."))
     type = models.CharField(max_length=64, help_text=_("Staff reply for the report."))
 
-    @admin.display(description="User", ordering="subs__email")
-    def user_name(self):
-        return (f"{ self.subs.first_name } ({ self.subs.email })" if self.subs.first_name else self.subs.email) if self.subs else None
-
     def __str__(self):
         return f"Report by { self.subs.email if self.subs is not None else 'null' } sent at { self.date.strftime('%Y-%m-%d %H:%M') } with id { self.id }"
 
@@ -80,10 +70,6 @@ class ReportPhoto(models.Model):
     def save(self, *args, **kwargs):
         self.thumbnail.save(self.photo.name.split('/')[-1], create_thumbnail(self.photo), save=False)
         super(ReportPhoto, self).save(*args, **kwargs)
-
-    @admin.display(description="Report photo")
-    def photo_tag(self):
-        return format_html(f'<img src="{settings.MEDIA_URL}{ self.thumbnail.name }" alt={ str(self) }/>')
 
     def __str__(self):
         return f"ReportPhoto (report { self.report.id }) with id { self.id }"

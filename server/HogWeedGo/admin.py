@@ -5,8 +5,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.http import HttpResponseRedirect, FileResponse
 from django.shortcuts import redirect
+from django.utils.html import format_html
 from leaflet.admin import LeafletGeoAdmin
 
+from HogWeedGo import settings
 from HogWeedGo.forms import UserForm
 from HogWeedGo.models import User, Report, ReportPhoto, Comment
 from HogWeedGo.serializers import ReportSerializer
@@ -26,7 +28,6 @@ def ban(model_admin, request, queryset):
         user.save()
 
 
-# Define a new User admin
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     readonly_fields = ["email", "last_login", "date_joined", "photo_tag"]
@@ -53,6 +54,11 @@ class UserAdmin(BaseUserAdmin):
             "fields": [("photo", "photo_tag")]
         })
     )
+
+    @admin.display(description="User photo")
+    def photo_tag(self, instance):
+        img_name = f"{settings.MEDIA_URL}{instance.thumbnail.name}" if instance.thumbnail.name else f"{settings.STATIC_URL}/no_image.png"
+        return format_html(f'<img src="{img_name}" alt="{str(instance)}"/>')
 
     def has_add_permission(self, request):
         return False
@@ -81,6 +87,10 @@ class ReportPhotoInline(admin.StackedInline):
     model = ReportPhoto
     extra = 0
 
+    @admin.display(description="Report photo")
+    def photo_tag(self, instance):
+        return format_html(f'<img src="{settings.MEDIA_URL}{instance.thumbnail.name}" alt="{str(instance)}"/>')
+
     def has_add_permission(self, request, obj):
         return False
 
@@ -99,7 +109,6 @@ class CommentInline(admin.TabularInline):
         return False
 
 
-# Define a new User admin
 @admin.register(Report)
 class ReportAdmin(LeafletGeoAdmin):
     modifiable = False
@@ -122,6 +131,10 @@ class ReportAdmin(LeafletGeoAdmin):
             "classes": ["wide"]
         })
     )
+
+    @admin.display(description="User", ordering="subs__email")
+    def user_name(self, instance):
+        return (f"{ instance.subs.first_name } ({ instance.subs.email })" if instance.subs.first_name else instance.subs.email) if instance.subs else None
 
     def has_add_permission(self, request):
         return False

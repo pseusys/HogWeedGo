@@ -5,7 +5,7 @@ mkdir bundled-server
 mkdir bundled-server/certificates
 
 cp docker/docker-compose.yml bundled-server
-cp docker/default.conf.template bundled-server
+cp docker/nginx.conf.template bundled-server
 cp config-generator.sh bundled-server
 
 cp tests/test-config.env bundled-server

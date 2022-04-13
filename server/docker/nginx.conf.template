@@ -17,7 +17,7 @@ server {
         proxy_set_header Host $host:$proxy_port;
     }
 
-    location ~ ^/media/(?<filename>.+\.(?:gif|jpe?g|png|svg|ico|GIF|JPE?G|PNG|SVG|ICO))$ {
+    location ~ ^/media/(?<filename>.+\.(?:gif|jpe?g|png|svg|ico|bmp|GIF|JPE?G|PNG|SVG|ICO|BMP))$ {
         alias /app/media/$filename;
     }
 

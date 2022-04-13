@@ -3,7 +3,6 @@ from io import BytesIO
 
 from PIL import Image
 from django.core.files import File
-from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 def create_thumbnail(image_field):
@@ -11,13 +10,7 @@ def create_thumbnail(image_field):
     image.thumbnail(size=(256, 256))
     image_file = BytesIO()
     image.save(image_file, image.format)
-    return InMemoryUploadedFile(
-        image_file,
-        'thumbnail', f'{image_field.name}.thumbnail',
-        image_field.file.content_type,
-        image_field.size,
-        image_field.file.charset
-    )
+    return File(image_file, f'{image_field.name}.thumbnail')
 
 
 def store_file(image_field):
