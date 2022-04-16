@@ -31,3 +31,5 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 EXPOSE $HOGWEED_PORT
 
 ENTRYPOINT ./docker/docker-entrypoint.sh
+
+
