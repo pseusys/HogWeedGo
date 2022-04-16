@@ -14,22 +14,22 @@ jobs:
         uses: actions/checkout@v2.3.4
 
       - name: Create user config file 🛠
-        run: ./server/config-generator.sh localhost
+        run: ./server/config-generator.sh 127.0.0.1
 
       - name: Install Newman for API testing 🧑‍🚀
-        run: npm install newman openapi-to-postmanv2
-        
-      - name: Generate OpenAPI scheme 📝
-        run: openapi2postmanv2 -s ./HogWeedGo.openapi.yml -o ./postman.collection.json
+        run: npm install newman
         
       - name: Run server in Docker 📥
-        run: docker-compose -f ./server/docker/docker-compose.yml -f ./server/docker/docker-compose.development.yml --env-file=./server/docker/.env.development up -d --build
+        run: |
+            cd server
+            docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development build --no-cache
+            docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.production up --no-build
         
       - name: Wait for server to start ⏱
         run: sleep 150
 
       - name: Run API tests 🌐
-        run: newman run ./postman.collection.json
+        run: cd ./server/tests && newman run ./HogWeedGoAPI.postman_collection.json
         
       - name: Stop server container 📤
         run: docker-compose stop -t 30
