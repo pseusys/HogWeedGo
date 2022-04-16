@@ -1,66 +1,262 @@
 openapi: 3.0.2
+
 info:
-  title: ''
-  version: ''
+  title: HogWeedGo service opemapi specification
+  version: 0.0.1
+
+
+
 paths:
   /healthcheck:
     get:
-      operationId: listHealths
-      description: ''
-      parameters: []
+      operationId: healthcheck
+      description: Endpoint to check whether the HogWeed server is alive.
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                const: healthy
+          description: Server is up and healthy.
+      tags:
+        - health
+        - unauth
+
+  /api/me/prove_email:
+    get:
+      operationId: proveEmail
+      description: Endpoint to generate a unique code for given email. It is required for authentication and stays valid for 10 minutes.
+      parameters:
+        - in: path
+          name: email
+          schema:
+            type: string
+            format: email
+          required: true
+          description: Email the code is requested for.
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                const: Code was sent
+                description: Response of server in production environment.
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+                description: Response of server in debug environment (environment variable MOCK_SMTP_SERVER is set to True).
+          description: The code was successfully generated and sent (by email or in response body - depending on server settings).
+      tags:
+        - me
+        - unauth
+
+  /api/me/auth:
+    get:
+      operationId: auth
+      description: Endpoint for creating new user (with given email).
+      parameters:
+        - in: path
+          name: email
+          schema:
+            type: string
+            format: email
+          required: true
+          description: Email user account is created with.
+        - in: path
+          name: code
+          schema:
+            type: string
+          required: true
+          description: Special unique registration code (usually received by email from '/api/me/prove_email' endpoint).
+        - in: path
+          name: password
+          schema:
+            type: string
+          required: true
+          description: Password of newly created user.
       responses:
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items: {}
-          description: ''
-      tags: health
-  /api/me/auth:
-    get:
-      operationId: authMe
-      description: ''
-      parameters: []
-      responses:
-        '200':
+                const: Token [TOKEN]
+          description: New user is successfully created. TOKEN stands for user session auth token. To log in user should add 'Authentication: Token [TOKEN]' header to his request.
+        '401':
+          content:
+            text/plain:
+              schema:
+                const: Wrong or expired code!
+          description: Provided code was wrong or expired (sent more than 10 minutes after being requested).
+        '403':
+          content:
+            text/plain:
+              schema:
+                const: User already exists!
+          description: User with provided email already exists.
+        '400':
+          content:
+            text/plain:
+              schema:
+                const: Can not authenticate user with email: [EMAIL], password: [PASSWORD]!
+          description: User can not be created for unknown reason. EMAIL and PASSWORD stand for email and password provided in params.
+        '429':
           content:
             application/json:
-              schema: {}
-          description: ''
+              schema:
+                type: object
+                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
+          description: This endpoint may be called maximum 4 times per minute.
       tags:
-      - me
+        - me
+        - unauth
+
   /api/me/log_in:
     get:
-      operationId: logInMe
-      description: ''
-      parameters: []
+      operationId: logIn
+      description: Endpoint for logging existing user in.
+      parameters:
+        - in: path
+          name: email
+          schema:
+            type: string
+            format: email
+          required: true
+          description: Email user account is created with.
+        - in: path
+          name: password
+          schema:
+            type: string
+          required: true
+          description: Password of newly created user.
       responses:
         '200':
           content:
             application/json:
-              schema: {}
-          description: ''
+              schema:
+                const: Token [TOKEN]
+          description: User is successfully logged in. TOKEN stands for user session auth token. To log in user should add 'Authentication: Token [TOKEN]' header to his request.
+        '400':
+          content:
+            text/plain:
+              schema:
+                const: Can not log in user with email: [EMAIL], password: [PASSWORD]!
+          description: User can not be logged in. EMAIL and PASSWORD stand for email and password provided in params.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
+          description: This endpoint may be called maximum 4 times per minute.
       tags:
-      - me
-  /api/me/prove_email:
-    get:
-      operationId: proveEmailMe
-      description: ''
-      parameters: []
+        - me
+        - unauth
+
+  /api/me/setup:
+    post:
+      operationId: setupMe
+      description: Endpoint for altering user information (such as email, password, name or profile picture).
+      parameters:
+        - in: path
+          name: email
+          schema:
+            type: string
+            format: email
+          description: New email for current user.
+        - in: path
+          name: code
+          schema:
+            type: string
+          description: Special unique registration code (usually received by email from '/api/me/prove_email' endpoint). Required for email changing only.
+        - in: path
+          name: password
+          schema:
+            type: string
+          description: New password for current user.
+        - in: path
+          name: name
+          schema:
+            type: string
+          description: New name of current user.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+              additionalProperties: false
+        description: New profile picture of current user.
       responses:
         '200':
           content:
             application/json:
-              schema: {}
-          description: ''
+              schema:
+                $ref: '#/components/schemas/Setup'
+          description: All requested user properties were successfully changed.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Setup'
+          description: At least one of the requested properties could not be changed.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
+          description: This endpoint may be called maximum 4 times per minute.
       tags:
-      - me
+        - me
+        - auth
+
+  /api/me/log_out:
+    delete:
+      operationId: logOut
+      description: Endpoint for logging current user out (finishing his session and deleting token).
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                const: Logged out successfully
+          description: User was logged out successfully, his token is valid no more.
+      tags:
+        - me
+        - auth
+
+  /api/me/leave:
+    delete:
+      operationId: leave
+      description: Endpoint for deleting current user.
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                const: User deleted successfully
+          description: User was deleted successfully, all his information removed from server.
+      tags:
+        - me
+        - auth
+
   /api/reports:
     get:
       operationId: listReports
-      description: ''
-      parameters: []
+      description: Endpoint for getting all reports ever sent.
+      parameters:
+        - in: path
+          name: filter
+          schema:
+            enum:
+              - RECEIVED
+              - APPROVED
+              - INVALID
+            type: string
+          description: Optional filter for requested reports (returns all if not set).
       responses:
         '200':
           content:
@@ -68,129 +264,178 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Report'
-          description: ''
+                  $ref: '#/components/schemas/ReportOut'
+          description: Reports list.
       tags:
-      - api
+        - api
     post:
       operationId: createReport
-      description: ''
-      parameters: []
+      description: Endpoint for creating a new report.
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Report'
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Report'
-          description: ''
-      tags:
-      - api
-  /api/reports/{id}:
-    get:
-      operationId: retrieveReport
-      description: ''
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this Report.
-        schema:
-          type: string
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/ReportIn'
+                photos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              additionalProperties: false
+              required:
+                - data
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report'
-          description: ''
+                $ref: '#/components/schemas/ReportOut'
+          description: New added report.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Report can not be created because of data integrity validation failure.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
+          description: This endpoint may be called maximum 4 times per minute.
       tags:
-      - api
+        - auth
+
   /api/users/{id}:
     get:
       operationId: retrieveUser
-      description: ''
+      description: Endpoint for retrieving information about particular service user.
       parameters:
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this User.
-        schema:
-          type: string
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: A unique integer value identifying this User.
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-          description: ''
+          description: User profile.
       tags:
-      - user
-  /api/me/setup:
-    post:
-      operationId: setupMe
-      description: ''
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema: {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema: {}
-          description: ''
-      tags:
-      - me
+        - api
+        - user
+
   /api/comments:
     post:
       operationId: createComment
-      description: ''
-      parameters: []
+      description: Endpoint for creating a new comment.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Comment'
+              $ref: '#/components/schemas/CommentIn'
       responses:
-        '201':
+        '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Comment'
-          description: ''
+                $ref: '#/components/schemas/CommentOut'
+          description: Comment was successfully created.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Report can not be created because of data integrity validation failure.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
+          description: This endpoint may be called maximum 4 times per minute.
       tags:
-      - comment
-  /api/me/leave:
-    delete:
-      operationId: leaveMe
-      description: ''
-      parameters: []
-      responses:
-        '204':
-          description: ''
-      tags:
-      - me
-  /api/me/log_out:
-    delete:
-      operationId: logOutMe
-      description: ''
-      parameters: []
-      responses:
-        '204':
-          description: ''
-      tags:
-      - me
+        - comment
+        - auth
+
+
+
 components:
   schemas:
-    Email: Email
-    Code: Code
-    Report:
+    Email:
+      type: object
+      properties:
+        subject:
+          const: HogWeedGo authentication
+        message:
+          const: Your confirmation code is: '[TOKEN]'\nIt will be valid for 10 minutes.
+          description: TOKEN stands for a token, unique for given server and email, valid for 10 minutes.
+        recipients:
+          type: array
+          prefixItems:
+            - type: string
+              format: email
+          items: false
+          description: Email the code is generated for.
+      additionalProperties: false
+      required:
+        - subject
+        - message
+        - recipients
+
+    Setup:
+      type: object
+      properties:
+        email:
+          enum:
+            - Wrong or expired code!
+            - Saved!
+            - User with given email already exists!
+          type: string
+          description: Describes whether user email was altered and if not why.
+        password:
+          const: Saved!
+          description: Describes whether user password was changed.
+        name:
+          const: Saved!
+          description: Describes whether user name was changed.
+        photo:
+          const: Saved!
+          description: Describes whether user profile picture was changed.
+      additionalProperties: false
+
+    ReportIn:
+      type: object
+      properties:
+        address:
+          type: string
+          nullable: true
+          description: Address defined by user. May be just a geo-related recommendation.
+          maxLength: 128
+        init_comment:
+          type: string
+          description: User comment about the report.
+          maxLength: 2048
+        place:
+          type: string
+        type:
+          type: string
+          description: User guess for report.
+          maxLength: 64
+      additionalProperties: false
+      required:
+        - init_comment
+        - place
+        - type
+
+    ReportOut:
       type: object
       properties:
         address:
@@ -208,68 +453,97 @@ components:
           description: Date specified by user for his observation.
         status:
           enum:
-          - RECEIVED
-          - APPROVED
-          - INVALID
+            - RECEIVED
+            - APPROVED
+            - INVALID
           type: string
           description: Report status.
         subs:
           type: integer
           nullable: true
           description: The sender of the report, subscription.
+        id:
+          type: integer
+          description: Unique identifier of this report.
         type:
           type: string
-          description: Staff reply for the report. NB! Auto type check appends ' |
-            NN%' to guessed type, thus everything after '|' is omitted by filtering.
+          description: Staff reply for the report.
           maxLength: 64
         place:
           type: string
+        photos:
+          type: array
+          items:
+            type: object
+            properties:
+              photo:
+                type: string
+                format: uri
+              thumbnail:
+                type: string
+                format: uri
+            additionalProperties: false
+            required:
+              - photo
+              - thumbnail
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommentOut"
+      additionalProperties: false
       required:
-      - init_comment
-      - date
-      - status
-      - subs
-      - type
-      - place
+        - init_comment
+        - date
+        - status
+        - subs
+        - id
+        - type
+        - place
+        - photos
+        - comments
+
     User:
       type: object
       properties:
-        password:
-          type: string
-          maxLength: 128
         last_login:
           type: string
           format: date-time
           nullable: true
-        is_superuser:
-          type: boolean
-          description: Designates that this user has all permissions without explicitly
-            assigning them.
-        email:
-          type: string
-          format: email
-          maxLength: 254
         first_name:
           type: string
           maxLength: 150
+          nullable: true
         is_staff:
           type: boolean
           description: Designates whether the user can log into this admin site.
-        is_active:
-          type: boolean
-          description: Designates whether this user should be treated as active. Unselect
-            this instead of deleting accounts.
-        date_joined:
-          type: string
-          format: date-time
         photo:
           type: string
-          format: binary
+          format: uri
           nullable: true
+        thumbnail:
+          type: string
+          format: uri
+          nullable: true
+      additionalProperties: false
       required:
-      - password
-      - email
-    Comment:
+        - is_staff
+
+    CommentIn:
+      type: object
+      properties:
+        report:
+          type: integer
+          description: Report this comment is attached to
+        text:
+          type: string
+          description: A comment, added to a report by another user.
+          maxLength: 2048
+      additionalProperties: false
+      required:
+        - report
+        - text
+
+    CommentOut:
       type: object
       properties:
         report:
@@ -283,6 +557,7 @@ components:
           type: integer
           nullable: true
           description: Author of the comment
+      additionalProperties: false
       required:
-      - report
-      - text
+        - report
+        - text

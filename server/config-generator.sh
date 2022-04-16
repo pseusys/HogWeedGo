@@ -96,7 +96,7 @@ echo "Argument $DJANGO_HOST is recognized as a domain name"
   ping -c 3 "$DJANGO_HOST" &> /dev/null && echo -e "${GOOD}Hostname reached!${OK}"
 } || {
   echo -e "${BAD}Could not reach host, aborting!${OK}"
-  exit
+  exit 1
 }
 
 
@@ -109,7 +109,7 @@ if [[ $DJANGO_SUPERUSER_EMAIL =~ $regex ]]; then
     echo "Superuser password will be set to '$DJANGO_SUPERUSER_PASSWORD'"
 else
     echo -e "${BAD}Argument ($DJANGO_SUPERUSER_EMAIL) is not a valid email address!${OK}"
-    exit
+    exit 1
 fi
 
 
@@ -131,7 +131,7 @@ echo "Configurations will be written to $OUTPUT_FILE"
   touch "$OUTPUT_FILE" &> /dev/null
 } || {
   echo -e "${BAD}File is not writable!${OK}"
-  exit
+  exit 1
 }
 
 echo "DJANGO_SECRET=$DJANGO_SECRET

@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.gis.geos import Point
 from django.utils.timezone import make_aware
+from rest_framework.exceptions import ParseError
 from rest_framework.serializers import ModelSerializer
 from rest_framework.fields import empty
 
@@ -46,6 +47,10 @@ class UserSerializer(StateModelSerializer):
                 rep['photo'] = {'data': data, 'name': name}
         else:
             rep.pop('password', None)
+            rep.pop('is_superuser', None)
+            rep.pop('email', None)
+            rep.pop('is_active', None)
+            rep.pop('date_joined', None)
             rep['photo'] = f'{settings.MEDIA_URL}{instance.photo.name}'
             rep['thumbnail'] = f'{settings.MEDIA_URL}{instance.thumbnail.name}'
         return rep
@@ -58,6 +63,8 @@ class UserSerializer(StateModelSerializer):
             data.pop('thumbnail', None)
             if data['photo']:
                 data['photo'] = restore_file(data['photo']['data'], data['photo']['name'])
+        else:
+            raise ParseError("UserSerializer can not parse User object in 'user' mode!")
         return super(UserSerializer, self).to_internal_value(data)
 
 
@@ -69,12 +76,13 @@ class ReportSerializer(StateModelSerializer):
 
     def to_representation(self, instance):
         rep = super(ReportSerializer, self).to_representation(instance)
-        rep['date'] = _from_datetime(instance.date)
         rep['subs'] = (instance.subs.email if self.mode == 'backup' else instance.subs.id) if instance.subs else None
         if self.mode == 'table':
-            rep.longitude = instance.place[0]
-            rep.latitude = instance.place[1]
+            rep['longitude'] = instance.place[0]
+            rep['latitude'] = instance.place[1]
+            del rep['place']
         else:
+            rep['date'] = _from_datetime(instance.date)
             rep['place'] = {'lng': instance.place[0], 'lat': instance.place[1]}
             rep['photos'] = [ReportPhotoSerializer(photo, mode=self.mode).data for photo in ReportPhoto.objects.filter(report=instance)]
             rep['comments'] = [CommentSerializer(comment, mode=self.mode).data for comment in Comment.objects.filter(report=instance)]
@@ -113,8 +121,8 @@ class ReportPhotoSerializer(StateModelSerializer):
         return rep
 
     def to_internal_value(self, data):
+        data['thumbnail'] = None
         if self.mode == 'backup':
-            data.pop('thumbnail', None)
             data['photo'] = restore_file(data['photo']['data'], data['photo']['name'])
         return super(ReportPhotoSerializer, self).to_internal_value(data)
 

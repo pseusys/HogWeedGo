@@ -65,7 +65,7 @@ class ReportPhoto(models.Model):
 
     report = models.ForeignKey(Report, on_delete=models.CASCADE, help_text="Report this photo is attached to")
     photo = models.ImageField(upload_to="report_photos", help_text="The photo itself")
-    thumbnail = models.ImageField(upload_to="thumbnails", help_text="The photo thumbnail")
+    thumbnail = models.ImageField(upload_to="thumbnails", null=True, help_text="The photo thumbnail")
 
     def save(self, *args, **kwargs):
         self.thumbnail.save(self.photo.name.split('/')[-1], create_thumbnail(self.photo), save=False)

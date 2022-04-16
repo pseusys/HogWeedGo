@@ -7,7 +7,7 @@ services:
     restart: always
     build:
       context: ..
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/Dockerfile-alpine
       args:
         - WORKDIR=app
         - HOGWEED_PORT=3000
@@ -82,7 +82,7 @@ services:
       - tls-cert.pem
       - tls-key.pem
     healthcheck:
-      test: exim -bV > /dev/null
+      test: exim -bV &> /dev/null
       interval: 10s
       timeout: 5s
       retries: 3

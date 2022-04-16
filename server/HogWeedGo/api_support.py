@@ -1,3 +1,4 @@
+import json
 import random
 import time
 from functools import wraps
@@ -8,6 +9,7 @@ from django.core.mail import send_mail
 from django.utils.encoding import smart_str
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.parsers import MultiPartParser, ParseError
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
@@ -20,6 +22,19 @@ class PlainTextRenderer(BaseRenderer):
 
     def render(self, data, media_type=None, renderer_context=None):
         return smart_str(data, encoding=self.charset)
+
+
+class MultiPartJSONParser(MultiPartParser):
+    def parse(self, stream, media_type=None, parser_context=None):
+        data_and_files = super(MultiPartJSONParser, self).parse(stream, media_type, parser_context)
+        try:
+            json_data = json.loads(data_and_files.data['data'])
+        except ValueError as e:
+            raise ParseError(f"JSON parse error - {e}")
+        data_and_files.data = data_and_files.data.copy()
+        data_and_files.data.update(json_data)
+        del data_and_files.data['data']
+        return data_and_files
 
 
 def verify_params(method, *args):
@@ -56,7 +71,7 @@ def auth(request, email, password):
         token, _ = Token.objects.get_or_create(user=user)
         return Response(f'Token {str(token)}')
     else:
-        return Response(f'Can not authenticate user with email:{email}, password:{password}', status.HTTP_400_BAD_REQUEST)
+        return Response(f'Can not authenticate user with email: {email}, password: {password}!', status.HTTP_400_BAD_REQUEST)
 
 
 # FD: when other auth methods added, transfer this to user model.

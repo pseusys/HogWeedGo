@@ -14,7 +14,7 @@ router.register('comments', CommentViewSet, basename='comment')
 
 urlpatterns = [
     path('healthcheck', healthcheck),
-    path('api/', include(router.urls)),
+    path('api/', include(router.urls))
 ]
 
 if settings.DEBUG and not settings.DOCKER:

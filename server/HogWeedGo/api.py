@@ -2,29 +2,24 @@ from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action, schema, renderer_classes
 from rest_framework.exceptions import ValidationError
-from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin
+from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.throttling import UserRateThrottle
-from rest_framework.viewsets import ViewSet, ReadOnlyModelViewSet, GenericViewSet
+from rest_framework.viewsets import ViewSet, GenericViewSet
 
-from HogWeedGo.api_schema import MeSchema, ReportsSchema
-from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth, send_email
+from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth, send_email, MultiPartJSONParser
 from HogWeedGo.models import User, Report, Comment
-from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer
+from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer, ReportPhotoSerializer
 
 
 # TODO: make async with Django async support.
 
 
-# ViewSets
-
-
 class MeViewSet(ViewSet):
-    schema = MeSchema(tags=['me'], operation_id_base='Me')
-
     @action(methods=['GET'], detail=False, permission_classes=[AllowAny], renderer_classes=[JSONRenderer, PlainTextRenderer])
     @verify_params('GET', "email")
     def prove_email(self, request):
@@ -50,32 +45,32 @@ class MeViewSet(ViewSet):
     def log_in(self, request):
         return auth(request, request.query_params.get('email'), request.query_params.get('password'))
 
-    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated])
+    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], throttle_classes=[UserRateThrottle], parser_classes=[MultiPartParser])
     def setup(self, request):
         results = {}
-        if 'email' in request.data and 'code' in request.data:
-            email = request.data['email']
+        if 'email' in request.query_params and 'code' in request.query_params:
+            email = request.query_params.get('email')
             token = random_token(email=email)
             existing = User.objects.get(email=email)
             if existing:
-                if token != request.data["code"]:
+                if token != request.query_params.get("code"):
                     results |= {'email': "Wrong or expired code!"}
                 else:
                     request.user.email = email
                     results |= {'email': "Saved!"}
             else:
-                results += {'email': "User with given email already exists!"}
-        if 'password' in request.data:
-            request.user.set_password(request.data['password'])
+                results |= {'email': "User with given email already exists!"}
+        if 'password' in request.query_params:
+            request.user.set_password(request.query_params.get('password'))
             results |= {'password': "Saved!"}
-        if 'name' in request.data:
-            request.user.first_name = request.data['name']
+        if 'name' in request.query_params:
+            request.user.first_name = request.query_params.get('name')
             results |= {'name': "Saved!"}
-        if 'photo' in request.data:
-            results |= {'photo': "TODO: implement!"}
-            # TODO: update user photo
+        if 'photo' in request.FILES:
+            request.user.photo = request.FILES['photo']
+            results |= {'photo': "Saved!"}
         request.user.save()
-        return Response(results, status=200 if [1 if mess != 'Saved!' else 0 for mess in results.values()].count(0) > 0 else 400)
+        return Response(results, status=status.HTTP_200_OK if [1 if mess != 'Saved!' else 0 for mess in results.values()].count(0) > 0 else status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['DELETE'], detail=False, permission_classes=[IsAuthenticated], renderer_classes=[PlainTextRenderer])
     def log_out(self, request):
@@ -89,21 +84,31 @@ class MeViewSet(ViewSet):
         return Response("User deleted successfully")
 
 
-class ReportViewSet(CreateModelMixin, ReadOnlyModelViewSet):
-    schema = ReportsSchema()
+class ReportViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     serializer_class = ReportSerializer
-    queryset = Report.objects.all()
+    parser_classes = [MultiPartJSONParser]
 
     def get_throttles(self):
         if self.action == 'create':
             return [UserRateThrottle()]
         return super(ReportViewSet, self).get_throttles()
 
+    def get_queryset(self):
+        if 'filter' in self.request.query_params:
+            return Report.objects.filter(status=self.request.query_params['filter'])
+        else:
+            return Report.objects.all()
+
     def create(self, request, *args, **kwargs):
-        # TODO: set photos
-        request.data['photos'] = []
         try:
-            return super().create(request, *args, **kwargs)
+            pk = super().create(request, *args, **kwargs).data['id']
+            for photo in request.FILES.getlist('photos'):
+                serializer = ReportPhotoSerializer(data={'photo': photo, 'report': pk})
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            serializer = self.get_serializer(instance=Report.objects.get(pk=pk))
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         except ValidationError as e:
             return Response(e.detail, status.HTTP_400_BAD_REQUEST)
 

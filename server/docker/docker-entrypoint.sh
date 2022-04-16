@@ -18,7 +18,7 @@ if [ "$#" -ne 1 ]; then
   python manage.py check --deploy
 
   echo "Start server"
-  daphne -b 0.0.0.0 -p "$HOGWEED_PORT" HogWeedGo.application.asgi:application
+  daphne -b 0.0.0.0 -p "$HOGWEED_PORT" HogWeedGo.asgi:application
 fi
 
 exec "$@"

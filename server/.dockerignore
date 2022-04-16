@@ -10,9 +10,15 @@ venv
 
 backup
 certificates
+tests
+docker
+
+!docker/docker-entrypoint.sh
 
 .dockerignore
 .gitignore
+config-generator.sh
+README.md
 *.env
 
 Pipfile.lock

@@ -1,0 +1,944 @@
+{
+	"info": {
+		"_postman_id": "3303d313-2dce-4917-a06e-18511aff6ad8",
+		"name": "HogWeedGoAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Healthcheck",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Server is healthy\", function () {",
+							"    pm.expect(pm.response.text()).to.be.equal(\"healthy\", \"Server is not available!\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/healthcheck",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request code",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"EMAIL_CODE\", pm.response.json()['message'].split(\"'\")[1]);",
+							"",
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"subject\": {",
+							"            \"const\": \"HogWeedGo authentication\"",
+							"        },",
+							"        \"message\": {",
+							"            \"type\": \"string\",",
+							"            \"pattern\": \"^Your confirmation code is: '.+?'\\nIt will be valid for 10 minutes\\.$\",",
+							"            \"description\": \"TOKEN stands for a token, unique for given server and email, valid for 10 minutes.\"",
+							"        },",
+							"        \"recipients\": {",
+							"            \"type\": \"array\",",
+							"            \"prefixItems\": [",
+							"                {",
+							"                    \"type\": \"string\",",
+							"                    \"format\": \"email\"",
+							"                }",
+							"          ],",
+							"          \"items\": false,",
+							"          \"description\": \"Email the code is generated for.\"",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"subject\", \"message\", \"recipients\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/prove_email?email={{TEST_USER_EMAIL}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"prove_email"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "{{TEST_USER_EMAIL}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Response text is valid', function () {",
+							"    pm.expect(pm.response.text()).to.be.a(\"string\").and.satisfy(text => text.startsWith(\"Token \"), \"Response does not contain auth token!\");",
+							"});",
+							"",
+							"pm.collectionVariables.set(\"AUTH_TOKEN\", pm.response.text());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/auth?email={{TEST_USER_EMAIL}}&password={{TEST_USER_PASSWORD}}&code={{EMAIL_CODE}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"auth"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "{{TEST_USER_EMAIL}}"
+						},
+						{
+							"key": "password",
+							"value": "{{TEST_USER_PASSWORD}}"
+						},
+						{
+							"key": "code",
+							"value": "{{EMAIL_CODE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Setup User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"TEST_USER_EMAIL\", \"toast@site.com\");",
+							"pm.collectionVariables.set(\"TEST_USER_PASSWORD\", \"98765\");",
+							"",
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"name\": {",
+							"            \"const\": \"Saved!\"",
+							"        },",
+							"        \"photo\": {",
+							"            \"const\": \"Saved!\"",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"subject\", \"message\", \"recipients\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "photo",
+							"contentType": "image/jpeg",
+							"type": "file",
+							"src": "./pictures/user.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/setup?email={{TEST_USER_EMAIL}}&code={{EMAIL_CODE}}&password={{TEST_USER_PASSWORD}}&name={{TEST_USER_NAME}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"setup"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "{{TEST_USER_EMAIL}}"
+						},
+						{
+							"key": "code",
+							"value": "{{EMAIL_CODE}}"
+						},
+						{
+							"key": "password",
+							"value": "{{TEST_USER_PASSWORD}}"
+						},
+						{
+							"key": "name",
+							"value": "{{TEST_USER_NAME}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Log out",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response text is valid\", function () {",
+							"    pm.expect(pm.response.text()).to.be.equal(\"Logged out successfully\", \"Error logging out!\");",
+							"});",
+							"",
+							"pm.collectionVariables.unset(\"AUTH_TOKEN\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/log_out",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"log_out"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Log in",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response text is valid\", function () {",
+							"    pm.expect(pm.response.text()).to.be.a(\"string\").and.satisfy(text => text.startsWith(\"Token \"), \"Response does not contain auth token!\");",
+							"});",
+							"",
+							"pm.collectionVariables.set(\"AUTH_TOKEN\", pm.response.text());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/log_in?email={{TEST_USER_EMAIL}}&password={{TEST_USER_PASSWORD}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"log_in"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "{{TEST_USER_EMAIL}}"
+						},
+						{
+							"key": "password",
+							"value": "{{TEST_USER_PASSWORD}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Report",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"TEST_USER_ID\", pm.response.json()['subs']);",
+							"pm.collectionVariables.set(\"REPORT_ID\", pm.response.json()['id']);",
+							"",
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							"",
+							"pm.test('Response photos are valid', function () {",
+							"    const port = pm.collectionVariables.get(\"SERVER_PORT\");",
+							"    pm.sendRequest(`http://localhost:${port}${pm.response.json()['photos'][0]['thumbnail']}`, function (err, response) {",
+							"        pm.expect(response.code).to.be.equal(200, \"Response photos unavailable!\");",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"address\": {",
+							"            \"type\": \"string\",",
+							"            \"nullable\": true,",
+							"            \"maxLength\": 128",
+							"        },",
+							"        \"init_comment\": {",
+							"            \"type\": \"string\",",
+							"            \"maxLength\": 2048",
+							"        },",
+							"        \"date\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"date-time\"",
+							"        },",
+							"        \"status\": {",
+							"            \"enum\": [ \"RECEIVED\", \"APPROVED\", \"INVALID\" ],",
+							"            \"type\": \"string\"",
+							"        },",
+							"        \"subs\": {",
+							"            \"type\": \"integer\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"id\": {",
+							"            \"type\": \"integer\"",
+							"        },",
+							"        \"type\": {",
+							"            \"type\": \"string\",",
+							"            \"maxLength\": 64",
+							"        },",
+							"        \"place\": {",
+							"          \"type\": \"string\"",
+							"        },",
+							"        \"photos\": {",
+							"            \"type\": \"array\",",
+							"            \"items\": {",
+							"                \"type\": \"object\",",
+							"                \"properties\": {",
+							"                    \"photo\": {",
+							"                        \"type\": \"string\",",
+							"                        \"format\": \"uri\"",
+							"                    },",
+							"                    \"thumbnail\": {",
+							"                        \"type\": \"string\",",
+							"                        \"format\": \"uri\"",
+							"                    }",
+							"                },",
+							"                \"additionalProperties\": false,",
+							"                \"required\": [ \"photo\", \"thumbnail\" ]",
+							"            }",
+							"        },",
+							"        \"comments\": {",
+							"            \"type\": \"array\",",
+							"            \"items\": {",
+							"                \"type\": \"object\",",
+							"                \"properties\": {",
+							"                    \"report\": {",
+							"                        \"type\": \"integer\"",
+							"                    },",
+							"                    \"text\": {",
+							"                        \"type\": \"string\",",
+							"                        \"maxLength\": 2048",
+							"                    },",
+							"                    \"subs\": {",
+							"                        \"type\": \"integer\",",
+							"                        \"nullable\": true",
+							"                    }",
+							"                },",
+							"                \"additionalProperties\": false,",
+							"                \"required\": [ \"report\", \"text\" ]",
+							"            }",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"init_comment\", \"date\", \"status\", \"subs\", \"id\", \"type\", \"place\", \"photos\", \"comments\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "photos",
+							"contentType": "image/jpeg",
+							"type": "file",
+							"src": "./pictures/nature-1.jpg"
+						},
+						{
+							"key": "photos",
+							"contentType": "image/jpeg",
+							"type": "file",
+							"src": "./pictures/nature-1.jpg"
+						},
+						{
+							"key": "photos",
+							"contentType": "image/jpeg",
+							"type": "file",
+							"src": "./pictures/nature-1.jpg"
+						},
+						{
+							"key": "data",
+							"value": "{\n    \"address\": \"Pupishevo\",\n    \"init_comment\": \"Wish I could visit Pupishevo instead of testing\",\n    \"place\": {\"lng\": 32.0945622, \"lat\": 59.905243},\n    \"type\": \"hogweed | 100%\"\n}",
+							"contentType": "application/json",
+							"type": "text"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/reports",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"reports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							"",
+							"pm.test('Response is valid', function () {",
+							"    pm.expect(pm.response.json()['first_name']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_NAME\"), \"User name is invalid!\");",
+							"});",
+							"",
+							"pm.test('Response photo is valid', function () {",
+							"    const port = pm.collectionVariables.get(\"SERVER_PORT\");",
+							"    pm.sendRequest(`http://localhost:${port}${pm.response.json()['thumbnail']}`, function (err, response) {",
+							"        pm.expect(response.code).to.be.equal(200, \"Response photo unavailable!\");",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"last_login\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"date-time\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"first_name\": {",
+							"            \"type\": \"string\",",
+							"            \"maxLength\": 150,",
+							"            \"nullable\": true",
+							"        },",
+							"        \"is_staff\": {",
+							"            \"type\": \"boolean\"",
+							"        },",
+							"        \"photo\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"uri\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"thumbnail\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"uri\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"is_staff\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/users/{{TEST_USER_ID}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"users",
+						"{{TEST_USER_ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Comment",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"report\": {",
+							"            \"type\": \"integer\"",
+							"        },",
+							"        \"text\": {",
+							"            \"type\": \"string\",",
+							"            \"maxLength\": 2048",
+							"        },",
+							"        \"subs\": {",
+							"            \"type\": \"integer\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"report\", \"text\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json()[0], schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							"",
+							"pm.test('Response is valid', function () {",
+							"    pm.expect(pm.response.json()['subs']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_ID\"), \"Response subs is invalid!\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text\": \"Why have you reported about this??\",\n    \"report\": {{REPORT_ID}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/comments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Reports",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json()[0], schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							"",
+							"pm.test('Response is valid', function () {",
+							"    pm.expect(pm.response.json()[0]['subs']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_ID\"), \"Response subs is invalid!\");",
+							"    pm.expect(pm.response.json()[0]['comments'][0]['subs']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_ID\"), \"Response comment subs is invalid!\");",
+							"});",
+							"",
+							"pm.test('Result sorting works', function () {",
+							"    const port = pm.collectionVariables.get(\"SERVER_PORT\");",
+							"    pm.sendRequest(`http://localhost:${port}/api/reports?filter=RECEIVED`, function (err, response) {",
+							"        pm.expect(response.json().length == 1).to.be.equal(true, \"Invalid number of received reports!\");",
+							"    });",
+							"    pm.sendRequest(`http://localhost:${port}/api/reports?filter=APPROVED`, function (err, response) {",
+							"        pm.expect(response.json().length == 0).to.be.equal(true, \"Invalid number of approved reports!\");",
+							"    });",
+							"    pm.sendRequest(`http://localhost:${port}/api/reports?filter=INVALID`, function (err, response) {",
+							"        pm.expect(response.json().length == 0).to.be.equal(true, \"Invalid number of invalid reports!\");",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"address\": {",
+							"            \"type\": \"string\",",
+							"            \"nullable\": true,",
+							"            \"maxLength\": 128",
+							"        },",
+							"        \"init_comment\": {",
+							"            \"type\": \"string\",",
+							"            \"maxLength\": 2048",
+							"        },",
+							"        \"date\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"date-time\"",
+							"        },",
+							"        \"status\": {",
+							"            \"enum\": [ \"RECEIVED\", \"APPROVED\", \"INVALID\" ],",
+							"            \"type\": \"string\"",
+							"        },",
+							"        \"subs\": {",
+							"            \"type\": \"integer\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"type\": {",
+							"            \"type\": \"string\",",
+							"            \"maxLength\": 64",
+							"        },",
+							"        \"place\": {",
+							"          \"type\": \"string\"",
+							"        },",
+							"        \"photos\": {",
+							"            \"type\": \"array\",",
+							"            \"items\": {",
+							"                \"type\": \"object\",",
+							"                \"properties\": {",
+							"                    \"photo\": {",
+							"                        \"type\": \"string\",",
+							"                        \"format\": \"uri\"",
+							"                    },",
+							"                    \"thumbnail\": {",
+							"                        \"type\": \"string\",",
+							"                        \"format\": \"uri\"",
+							"                    }",
+							"                },",
+							"                \"additionalProperties\": false,",
+							"                \"required\": [ \"photo\", \"thumbnail\" ]",
+							"            }",
+							"        },",
+							"        \"comments\": {",
+							"            \"type\": \"array\",",
+							"            \"items\": {",
+							"                \"type\": \"object\",",
+							"                \"properties\": {",
+							"                    \"report\": {",
+							"                        \"type\": \"integer\"",
+							"                    },",
+							"                    \"text\": {",
+							"                        \"type\": \"string\",",
+							"                        \"maxLength\": 2048",
+							"                    },",
+							"                    \"subs\": {",
+							"                        \"type\": \"integer\",",
+							"                        \"nullable\": true",
+							"                    }",
+							"                },",
+							"                \"additionalProperties\": false,",
+							"                \"required\": [ \"report\", \"text\" ]",
+							"            }",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"init_comment\", \"date\", \"status\", \"subs\", \"type\", \"place\", \"photos\", \"comments\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/reports",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"reports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"esponse text is valid\", function () {",
+							"    pm.expect(pm.response.text()).to.be.equal(\"User deleted successfully\", \"Error deleting user!\");",
+							"});",
+							"",
+							"pm.collectionVariables.unset(\"REPORT_ID\");",
+							"pm.collectionVariables.unset(\"TEST_USER_ID\");",
+							"pm.collectionVariables.unset(\"EMAIL_CODE\");",
+							"pm.collectionVariables.unset(\"AUTH_TOKEN\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/leave",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"leave"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{AUTH_TOKEN}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Status code is successful\", function () {",
+					"    pm.expect(pm.response.code).to.be.least(200, \"Wrong response code!\");",
+					"    pm.expect(pm.response.code).to.be.below(400, \"Response with an error!\");",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "TEST_USER_EMAIL",
+			"value": "test@site.com"
+		},
+		{
+			"key": "TEST_USER_PASSWORD",
+			"value": "12345"
+		},
+		{
+			"key": "TEST_USER_NAME",
+			"value": "Test User"
+		},
+		{
+			"key": "SERVER_PORT",
+			"value": "8000"
+		}
+	]
+}
