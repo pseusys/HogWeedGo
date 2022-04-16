@@ -20,12 +20,10 @@ jobs:
         run: npm install newman
         
       - name: Run server in Docker 📥
-        run: |
-            cd server
-            docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build -d
+        run: cd server && docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build
         
       - name: Wait for server to start ⏱
-        run: sleep 150
+        run: sleep 90
 
       - name: Run API tests 🌐
         run: cd ./server/tests && newman run ./HogWeedGoAPI.postman_collection.json
