@@ -22,8 +22,7 @@ jobs:
       - name: Run server in Docker 📥
         run: |
             cd server
-            docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development build --no-cache
-            docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.production up --no-build
+            docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build -d
         
       - name: Wait for server to start ⏱
         run: sleep 150
