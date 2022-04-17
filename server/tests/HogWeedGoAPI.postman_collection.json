@@ -186,18 +186,108 @@
 			"response": []
 		},
 		{
+			"name": "Request code",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"EMAIL_CODE\", pm.response.json()['message'].split(\"'\")[1]);",
+							"",
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"TEST_USER_EMAIL\", \"toast@site.com\");",
+							"",
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"subject\": {",
+							"            \"const\": \"HogWeedGo authentication\"",
+							"        },",
+							"        \"message\": {",
+							"            \"type\": \"string\",",
+							"            \"pattern\": \"^Your confirmation code is: '.+?'\\nIt will be valid for 10 minutes\\.$\",",
+							"            \"description\": \"TOKEN stands for a token, unique for given server and email, valid for 10 minutes.\"",
+							"        },",
+							"        \"recipients\": {",
+							"            \"type\": \"array\",",
+							"            \"prefixItems\": [",
+							"                {",
+							"                    \"type\": \"string\",",
+							"                    \"format\": \"email\"",
+							"                }",
+							"          ],",
+							"          \"items\": false,",
+							"          \"description\": \"Email the code is generated for.\"",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"subject\", \"message\", \"recipients\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/prove_email?email={{TEST_USER_EMAIL}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"prove_email"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "{{TEST_USER_EMAIL}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Setup User",
 			"event": [
 				{
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"pm.collectionVariables.set(\"TEST_USER_EMAIL\", \"toast@site.com\");",
 							"pm.collectionVariables.set(\"TEST_USER_PASSWORD\", \"98765\");",
 							"",
 							"const schema = {",
 							"    \"type\": \"object\",",
 							"    \"properties\": {",
+							"        \"email\": {",
+							"            \"const\": \"Saved!\"",
+							"        },",
+							"        \"password\": {",
+							"            \"const\": \"Saved!\"",
+							"        },",
 							"        \"name\": {",
 							"            \"const\": \"Saved!\"",
 							"        },",
@@ -205,7 +295,7 @@
 							"            \"const\": \"Saved!\"",
 							"        },",
 							"        \"additionalProperties\": false,",
-							"        \"required\": [ \"subject\", \"message\", \"recipients\" ]",
+							"        \"required\": [ \"email\", \"password\", \"name\", \"photo\" ]",
 							"    }",
 							"};",
 							"",
@@ -521,12 +611,7 @@
 							"contentType": "application/json",
 							"type": "text"
 						}
-					],
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
+					]
 				},
 				"url": {
 					"raw": "http://localhost:{{SERVER_PORT}}/api/reports",
@@ -847,7 +932,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"esponse text is valid\", function () {",
+							"pm.test(\"Response text is valid\", function () {",
 							"    pm.expect(pm.response.text()).to.be.equal(\"User deleted successfully\", \"Error deleting user!\");",
 							"});",
 							"",

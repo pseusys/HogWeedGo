@@ -51,8 +51,8 @@ class MeViewSet(ViewSet):
         if 'email' in request.query_params and 'code' in request.query_params:
             email = request.query_params.get('email')
             token = random_token(email=email)
-            existing = User.objects.get(email=email)
-            if existing:
+            existing = User.objects.filter(email=email).first()
+            if not existing:
                 if token != request.query_params.get("code"):
                     results |= {'email': "Wrong or expired code!"}
                 else:
@@ -70,7 +70,7 @@ class MeViewSet(ViewSet):
             request.user.photo = request.FILES['photo']
             results |= {'photo': "Saved!"}
         request.user.save()
-        return Response(results, status=status.HTTP_200_OK if [1 if mess != 'Saved!' else 0 for mess in results.values()].count(0) > 0 else status.HTTP_400_BAD_REQUEST)
+        return Response(results, status=status.HTTP_200_OK if [1 if mess != 'Saved!' else 0 for mess in results.values()].count(1) == 0 else status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['DELETE'], detail=False, permission_classes=[IsAuthenticated], renderer_classes=[PlainTextRenderer])
     def log_out(self, request):

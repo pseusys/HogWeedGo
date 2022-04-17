@@ -23,7 +23,13 @@ jobs:
         run: cd server && docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build -d
         
       - name: Wait for server to start ⏱
-        run: sleep 60
+        uses: ifaxity/wait-on-action@v1
+        with:
+          delay: 30000
+          interval: 1000
+          log: true
+          timeout: 150000
+          resource: http://localhost:8000/healthcheck
 
       - name: Run API tests 🌐
         run: cd ./server/tests && newman run ./HogWeedGoAPI.postman_collection.json
