@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
+        
+      - name: Test 🛎️
+        run: echo "${{ github.event.inputs.test }}"
 
       - name: Create user config file 🛠
         run: ./server/config-generator.sh localhost
@@ -117,7 +120,7 @@ jobs:
         if: ${{ github.event.inputs.publish }}
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: ./server/
+          context: ./server/docker/
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
