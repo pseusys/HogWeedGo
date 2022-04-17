@@ -19,7 +19,7 @@ on:
 
 jobs:
   test-server-local:
-    if: ${{ github.event.inputs.test }} == 'true'
+    if: "${{ github.event.inputs.test }}" == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +52,7 @@ jobs:
         run: cd ./server && ./init-local.sh ./config.env test
 
   test-server-docker:
-    if: ${{ github.event.inputs.test }} == 'true'
+    if: "${{ github.event.inputs.test }}" == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -121,9 +121,9 @@ jobs:
         with:
           context: ./server/
           file: ./server/docker/Dockerfile-alpine
-          build-args:
-            - WORKDIR=app
-            - HOGWEED_PORT=3000
+          build-args: |
+            WORKDIR=app
+            HOGWEED_PORT=3000
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
