@@ -19,15 +19,12 @@ on:
 
 jobs:
   test-server-local:
-    if: "${{ github.event.inputs.test }}" == 'true'
+    if: github.event.inputs.test == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
-        
-      - name: Test 🛎️
-        run: echo "${{ github.event.inputs.test }}"
 
       - name: Create user config file 🛠
         run: ./server/config-generator.sh localhost
@@ -52,7 +49,7 @@ jobs:
         run: cd ./server && ./init-local.sh ./config.env test
 
   test-server-docker:
-    if: "${{ github.event.inputs.test }}" == 'true'
+    if: github.event.inputs.test == 'true'
     runs-on: ubuntu-latest
 
     steps:
