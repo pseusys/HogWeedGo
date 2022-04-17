@@ -9,7 +9,8 @@
  - Debug + build mode: `docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build`
  - Debug mode: `docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up`
  - Release mode: `docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.production up`
-
+ 
+### Image will be published using Github
 
 HogWeed Server roadmap:
 - [x] Server website
