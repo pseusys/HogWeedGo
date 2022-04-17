@@ -19,7 +19,7 @@ on:
 
 jobs:
   test-server-local:
-    if: ${{ github.event.inputs.test }}
+    if: ${{ github.event.inputs.test }} == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -49,7 +49,7 @@ jobs:
         run: cd ./server && ./init-local.sh ./config.env test
 
   test-server-docker:
-    if: ${{ github.event.inputs.test }}
+    if: ${{ github.event.inputs.test }} == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -86,7 +86,7 @@ jobs:
 
   publish-server-image:
     runs-on: ubuntu-latest
-    needs: [test-server-local, test-server-docker]
+#    needs: [test-server-local, test-server-docker]
 #    if: |
 #      always() &&
 #      (needs.test-server-local.result == 'success' || needs.test-server-local.result == 'skipped') &&
