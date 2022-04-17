@@ -12,6 +12,10 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.3.4
+        
+      - uses: KengoTODA/actions-setup-docker-compose@v1.0.3
+        with:
+          version: 2.2.3
 
       - name: Create user config file 🛠
         run: cd server && ./config-generator.sh localhost

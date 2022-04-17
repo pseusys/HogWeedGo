@@ -15,6 +15,7 @@
 HogWeed Server roadmap:
 - [x] Server website
 - [x] Server API
+- [x] Server API testing
 - [ ] Server settings (backup, logs, admin notifications)
 - [ ] Languages + translation
 - [ ] Different authentication methods and providers
