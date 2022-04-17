@@ -2,16 +2,59 @@ name: SERVER
 
 on:
   push:
+    branches:
+      - 'main'
     paths:
       - 'server/**'
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Should test server'     
+        required: true
+        default: true
+      publish:
+        description: 'Should publish server image'     
+        required: true
+        default: true
 
 jobs:
-  test-server:
+  test-server-local:
+    if: ${{ github.event.inputs.publish }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
+
+      - name: Create user config file 🛠
+        run: ./server/config-generator.sh localhost
+
+      - name: Install Python 3.10 🐍
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install PostgreSQL 🐘
+        run: |
+          apt install wget ca-certificates
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+          echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
+          apt update && apt install -y postgresql-13 postgresql-client-13 postgis postgresql-13-postgis-3 gdal-bin
+          pg_ctlcluster 13 main start
+
+      - name: Run initializing script 📜
+        run: cd ./server && POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
+
+      - name: Run server tests 🧪
+        run: cd ./server && ./init-local.sh ./config.env test
+
+  test-server-docker:
+    if: ${{ github.event.inputs.publish }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
         
       - uses: KengoTODA/actions-setup-docker-compose@v1.0.3
         with:
@@ -40,3 +83,35 @@ jobs:
         
       - name: Stop server container 📤
         run: cd server && sudo docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development stop -t 30
+
+  publish-server-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        if: ${{ github.event.inputs.publish }}
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: ./server/
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
