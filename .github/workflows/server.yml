@@ -13,6 +13,10 @@ on:
         required: true
         default: true
 
+defaults:
+  run:
+    working-directory: ./server
+
 jobs:
   test-server-local:
     runs-on: ubuntu-latest
@@ -22,7 +26,7 @@ jobs:
         uses: actions/checkout@v3.0.1
 
       - name: Create user config file 🛠
-        run: ./server/config-generator.sh localhost
+        run: ./config-generator.sh localhost
 
       - name: Install Python 3.10 🐍
         uses: actions/setup-python@v3
@@ -38,10 +42,10 @@ jobs:
           sudo pg_ctlcluster 13 main start
 
       - name: Run initializing script 📜
-        run: cd ./server && POSTGRES_ADMIN=postgres ./tests/init-local.sh ./config.env
+        run: POSTGRES_ADMIN=postgres ./tests/init-local.sh ./config.env
 
       - name: Run server tests 🧪
-        run: cd ./server && ./tests/init-local.sh ./config.env test
+        run: ./tests/init-local.sh ./config.env test
 
   test-server-docker:
     runs-on: ubuntu-latest
@@ -55,12 +59,10 @@ jobs:
           version: v2.2.3
 
       - name: Create user config file 🛠
-        run: cd server && ./config-generator.sh localhost
+        run: ./config-generator.sh localhost
         
       - name: Run server in Docker 📥
-        run: |
-            docker-compose --version
-            cd server && docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build -d
+        run: docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build
     
       - name: Install Newman for API testing 🧑‍🚀
         run: npm install newman
@@ -75,10 +77,10 @@ jobs:
           resource: http://localhost:8000/healthcheck
 
       - name: Run API tests 🌐
-        run: cd ./server/tests && newman run ./HogWeedGoAPI.postman_collection.json
+        run: newman run ./tests/HogWeedGoAPI.postman_collection.json
         
       - name: Stop server container 📤
-        run: cd server && docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development stop -t 30
+        run: docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development stop -t 30
 
   publish-server-image:
     runs-on: ubuntu-latest
@@ -107,8 +109,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2.10.0
         with:
-          context: ./server/
-          file: ./server/docker/Dockerfile-alpine
+          context: .
+          file: ./docker/Dockerfile-alpine
           build-args: |
             WORKDIR=app
             HOGWEED_PORT=3000

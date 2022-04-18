@@ -13,6 +13,7 @@ backup/*
 certificates
 
 *.env
+!tests/test-config.env
 
 Pipfile.lock
 bundled-server.zip

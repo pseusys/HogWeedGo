@@ -7,7 +7,7 @@ OK='\u001b[0m'
 
 
 function help {
-  echo "Run \"./act.sh [KEYS] DOMAIN\" with following keys:"
+  echo "Run \"./config-generator.sh [KEYS] DOMAIN\" with following keys:"
   echo "    DOMAIN - the domain name this server is running on (example: 'example.com'), required!"
   echo "  KEYS:"
   echo "    '-h' to see this message again"
