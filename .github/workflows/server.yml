@@ -38,7 +38,7 @@ jobs:
 
       - name: Run initializing script 📜
         run: |
-          useradd -m -G root postgres
+          pg_isready
           POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
 
       - name: Run server tests 🧪
