@@ -38,10 +38,10 @@ jobs:
           sudo pg_ctlcluster 13 main start
 
       - name: Run initializing script 📜
-        run: cd ./server && POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
+        run: cd ./server && POSTGRES_ADMIN=postgres ./tests/init-local.sh ./config.env
 
       - name: Run server tests 🧪
-        run: cd ./server && ./init-local.sh ./config.env test
+        run: cd ./server && ./tests/init-local.sh ./config.env test
 
   test-server-docker:
     runs-on: ubuntu-latest
