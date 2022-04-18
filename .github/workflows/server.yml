@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       test:
-        description: 'Should test server'     
+        description: 'Should test server'
         required: true
         default: true
 
@@ -53,20 +53,20 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3.0.1
-        
+
       - uses: KengoTODA/actions-setup-docker-compose@v1.0.7
         with:
           version: v2.2.3
 
       - name: Create user config file 🛠
         run: ./config-generator.sh localhost
-        
+
       - name: Run server in Docker 📥
-        run: docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build
-    
+        run: docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build -d
+
       - name: Install Newman for API testing 🧑‍🚀
         run: npm install newman
-        
+
       - name: Wait for server to start ⏱
         uses: ifaxity/wait-on-action@v1
         with:
@@ -78,7 +78,7 @@ jobs:
 
       - name: Run API tests 🌐
         run: newman run ./tests/HogWeedGoAPI.postman_collection.json
-        
+
       - name: Stop server container 📤
         run: docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development stop -t 30
 
