@@ -53,7 +53,7 @@ if [ $# -eq 1 ]; then
   echo "Create PostGIS extension for database '$POSTGRES_DB' if not exists"
   sudo -u "$POSTGRES_ADMIN" psql -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS postgis;" &&
   echo "Restart PostgreSQL"
-  service postgresql restart
+  sudo systemctl restart postgresql.service
 
   export PIPENV_QUIET='True'
   echo "Install Pipfile packages"

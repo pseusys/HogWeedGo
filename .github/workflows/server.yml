@@ -34,10 +34,12 @@ jobs:
           python-version: '3.10'
 
       - name: Start PostgreSQL 🐘
-        run: sudo systemctl start postgresql.service
+        run: |
+          sudo apt update && sudo apt-get install postgis postgresql-14-postgis-3
+          sudo systemctl start postgresql.service
 
       - name: Run initializing script 📜
-        run: POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
+        run: sudo POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
 
       - name: Run server tests 🧪
         run: ./init-local.sh ./config.env test
