@@ -44,7 +44,7 @@ if [ $# -eq 1 ]; then
   [ "$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" == '3.10' ] || print_error "Python 3.10 appears not to be installed, visit following link for installation guide: https://www.python.org/downloads/release/python-3100"
   psql --version > /dev/null || print_error "PostgreSQL appears not to be installed run following command to fix this: 'apt install postgresql-13 postgresql-client-13 postgresql-contrib postgis postgresql-13-postgis-3 gdal-bin"
   echo "Check PostgreSQL availability for user $POSTGRES_ADMIN"
-  sudo -u postgres psql -U "$POSTGRES_ADMIN" -c "" || print_error "Current user is not an administrator for PostgreSQL or has a password. Remove admin password (if any) and run the script again with 'sudo -u admin ...'"
+  sudo -u "$POSTGRES_ADMIN" psql -c "" || print_error "Current user is not an administrator for PostgreSQL or has a password. Remove admin password (if any) and run the script again with 'sudo -u admin ...'"
 
   echo "Create PostgreSQL user '$POSTGRES_USER'"
   sudo psql -U "$POSTGRES_ADMIN" -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
