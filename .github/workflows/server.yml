@@ -32,10 +32,10 @@ jobs:
       - name: Install PostgreSQL 🐘
         run: |
           sudo apt-get install wget ca-certificates
-          sudo wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
           sudo apt update && sudo apt-get install -y postgresql-13 postgresql-client-13 postgis postgresql-13-postgis-3 gdal-bin
-          sudo pg_ctlcluster 13 main start
+          pg_ctlcluster 13 main start
 
       - name: Run initializing script 📜
         run: cd ./server && POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
@@ -59,8 +59,8 @@ jobs:
         
       - name: Run server in Docker 📥
         run: |
-            sudo docker-compose --version
-            cd server && sudo docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build -d
+            docker-compose --version
+            cd server && docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build -d
     
       - name: Install Newman for API testing 🧑‍🚀
         run: npm install newman
@@ -78,7 +78,7 @@ jobs:
         run: cd ./server/tests && newman run ./HogWeedGoAPI.postman_collection.json
         
       - name: Stop server container 📤
-        run: cd server && sudo docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development stop -t 30
+        run: cd server && docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development stop -t 30
 
   publish-server-image:
     runs-on: ubuntu-latest
