@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.0.1
 
       - name: Create user config file 🛠
         run: ./server/config-generator.sh localhost
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.0.1
         
       - uses: KengoTODA/actions-setup-docker-compose@v1.0.7
         with:
@@ -89,7 +89,7 @@ jobs:
 
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.0.1
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1.14.1
