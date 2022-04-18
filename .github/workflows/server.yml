@@ -34,7 +34,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install PostgreSQL 🐘
-        run: sudo pg_ctlcluster 14 main start
+        run: sudo pg_ctlcluster 14 main start && cat /var/lib/pgsql/9.3/data/pg_hba.conf
 
       - name: Run initializing script 📜
         run: POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
@@ -43,6 +43,7 @@ jobs:
         run: ./init-local.sh ./config.env test
 
   test-server-docker:
+    if: false
     runs-on: ubuntu-latest
 
     steps:
