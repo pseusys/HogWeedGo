@@ -6,7 +6,12 @@ on:
       - 'main'
     paths:
       - 'server/**'
-  workflow-dispatch: {}
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Should test server'     
+        required: true
+        default: true
 
 jobs:
   test-server-local:
