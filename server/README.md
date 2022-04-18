@@ -23,7 +23,7 @@ NB! Superuser email and password for accessing admin website are stored in `./co
 HogWeed Server roadmap:
 - [x] Server website
 - [x] Server API
-- [x] Server API testing
+- [x] Server API testing (in docker and locally)
 - [ ] Server settings (backup, logs, admin notifications)
 - [ ] Languages + translation
 - [ ] Different authentication methods and providers

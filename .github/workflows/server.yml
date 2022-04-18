@@ -6,12 +6,6 @@ on:
       - 'main'
     paths:
       - 'server/**'
-  workflow_dispatch:
-    inputs:
-      test:
-        description: 'Should test server'
-        required: true
-        default: true
 
 defaults:
   run:
