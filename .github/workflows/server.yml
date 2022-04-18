@@ -35,7 +35,7 @@ jobs:
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
           sudo apt update && sudo apt-get install -y postgresql-13 postgresql-client-13 postgis postgresql-13-postgis-3 gdal-bin
-          pg_ctlcluster 13 main start
+          sudo pg_ctlcluster 13 main start
 
       - name: Run initializing script 📜
         run: cd ./server && POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
