@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   hogweed-server:
-    image: pseusys/hogweedgo:0.0.1
+    image: ghcr.io/pseusys/hogweedgo:main
     container_name: hogweed-server
     restart: always
     build:
@@ -82,7 +82,7 @@ services:
       - tls-cert.pem
       - tls-key.pem
     healthcheck:
-      test: exim -bV &> /dev/null
+      test: exiwhat > /dev/null
       interval: 10s
       timeout: 5s
       retries: 3
@@ -103,7 +103,7 @@ services:
 
 configs:
   nginx-config:
-    file: nginx.conf.template
+    file: ./nginx.conf.template
 
 secrets:
   ssl-key.pem:
