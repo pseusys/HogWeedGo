@@ -34,7 +34,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install PostgreSQL 🐘
-        run: sudo pg_ctlcluster 14 main start && sudo pg_lsclusters
+        run: sudo pg_ctlcluster 14 main start
 
       - name: Run initializing script 📜
         run: POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
@@ -63,20 +63,11 @@ jobs:
         run: npm install newman
 
       - name: Wait for server to start ⏱
-        run: |
-          sleep 90
-          docker ps
-          curl http://localhost:8000/healthcheck
-        #uses: ifaxity/wait-on-action@v1
-        #with:
-        #  delay: 30000
-        #  interval: 1000
-        #  log: true
-        #  timeout: 150000
-        #  resource: http://localhost:8000/healthcheck
-
-      - name: Dump docker logs on failure
-        uses: jwalton/gh-docker-logs@v1
+        uses: mydea/action-wait-for-api@v1.0.0
+        with:
+          url: https://api.example.com/status
+          timeout: 150
+          interval: 3
 
       - name: Run API tests 🌐
         run: cd ./tests/ && newman run ./HogWeedGoAPI.postman_collection.json

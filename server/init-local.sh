@@ -44,14 +44,14 @@ if [ $# -eq 1 ]; then
   [ "$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" == '3.10' ] || print_error "Python 3.10 appears not to be installed, visit following link for installation guide: https://www.python.org/downloads/release/python-3100"
   psql --version > /dev/null || print_error "PostgreSQL appears not to be installed run following command to fix this: 'apt install postgresql-13 postgresql-client-13 postgresql-contrib postgis postgresql-13-postgis-3 gdal-bin"
   echo "Check PostgreSQL availability for user $POSTGRES_ADMIN"
-  psql -U "$POSTGRES_ADMIN" -c "" || print_error "Current user is not an administrator for PostgreSQL or has a password. Remove admin password (if any) and run the script again with 'sudo -u admin ...'"
+  psql -U "$POSTGRES_ADMIN" -h 127.0.0.1 -c "" || print_error "Current user is not an administrator for PostgreSQL or has a password. Remove admin password (if any) and run the script again with 'sudo -u admin ...'"
 
   echo "Create PostgreSQL user '$POSTGRES_USER'"
-  psql -U "$POSTGRES_ADMIN" -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
+  psql -U "$POSTGRES_ADMIN" -h 127.0.0.1 -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
   echo "Create PostgreSQL database '$POSTGRES_DB'"
-  psql -U "$POSTGRES_ADMIN" -c "CREATE DATABASE $POSTGRES_DB WITH OWNER $POSTGRES_USER ENCODING UTF8;"
+  psql -U "$POSTGRES_ADMIN" -h 127.0.0.1 -c "CREATE DATABASE $POSTGRES_DB WITH OWNER $POSTGRES_USER ENCODING UTF8;"
   echo "Create PostGIS extension for database '$POSTGRES_DB' if not exists"
-  psql -U "$POSTGRES_ADMIN" -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS postgis;" &&
+  psql -U "$POSTGRES_ADMIN" -h 127.0.0.1 -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS postgis;" &&
   echo "Restart PostgreSQL"
   service postgresql restart
 
