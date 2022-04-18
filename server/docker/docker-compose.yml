@@ -64,7 +64,7 @@ services:
       - ../docker-volume/static:/app/static
       - ../docker-volume/media:/app/media
     healthcheck:
-      test: service nginx status > /dev/null
+      test: ps -ef | grep nginx > /dev/null
       interval: 10s
       timeout: 5s
       retries: 3

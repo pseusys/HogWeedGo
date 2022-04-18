@@ -33,7 +33,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install PostgreSQL 🐘
+      - name: Start PostgreSQL 🐘
         run: sudo systemctl start postgresql.service
 
       - name: Run initializing script 📜
