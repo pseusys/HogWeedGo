@@ -40,6 +40,7 @@ jobs:
           echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
           sudo apt update && sudo apt-get install -y postgresql-13 postgresql-client-13 postgis postgresql-13-postgis-3 gdal-bin
           sudo pg_ctlcluster 13 main start
+          sudo pg_lsclusters
 
       - name: Run initializing script 📜
         run: POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
@@ -68,13 +69,16 @@ jobs:
         run: npm install newman
 
       - name: Wait for server to start ⏱
-        uses: ifaxity/wait-on-action@v1
-        with:
-          delay: 30000
-          interval: 1000
-          log: true
-          timeout: 150000
-          resource: http://localhost:8000/healthcheck
+        run: |
+          sleep(90)
+          docker ps
+        #uses: ifaxity/wait-on-action@v1
+        #with:
+        #  delay: 30000
+        #  interval: 1000
+        #  log: true
+        #  timeout: 150000
+        #  resource: http://localhost:8000/healthcheck
 
       - name: Run API tests 🌐
         run: newman run ./tests/HogWeedGoAPI.postman_collection.json
