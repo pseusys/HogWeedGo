@@ -35,7 +35,7 @@ jobs:
 
       - name: Start PostgreSQL 🐘
         run: |
-          sudo apt update && sudo apt-get install postgis postgresql-14-postgis-3
+          sudo apt-get update && sudo apt-get -y install postgis	postgresql-14-postgis-3
           sudo systemctl start postgresql.service
 
       - name: Run initializing script 📜
