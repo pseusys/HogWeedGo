@@ -41,8 +41,8 @@ while IFS='=' read -r key value; do export "$key"="$value"; done <<< "$config"
 
 if [ $# -eq 1 ]; then
   echo "Check Python3 availability"
-  [ "$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" == '3.10' ] || print_error "Python 3.10 appears not to be installed, visit following link for installation guide: https://www.python.org/downloads/release/python-3100"
-  psql --version > /dev/null || print_error "PostgreSQL appears not to be installed run following command to fix this: 'apt install postgresql-13 postgresql-client-13 postgresql-contrib postgis postgresql-13-postgis-3 gdal-bin"
+  sudo -u runner [ "$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" == '3.10' ] || print_error "Python 3.10 appears not to be installed, visit following link for installation guide: https://www.python.org/downloads/release/python-3100"
+  sudo -u runner psql --version > /dev/null || print_error "PostgreSQL appears not to be installed run following command to fix this: 'apt install postgresql-13 postgresql-client-13 postgresql-contrib postgis postgresql-13-postgis-3 gdal-bin"
   echo "Check PostgreSQL availability for user $POSTGRES_ADMIN"
   sudo -u "$POSTGRES_ADMIN" psql -c "" || print_error "Current user is not an administrator for PostgreSQL or has a password. Remove admin password (if any) and run the script again with 'sudo -u admin ...'"
 
@@ -58,17 +58,17 @@ if [ $# -eq 1 ]; then
   export PIPENV_QUIET='True'
   echo "Install Pipfile packages"
   [ -d ./.venv ] || mkdir ./.venv
-  pip install pipenv
-  pipenv install --skip-lock
+  sudo -u runner pip install pipenv
+  sudo -u runner pipenv install --skip-lock
 
   echo "Create database migrations"
-  pipenv run python3 ./manage.py makemigrations HogWeedGo
+  sudo -u runner pipenv run python3 ./manage.py makemigrations HogWeedGo
   echo "Apply database migrations"
-  pipenv run python3 ./manage.py migrate
+  sudo -u runner pipenv run python3 ./manage.py migrate
   echo "Create superuser"
-  pipenv run python3 ./manage.py admin -e "$DJANGO_SUPERUSER_EMAIL" -p "$DJANGO_SUPERUSER_PASSWORD"
+  sudo -u runner pipenv run python3 ./manage.py admin -e "$DJANGO_SUPERUSER_EMAIL" -p "$DJANGO_SUPERUSER_PASSWORD"
   echo "Server initialized successfully, use: './init-local.sh CONFIG COMMANDS' to run server."
 
 else
-  pipenv run python3 ./manage.py "${@:2}"
+  sudo -u runner pipenv run python3 ./manage.py "${@:2}"
 fi
