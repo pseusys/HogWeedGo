@@ -33,12 +33,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Start PostgreSQL 🐘
-        uses: huaxk/postgis-action@v1
-        with:
-          postgresql version: 14
-          postgresql user: root
-
       - name: Run initializing script 📜
         run: ./init-local.sh ./config.env
 
