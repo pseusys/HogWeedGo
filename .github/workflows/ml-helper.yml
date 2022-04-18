@@ -2,6 +2,8 @@ name: ML-HELPER
 
 on:
   push:
+    branches:
+      - 'main'
     paths:
       - 'ml-helper/**'
 

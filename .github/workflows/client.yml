@@ -1,12 +1,14 @@
-name: DEPLOY
+name: CLIENT
 
 on:
   push:
+    branches:
+      - 'main'
     paths:
       - 'client/**'
 
 jobs:
-  deploy:
+  deploy-client-default:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,8 +22,7 @@ jobs:
         
     - name: Verify with Doctor ⚕
       working-directory: ./client/
-      run: |
-        flutter doctor
+      run: flutter doctor
 
     - name: Build 🛠
       working-directory: ./client/

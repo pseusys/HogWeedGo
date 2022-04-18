@@ -6,7 +6,7 @@ on:
       - 'main'
     paths:
       - 'server/**'
-  workflow-dispatch:
+  workflow-dispatch: {}
 
 jobs:
   test-server-local:
