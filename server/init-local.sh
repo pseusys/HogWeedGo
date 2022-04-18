@@ -47,11 +47,11 @@ if [ $# -eq 1 ]; then
   sudo -u "$POSTGRES_ADMIN" psql -c "" || print_error "Current user is not an administrator for PostgreSQL or has a password. Remove admin password (if any) and run the script again with 'sudo -u admin ...'"
 
   echo "Create PostgreSQL user '$POSTGRES_USER'"
-  sudo psql -U "$POSTGRES_ADMIN" -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
+  sudo -u "$POSTGRES_ADMIN" psql -c "CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
   echo "Create PostgreSQL database '$POSTGRES_DB'"
-  sudo psql -U "$POSTGRES_ADMIN" -c "CREATE DATABASE $POSTGRES_DB WITH OWNER $POSTGRES_USER ENCODING UTF8;"
+  sudo -u "$POSTGRES_ADMIN" psql -c "CREATE DATABASE $POSTGRES_DB WITH OWNER $POSTGRES_USER ENCODING UTF8;"
   echo "Create PostGIS extension for database '$POSTGRES_DB' if not exists"
-  sudo psql -U "$POSTGRES_ADMIN" -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS postgis;" &&
+  sudo -u "$POSTGRES_ADMIN" psql -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS postgis;" &&
   echo "Restart PostgreSQL"
   service postgresql restart
 
