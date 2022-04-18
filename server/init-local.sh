@@ -3,8 +3,9 @@
 # Functions
 
 function help () {
-  echo "Run './start-local.sh CONFIG [ARGS]' where:"
+  echo "Run './start-local.sh CONFIG [TASK] [ARGS]' where:"
   echo "    'CONFIG' is a path to user config file (required!)"
+  echo "    if 'TASK' is specified, the scripts sets up 'database' or 'server' respectively"
   echo "    if 'ARGS' is specified it will be executed after './manage.py ...', if not service initialization will be performed"
   echo "    if none is specified, this message will be displayed"
   exit 0
@@ -39,10 +40,10 @@ config=$(sed -e 's/[[:space:]]*#.*// ; /^[[:space:]]*$/d' "$1")
 echo "Set environmental variables from '$1'"
 while IFS='=' read -r key value; do export "$key"="$value"; done <<< "$config"
 
-if [ $# -eq 1 ]; then
+if [ "$2" == 'database' ]; then
   echo "Check Python3 availability"
-  sudo -u runner [ "$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" == '3.10' ] || print_error "Python 3.10 appears not to be installed, visit following link for installation guide: https://www.python.org/downloads/release/python-3100"
-  sudo -u runner psql --version > /dev/null || print_error "PostgreSQL appears not to be installed run following command to fix this: 'apt install postgresql-13 postgresql-client-13 postgresql-contrib postgis postgresql-13-postgis-3 gdal-bin"
+  [ "$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" == '3.10' ] || print_error "Python 3.10 appears not to be installed, visit following link for installation guide: https://www.python.org/downloads/release/python-3100"
+  psql --version > /dev/null || print_error "PostgreSQL appears not to be installed run following command to fix this: 'apt install postgresql-13 postgresql-client-13 postgresql-contrib postgis postgresql-13-postgis-3 gdal-bin"
   echo "Check PostgreSQL availability for user $POSTGRES_ADMIN"
   sudo -u "$POSTGRES_ADMIN" psql -c "" || print_error "Current user is not an administrator for PostgreSQL or has a password. Remove admin password (if any) and run the script again with 'sudo -u admin ...'"
 
@@ -51,24 +52,23 @@ if [ $# -eq 1 ]; then
   echo "Create PostgreSQL database '$POSTGRES_DB'"
   sudo -u "$POSTGRES_ADMIN" psql -c "CREATE DATABASE $POSTGRES_DB WITH OWNER $POSTGRES_USER ENCODING UTF8;"
   echo "Create PostGIS extension for database '$POSTGRES_DB' if not exists"
-  sudo -u "$POSTGRES_ADMIN" psql -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS postgis;" &&
-  echo "Restart PostgreSQL"
-  sudo systemctl restart postgresql.service
+  sudo -u "$POSTGRES_ADMIN" psql -d "$POSTGRES_DB" -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
+elif [ "$2" == 'server' ]; then
   export PIPENV_QUIET='True'
   echo "Install Pipfile packages"
   [ -d ./.venv ] || mkdir ./.venv
-  sudo -u runner pip install pipenv
-  sudo -u runner pipenv install --skip-lock
+  pip install pipenv
+  pipenv install --skip-lock
 
   echo "Create database migrations"
-  sudo -u runner pipenv run python3 ./manage.py makemigrations HogWeedGo
+  pipenv run python3 ./manage.py makemigrations HogWeedGo
   echo "Apply database migrations"
-  sudo -u runner pipenv run python3 ./manage.py migrate
+  pipenv run python3 ./manage.py migrate
   echo "Create superuser"
-  sudo -u runner pipenv run python3 ./manage.py admin -e "$DJANGO_SUPERUSER_EMAIL" -p "$DJANGO_SUPERUSER_PASSWORD"
+  pipenv run python3 ./manage.py admin -e "$DJANGO_SUPERUSER_EMAIL" -p "$DJANGO_SUPERUSER_PASSWORD"
   echo "Server initialized successfully, use: './init-local.sh CONFIG COMMANDS' to run server."
 
 else
-  sudo -u runner pipenv run python3 ./manage.py "${@:2}"
+  pipenv run python3 ./manage.py "${@:2}"
 fi
