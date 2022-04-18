@@ -34,7 +34,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install PostgreSQL 🐘
-        run: sudo pg_lsclusters
+        run: sudo pg_ctlcluster 14 main start && sudo pg_lsclusters
 
       - name: Run initializing script 📜
         run: POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
@@ -66,6 +66,7 @@ jobs:
         run: |
           sleep 90
           docker ps
+          curl http://localhost:8000/healthcheck
         #uses: ifaxity/wait-on-action@v1
         #with:
         #  delay: 30000
@@ -74,8 +75,11 @@ jobs:
         #  timeout: 150000
         #  resource: http://localhost:8000/healthcheck
 
+      - name: Dump docker logs on failure
+        uses: jwalton/gh-docker-logs@v1
+
       - name: Run API tests 🌐
-        run: newman run ./tests/HogWeedGoAPI.postman_collection.json
+        run: cd ./tests/ && newman run ./HogWeedGoAPI.postman_collection.json
 
       - name: Stop server container 📤
         run: docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development stop -t 30
