@@ -34,13 +34,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install PostgreSQL 🐘
-        run: |
-          sudo apt-get install wget ca-certificates
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee -a /etc/apt/sources.list.d/pgdg.list
-          sudo apt update && sudo apt-get install -y postgresql-13 postgresql-client-13 postgis postgresql-13-postgis-3 gdal-bin
-          sudo pg_ctlcluster 13 main start
-          sudo pg_lsclusters
+        run: sudo pg_lsclusters
 
       - name: Run initializing script 📜
         run: POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
@@ -70,7 +64,7 @@ jobs:
 
       - name: Wait for server to start ⏱
         run: |
-          sleep(90)
+          sleep 90
           docker ps
         #uses: ifaxity/wait-on-action@v1
         #with:
