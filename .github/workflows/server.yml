@@ -46,7 +46,6 @@ jobs:
         run: ./init-local.sh ./config.env test
 
   test-server-docker:
-    if: false
     runs-on: ubuntu-latest
 
     steps:
