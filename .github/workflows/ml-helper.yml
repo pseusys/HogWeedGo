@@ -6,6 +6,7 @@ on:
       - 'main'
     paths:
       - 'ml-helper/**'
+      - '.github/workflows/ml-helper.yml'
 
 jobs:
   test-hogweed-detector:
