@@ -52,7 +52,8 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v3.0.1
 
-      - uses: KengoTODA/actions-setup-docker-compose@v1.0.7 🐋
+      - name: Download docker-compose 2 🐋
+        uses: KengoTODA/actions-setup-docker-compose@v1.0.7
         with:
           version: v2.2.3
 
