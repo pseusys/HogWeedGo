@@ -42,7 +42,7 @@ jobs:
           sudo systemctl start postgresql.service
 
       - name: Run initializing script 📜
-        run: sudo POSTGRES_ADMIN=postgres ./init-local.sh ./config.env
+        run: POSTGRES_ADMIN=postgres sudo ./init-local.sh ./config.env
 
       - name: Run server tests 🧪
         run: ./init-local.sh ./config.env test
