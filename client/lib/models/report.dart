@@ -19,19 +19,18 @@ class Photo {
   Photo(this.photo, this.thumbnail);
 
   factory Photo.fromJson(Map<String, dynamic> json) => _$PhotoFromJson(json);
-  Map<String, dynamic> toJson() => _$PhotoToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
 class Report {
   @JsonKey(name: 'address') final String address;
   @JsonKey(name: 'init_comment') final String initComment;
-  @JsonKey(name: 'date') final DateTime date;
-  @JsonKey(name: 'status') final ReportStatus status;
-  @JsonKey(name: 'subs') final String subs;
+  @JsonKey(name: 'date', toJson: toNull, includeIfNull: false) final DateTime date;
+  @JsonKey(name: 'status', toJson: toNull, includeIfNull: false) final ReportStatus status;
+  @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final String subs;
   @JsonKey(name: 'type') final String type;
-  @JsonKey(name: 'photos') final List<Photo> photos;
-  @JsonKey(name: 'comments') final List<Comment> comments;
+  @JsonKey(name: 'photos', toJson: toNull, includeIfNull: false) final List<Photo> photos;
+  @JsonKey(name: 'comments', toJson: toNull, includeIfNull: false) final List<Comment> comments;
 
   @JsonKey(name: 'lat') final double lat;
   @JsonKey(name: 'lng') final double lng;

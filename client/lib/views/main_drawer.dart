@@ -1,9 +1,4 @@
-import 'dart:async';
-
-import 'package:client/main.dart';
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart';
 
 import 'package:client/pages/fullscreen.dart';
 import 'package:client/pages/auth.dart';
@@ -12,6 +7,7 @@ import 'package:client/pages/map.dart';
 import 'package:client/pages/account.dart';
 import 'package:client/pages/about.dart';
 import 'package:client/misc/const.dart';
+import 'package:client/access/api.dart';
 
 
 class MainDrawer extends StatefulWidget {
@@ -22,21 +18,16 @@ class MainDrawer extends StatefulWidget {
 }
 
 class _MainDrawerState extends State<MainDrawer> {
-  StreamSubscription? _connection;
   bool? _connected;
 
   @override
   void initState() {
     super.initState();
-    _connection = get(Uri.parse("${HogWeedGo.server}/healthcheck")).timeout(const Duration(seconds: 5)).asStream().listen((Response r) {
-      setState(() => _connected = r.statusCode == 200);
-    }, onError: (error) => setState(() => _connected = false));
-  }
-
-  @override
-  void dispose() {
-    _connection?.cancel();
-    super.dispose();
+    healthcheck().timeout(const Duration(seconds: 5)).then((value) =>
+        setState(() => _connected = value)
+    ).onError((error, stackTrace) =>
+        setState(() => _connected = false)
+    );
   }
 
   @override

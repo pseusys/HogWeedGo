@@ -28,6 +28,34 @@ class _AuthPageState extends State<AuthPage> {
 
   final TextEditingController _passwordController = TextEditingController();
 
+  Future<void> _showCodeConfirmationDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('AlertDialog Title'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('This is a demo alert dialog.'),
+                Text('Would you like to approve of this message?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Approve'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _authForm() {
     return Container(
       margin: const EdgeInsets.all(MARGIN),
@@ -79,13 +107,13 @@ class _AuthPageState extends State<AuthPage> {
             SizedBox(height: MARGIN / (_noAccount ? 1 : 2)),
 
             ElevatedButton(
-                onPressed: (!_noAccount || _createAccount) ? () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    // TODO: login!
-                  }
-                } : null,
-                child: const Text('Submit')
+              onPressed: (!_noAccount || _createAccount) ? () {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                  _showCodeConfirmationDialog();
+                }
+              } : null,
+              child: const Text('Submit'),
             ),
           ],
         ),
@@ -106,9 +134,12 @@ class _AuthPageState extends State<AuthPage> {
 
         body: Container(
           margin: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
-          child: Column(
+          child: ListView(
             children: [
-              Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
+              Align(
+                alignment: Alignment.center,
+                child: Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
+              ),
 
               Align(
                 alignment: Alignment.centerRight,

@@ -25,6 +25,7 @@ dependencies:
 
   flutter_focus_watcher: ^2.0.0
   json_annotation: ^4.4.0
+  mime: ^1.0.1
 
 dev_dependencies:
   flutter_test:
