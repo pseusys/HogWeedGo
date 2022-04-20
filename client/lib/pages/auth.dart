@@ -134,12 +134,9 @@ class _AuthPageState extends State<AuthPage> {
 
         body: Container(
           margin: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
-          child: ListView(
+          child: Column(
             children: [
-              Align(
-                alignment: Alignment.center,
-                child: Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
-              ),
+              Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
 
               Align(
                 alignment: Alignment.centerRight,
