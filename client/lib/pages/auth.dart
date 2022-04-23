@@ -1,3 +1,4 @@
+import 'package:client/access/account.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,7 @@ class _AuthPageState extends State<AuthPage> {
   var email = "";
   var password = "";
 
+  final TextEditingController _codeController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _showCodeConfirmationDialog() async {
@@ -34,20 +36,35 @@ class _AuthPageState extends State<AuthPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('AlertDialog Title'),
+          title: const Text('Confirm your email'),
           content: SingleChildScrollView(
             child: ListBody(
-              children: const <Widget>[
-                Text('This is a demo alert dialog.'),
-                Text('Would you like to approve of this message?'),
+              children: <Widget>[
+                const Text('Enter the 8-digit confirmation code (sent to your email address)'),
+                TextFormField(
+                  decoration: const InputDecoration(hintText: 'Confirmation code'),
+                  controller: _codeController,
+                  autocorrect: false,
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty || value.length < 8) {
+                      return 'Please enter valid code!';
+                    } else { return null; }
+                  },
+                ),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Approve'),
+              child: const Text('Submit'),
               onPressed: () {
-                Navigator.of(context).pop();
+                final text = _codeController.text;
+                if (text.isEmpty || text.length < 8) {
+                  print("object");
+                } else {
+                  Navigator.of(context).pop();
+                  authenticate(email, password, _codeController.text);
+                }
               },
             ),
           ],
@@ -64,7 +81,6 @@ class _AuthPageState extends State<AuthPage> {
         child: Column(
           children: [
             Text(_noAccount ? "Sign in" : "Log in", style: Theme.of(context).textTheme.headline5),
-            const SizedBox(height: GAP),
 
             TextFormField(
               decoration: const InputDecoration(hintText: 'Email'),
@@ -77,7 +93,6 @@ class _AuthPageState extends State<AuthPage> {
               },
               onSaved: (String? value) => email = value ?? "",
             ),
-            const SizedBox(height: GAP),
 
             TextFormField(
               controller: _passwordController,
@@ -92,7 +107,6 @@ class _AuthPageState extends State<AuthPage> {
               },
               onSaved: (String? value) => password = value ?? "",
             ),
-            const SizedBox(height: GAP),
 
             if (_noAccount) TextFormField(
               decoration: const InputDecoration(hintText: 'Validation'),
@@ -104,13 +118,14 @@ class _AuthPageState extends State<AuthPage> {
                 else { return null; }
               },
             ),
-            SizedBox(height: MARGIN / (_noAccount ? 1 : 2)),
+            SizedBox(height: _noAccount ? MARGIN : GAP),
 
             ElevatedButton(
               onPressed: (!_noAccount || _createAccount) ? () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
-                  _showCodeConfirmationDialog();
+                  if (_noAccount) { _showCodeConfirmationDialog(); }
+                  else { logIn(email, password); }
                 }
               } : null,
               child: const Text('Submit'),

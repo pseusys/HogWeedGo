@@ -22,12 +22,12 @@ RUN apk add --no-cache geos gdal
 
 WORKDIR ./$WORKDIR
 COPY --from=builder ./$WORKDIR/.venv ./.venv
-COPY . .
 
 ENV VIRTUAL_ENV=./.venv
 RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-EXPOSE $HOGWEED_PORT
+COPY . .
 
+EXPOSE $HOGWEED_PORT
 ENTRYPOINT ./docker/docker-entrypoint.sh

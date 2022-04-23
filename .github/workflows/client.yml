@@ -30,7 +30,7 @@ jobs:
       run: |
         flutter pub get
         flutter pub run build_runner build
-        flutter build web --base-href "/HogWeedGo/"
+        flutter build web --dart-define SERVER=https://localhost:8000/
         
     - name: NoJekyll ❌
       run: touch ./client/build/web/.nojekyll
