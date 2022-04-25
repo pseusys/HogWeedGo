@@ -13,7 +13,7 @@ import 'package:client/models/comment.dart';
 
 Future<bool> healthcheck() async {
   final response = await get(Uri.parse("${HogWeedGo.server}/healthcheck"));
-  return Future.value(response.statusCode == 200);
+  return response.statusCode == 200;
 }
 
 Future<List<Report>> getReports() async {

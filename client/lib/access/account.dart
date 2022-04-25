@@ -6,52 +6,51 @@ import 'package:client/main.dart';
 
 String _token = "";
 String get token => _token;
+bool get authenticated => _token == "";
 
 
-Future proveEmail(String email, String password, String code) async {
-  final response = await get(Uri.parse("${HogWeedGo.server}/api/me/prove_email?email=$email"));
-  if (response.statusCode == 200) {
-    // TODO: make toast.
-  }
+Future<bool> proveEmail(String email) async {
+  final response = await base.get(Uri.parse("${HogWeedGo.server}/api/me/prove_email?email=$email"))
+    ..addExceptionHandler("Error!");
+  return response.statusCode == 200;
 }
 
-Future authenticate(String email, String password, String code) async {
-  final response = await get(Uri.parse("${HogWeedGo.server}/api/me/auth?email=$email&password=$password&code=$code"));
-  if (response.statusCode == 200) {
-    _token = response.body;
-  }
+Future<bool> authenticate(String email, String password, String code) async {
+  final response = await base.get(Uri.parse("${HogWeedGo.server}/api/me/auth?email=$email&password=$password&code=$code"))
+    ..addExceptionHandler("Error!");
+  if (response.statusCode == 200) _token = response.body;
+  return response.statusCode == 200;
 }
 
-Future logIn(String email, String password) async {
-  final response = await get(Uri.parse("${HogWeedGo.server}/api/me/log_in?email=$email&password=$password"));
-  if (response.statusCode == 200) {
-    _token = response.body;
-  }
+Future<bool> logIn(String email, String password) async {
+  final response = await base.get(Uri.parse("${HogWeedGo.server}/api/me/log_in?email=$email&password=$password"))
+    ..addExceptionHandler("Error!");
+  if (response.statusCode == 200) _token = response.body;
+  return response.statusCode == 200;
 }
 
-Future setup(String email, String password, String code) async {
+Future<bool> setup(String email, String password, String code) async {
   final request = Request('GET', Uri.parse("${HogWeedGo.server}/api/me/setup?email=$email&password=$password&code=$code"))
     ..auth();
-  final response = await request.response();
-  if (response.statusCode == 200) {
-    _token = response.body;
-  }
+  final response = await request.response()
+    ..addExceptionHandler("Error!");
+  return response.statusCode == 200;
 }
 
-Future logOut(String email, String password, String code) async {
+Future<bool> logOut(String email, String password, String code) async {
   final request = Request('GET', Uri.parse("${HogWeedGo.server}/api/me/log_out"))
     ..auth();
-  final response = await request.response();
-  if (response.statusCode == 200) {
-    _token = "";
-  }
+  final response = await request.response()
+    ..addExceptionHandler("Error!");
+  if (response.statusCode == 200) _token = "";
+  return response.statusCode == 200;
 }
 
-Future leave(String email, String password, String code) async {
+Future<bool> leave(String email, String password, String code) async {
   final request = Request('GET', Uri.parse("${HogWeedGo.server}/api/me/leave"))
     ..auth();
-  final response = await request.response();
-  if (response.statusCode == 200) {
-    _token = "";
-  }
+  final response = await request.response()
+    ..addExceptionHandler("Error!");
+  if (response.statusCode == 200) _token = "";
+  return response.statusCode == 200;
 }

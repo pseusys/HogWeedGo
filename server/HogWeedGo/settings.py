@@ -38,8 +38,6 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
-    'HogWeedGo.apps.HogWeedGoConfig',
-    'HogWeedGo.apps.HogWeedGoAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -50,7 +48,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'leaflet',
-    'django_cleanup.apps.CleanupConfig'
+    'corsheaders',
+    'django_cleanup.apps.CleanupConfig',
+    'HogWeedGo.apps.HogWeedGoConfig',
+    'HogWeedGo.apps.HogWeedGoAdminConfig',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -152,6 +154,12 @@ LEAFLET_CONFIG = {
     'DEFAULT_ZOOM': 9,
     'MIN_ZOOM': 1
 }
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

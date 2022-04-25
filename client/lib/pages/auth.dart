@@ -1,11 +1,12 @@
-import 'package:client/access/account.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:client/misc/const.dart';
+import 'package:client/access/account.dart';
 
 
 class AuthPage extends StatefulWidget {
@@ -59,11 +60,11 @@ class _AuthPageState extends State<AuthPage> {
               child: const Text('Submit'),
               onPressed: () {
                 final text = _codeController.text;
-                if (text.isEmpty || text.length < 8) {
-                  print("object");
-                } else {
+                if (text.isNotEmpty && text.length == 8) {
                   Navigator.of(context).pop();
                   authenticate(email, password, _codeController.text);
+                } else {
+                  Fluttertoast.showToast(msg: "Code incorrect!");
                 }
               },
             ),
@@ -121,11 +122,14 @@ class _AuthPageState extends State<AuthPage> {
             SizedBox(height: _noAccount ? MARGIN : GAP),
 
             ElevatedButton(
-              onPressed: (!_noAccount || _createAccount) ? () {
+              onPressed: (!_noAccount || _createAccount) ? () async {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
-                  if (_noAccount) { _showCodeConfirmationDialog(); }
-                  else { logIn(email, password); }
+                  if (_noAccount) {
+                    if (await proveEmail(email)) _showCodeConfirmationDialog();
+                  } else {
+                    logIn(email, password);
+                  }
                 }
               } : null,
               child: const Text('Submit'),
@@ -184,7 +188,7 @@ class _AuthPageState extends State<AuthPage> {
                           text: 'terms',
                           style: const TextStyle(color: Colors.blue),
                           recognizer: TapGestureRecognizer()
-                            ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                            ..onTap = () => launchUrlString('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
                         ),
                         TextSpan(
                           text: ' and ',
@@ -194,7 +198,7 @@ class _AuthPageState extends State<AuthPage> {
                           text: 'conditions',
                           style: const TextStyle(color: Colors.blue),
                           recognizer: TapGestureRecognizer()
-                            ..onTap = () => launch('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                            ..onTap = () => launchUrlString('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
                         ),
                         TextSpan(
                           text: '.',
