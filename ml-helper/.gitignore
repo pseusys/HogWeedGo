@@ -10,4 +10,3 @@ datasets/*
 !datasets/test.csv
 
 models/*
-!models/hogweed-detector.tflite
