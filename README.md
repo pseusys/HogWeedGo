@@ -2,3 +2,6 @@
 [![SERVER](https://github.com/pseusys/HogWeedGo/actions/workflows/server.yml/badge.svg)](https://github.com/pseusys/HogWeedGo/actions/workflows/server.yml)
 [![CLIENT](https://github.com/pseusys/HogWeedGo/actions/workflows/client.yml/badge.svg)](https://github.com/pseusys/HogWeedGo/actions/workflows/client.yml)
 [![ML-HELPER](https://github.com/pseusys/HogWeedGo/actions/workflows/ml-helper.yml/badge.svg)](https://github.com/pseusys/HogWeedGo/actions/workflows/ml-helper.yml)
+[![REPORT](https://github.com/pseusys/HogWeedGo/actions/workflows/report.yml/badge.svg)](https://github.com/pseusys/HogWeedGo/actions/workflows/report.yml)
+
+Report available [here](pseusys.github.io/hogweedgo/report/report.pdf).

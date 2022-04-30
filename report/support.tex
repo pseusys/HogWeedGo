@@ -5,3 +5,38 @@
 \newcommand{\emptydate}{
 	«\uline{\hspace{1cm}}» \uline{\hspace{3cm}} 20\uline{\hspace{1cm}} г.
 }
+
+\newcommand{\worktitle}{
+	\begin{tabularx}{\textwidth}{ X X }
+		Студент \hspace{1cm} Сергеев А. Д. & \raggedleft{Группа 8304}
+	\end{tabularx}
+	
+	\begin{tabularx}{\textwidth}{ X }
+		Тема работы: Наименование темы
+	\end{tabularx}
+}
+
+\newcommand{\subsblock}{
+	\begin{tabularx}{\textwidth}[t]{ X X X X }
+		Студент & & & Сергеев А. Д. \\ \cline{3-3}
+		& & \subscript{(подпись)} & \\
+		Руководитель & & & Иванов И. И. \\ \cline{3-3}
+		& \subscript{(Уч. степень, уч. звание)} & \subscript{(подпись)} & \\
+		Консультант & & & Иванов И. И. \\ \cline{3-3}
+		& \subscript{(Уч. степень, уч. звание)} & \subscript{(подпись)} & \\
+	\end{tabularx}
+}
+
+\newcommand{\confirmation}{
+	\setlength{\extrarowheight}{0.25cm}
+	\begin{tabularx}{\textwidth}{ X X }
+		& Утверждаю \\
+		& Зав. кафедрой МО ЭВМ \\
+		& \uline{\hspace{3cm}} Иванов И. И. \\
+		& \emptydate
+	\end{tabularx}
+}
+
+
+
+\titleformat{\chapter}[display] {}{} {0pt}{\textbf} 

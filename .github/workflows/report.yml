@@ -1,0 +1,38 @@
+name: REPORT
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'report/**'
+      - '.github/workflows/report.yml'
+
+jobs:
+  compile-report:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v3.0.1
+      
+    - name: Compile 📄
+      uses: xu-cheng/latex-action@v2
+      with:
+        root_file: ./report/report.tex
+        working_directory: ./report/
+        
+    - name: Move PDF ✂️
+      run: |
+        mkdir ./report/build/
+        cp ./report/report.pdf ./report/build/report.pdf
+    
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@v4.3.0
+      with:
+        branch: gh-pages
+        folder: ./report/build/
+        target-folder: ./report/
+        clean: false
+        single-commit: True
+ 

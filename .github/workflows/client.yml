@@ -40,4 +40,5 @@ jobs:
       with:
         branch: gh-pages
         folder: ./client/build/web/
+        clean-exclude: ./report/
         single-commit: True
