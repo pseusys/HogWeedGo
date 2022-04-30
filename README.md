@@ -4,4 +4,4 @@
 [![ML-HELPER](https://github.com/pseusys/HogWeedGo/actions/workflows/ml-helper.yml/badge.svg)](https://github.com/pseusys/HogWeedGo/actions/workflows/ml-helper.yml)
 [![REPORT](https://github.com/pseusys/HogWeedGo/actions/workflows/report.yml/badge.svg)](https://github.com/pseusys/HogWeedGo/actions/workflows/report.yml)
 
-Report available [here](https://pseusys.github.io/hogweedgo/report/report.pdf).
+Report available [here](https://pseusys.github.io/HogWeedGo/report/report.pdf).
