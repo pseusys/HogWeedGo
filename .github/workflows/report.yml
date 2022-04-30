@@ -19,7 +19,7 @@ jobs:
     - name: Compile 📄
       uses: xu-cheng/latex-action@v2
       with:
-        root_file: ./report/report.tex
+        root_file: ./report.tex
         working_directory: ./report/
         
     - name: Move PDF ✂️
