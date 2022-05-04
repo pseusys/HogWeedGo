@@ -1,15 +1,18 @@
 \documentclass[14pt]{extreport}
 
-\usepackage[legalpaper, left=3cm, right=1.5cm, top=2cm, bottom=1.25cm]{geometry}
+\usepackage[legalpaper, left=3cm, right=1.5cm, top=2cm, bottom=1.25cm, includefoot, footskip=1cm]{geometry}
 \usepackage[utf8]{inputenc}
-\usepackage[T2A]{fontenc}
+\usepackage[T1, T2A]{fontenc}
 \usepackage[english, russian]{babel}
 \usepackage{tempora}
+\usepackage{newtxmath}
 \usepackage{tabularx}
 \usepackage{ulem}
 \usepackage{tocloft}
 \usepackage{titlesec}
-\usepackage[colorlinks=true, linkcolor=, urlcolor=blue]{hyperref}
+\usepackage[superscript]{cite}
+\usepackage{enumitem}
+\usepackage[colorlinks=true, linkcolor=, urlcolor=blue, citecolor=]{hyperref}
 
 \begin{document}
 	\setlength\parindent{0pt}
@@ -20,4 +23,5 @@
 	\input{plan.tex}
 	\input{contents.tex}
 	\input{document.tex}
+	\input{bibliography.tex}
 \end{document}
