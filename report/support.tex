@@ -48,5 +48,13 @@
 \titleformat{\section}[display] {\centering\bfseries}{} {0pt}{\MakeUppercase}
 \titleformat{\subsection}[display] {\bfseries}{} {0pt}{}
 
+\newcommand{\longcaption}[1]{
+	\caption{#1}
+	\addtocounter{table}{-1}
+	\endfirsthead
+	\caption*{Продолжение таблицы \arabic{table}}
+	\endhead
+}
+
 \renewcommand\bibname{\normalsize Список литературы}
 \newcommand{\webbibitem}[4]{\bibitem{#1} \href{#2}{#2} // #3, дата обращения: #4}
