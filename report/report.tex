@@ -1,17 +1,20 @@
 \documentclass[14pt]{extreport}
 
 \usepackage[legalpaper, left=3cm, right=1.5cm, top=2cm, bottom=1.25cm, includefoot, footskip=1cm]{geometry}
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1, T2A]{fontenc}
 \usepackage[english, russian]{babel}
-\usepackage{tempora}
-\usepackage{newtxmath}
-\usepackage{tabularx}
+\usepackage{tempora, newtxmath}
+
+\usepackage{tabularx, xltabular, multirow, makecell}
+\usepackage[compact]{titlesec}
+\usepackage{enumitem, tocloft}
+
 \usepackage{ulem}
-\usepackage{tocloft}
-\usepackage{titlesec}
-\usepackage[superscript]{cite}
-\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{csquotes}
+
 \usepackage[colorlinks=true, linkcolor=, urlcolor=blue, citecolor=]{hyperref}
 
 \begin{document}
@@ -21,7 +24,13 @@
 	\input{title.tex}
 	\input{task.tex}
 	\input{plan.tex}
-	\input{contents.tex}
-	\input{document.tex}
+	
+	\begin{spacing}{1.5}
+		\input{contents.tex}
+		
+		\input{definitions.tex}
+		\input{document.tex}
+	\end{spacing}
+	
 	\input{bibliography.tex}
 \end{document}

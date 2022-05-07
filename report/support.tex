@@ -10,7 +10,6 @@
 	\begin{tabularx}{\textwidth}{ X X }
 		Студент \hspace{1cm} Сергеев А. Д. & \raggedleft{Группа 8304}
 	\end{tabularx}
-	
 	\begin{tabularx}{\textwidth}{ X }
 		Тема работы: Наименование темы
 	\end{tabularx}
@@ -20,9 +19,9 @@
 	\begin{tabularx}{\textwidth}[t]{ X X X X }
 		Студент & & & Сергеев А. Д. \\ \cline{3-3}
 		& & \subscript{(подпись)} & \\
-		Руководитель & & & Иванов И. И. \\ \cline{3-3}
+		Руководитель & \centering{к.т.н., доцент} & & Заславский М. М. \\ \cline{3-3}
 		& \subscript{(Уч. степень, уч. звание)} & \subscript{(подпись)} & \\
-		Консультант & & & Иванов И. И. \\ \cline{3-3}
+		Консультант & & & Черепанов И. В. \\ \cline{3-3}
 		& \subscript{(Уч. степень, уч. звание)} & \subscript{(подпись)} & \\
 	\end{tabularx}
 }
@@ -32,15 +31,22 @@
 	\begin{tabularx}{\textwidth}{ X X }
 		& Утверждаю \\
 		& Зав. кафедрой МО ЭВМ \\
-		& \uline{\hspace{3cm}} Иванов И. И. \\
+		& \uline{\hspace{3cm}} Кринкин К. В. \\
 		& \emptydate
 	\end{tabularx}
 }
 
 
 
-\newcommand{\tab}{\hspace{0.5cm}}
+\newcommand{\defineterm}[2]{\label{"def_#1"}\hyperref["lnk_#1"]{#2}}
+\newcommand{\linkterm}[2]{\label{"lnk_#1"}\hyperref["def_#1"]{\textbf{#2}}}
 
-\titleformat{\section}[display] {}{} {0pt}{\textbf}
+\newcommand{\tab}{\hspace{0.5cm}}
+\newcommand{\nwln}{\vspace{\baselineskip}\tab}
+
+\newcommand{\sectionbreak}{\clearpage}
+\titleformat{\section}[display] {\centering\bfseries}{} {0pt}{\MakeUppercase}
+\titleformat{\subsection}[display] {\bfseries}{} {0pt}{}
 
 \renewcommand\bibname{\normalsize Список литературы}
+\newcommand{\webbibitem}[4]{\bibitem{#1} \href{#2}{#2} // #3, дата обращения: #4}
