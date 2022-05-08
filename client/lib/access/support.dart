@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 
 import 'package:client/access/account.dart';
@@ -24,16 +25,26 @@ extension ResponseSupport on Response {
   }
 
   void addExceptionHandler(String generalErrorMessage) {
-    if (statusCode == 200) {
-      print(body);
-    } else if (statusCode == 400) {
-      print(generalErrorMessage);
-    } else if (statusCode == 401) {
-      print("Wrong or expired code!");
-    } else if (statusCode == 403) {
-      print("User already exists!");
-    } else if (statusCode == 429) {
-      print("Requesting too fast!");
+    String toastMessage = "";
+    switch (statusCode) {
+      case 200:
+        print(body);
+        return;
+      case 400:
+        toastMessage = "request error: $generalErrorMessage!";
+        break;
+      case 401:
+        toastMessage = "wrong or expired code!";
+        break;
+      case 403:
+        toastMessage = "user already exists!";
+        break;
+      case 429:
+        toastMessage = "requesting too fast!";
+        break;
+      default:
+        toastMessage = "unknown!";
     }
+    Fluttertoast.showToast(msg: "API error: $toastMessage");
   }
 }
