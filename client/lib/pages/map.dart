@@ -13,6 +13,7 @@ import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
 import 'package:client/access/location.dart';
 import 'package:client/misc/cached_provider.dart';
+import 'package:client/access/account.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -109,7 +110,13 @@ class _MapPageState extends State<MapPage> {
         ),
 
         floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me),
+          onPressed: () {
+            if (authenticated) {
+              Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me);
+            } else {
+              showAuthDialog(context);
+            }
+          },
           tooltip: "Report!",
           child: const Icon(Icons.add),
         ),

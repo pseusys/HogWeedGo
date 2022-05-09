@@ -20,22 +20,18 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   var _noAccount = true;
   var _createAccount = false;
 
   var email = "";
   var password = "";
 
-  final TextEditingController _codeController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
   Future<void> _showCodeConfirmationDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        final TextEditingController codeController = TextEditingController();
         return AlertDialog(
           title: const Text('Confirm your email'),
           content: SingleChildScrollView(
@@ -44,7 +40,7 @@ class _AuthPageState extends State<AuthPage> {
                 const Text('Enter the 8-digit confirmation code (sent to your email address)'),
                 TextFormField(
                   decoration: const InputDecoration(hintText: 'Confirmation code'),
-                  controller: _codeController,
+                  controller: codeController,
                   autocorrect: false,
                   validator: (String? value) {
                     if (value == null || value.isEmpty || value.length < 8) {
@@ -59,10 +55,10 @@ class _AuthPageState extends State<AuthPage> {
             TextButton(
               child: const Text('Submit'),
               onPressed: () {
-                final text = _codeController.text;
+                final text = codeController.text;
                 if (text.isNotEmpty && text.length == 8) {
                   Navigator.of(context).pop();
-                  authenticate(email, password, _codeController.text);
+                  authenticate(email, password, codeController.text);
                 } else {
                   Fluttertoast.showToast(msg: "Code incorrect!");
                 }
@@ -75,10 +71,12 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Widget _authForm() {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final TextEditingController passwordController = TextEditingController();
     return Container(
       margin: const EdgeInsets.all(MARGIN),
       child: Form(
-        key: _formKey,
+        key: formKey,
         child: Column(
           children: [
             Text(_noAccount ? "Sign in" : "Log in", style: Theme.of(context).textTheme.headline5),
@@ -96,7 +94,7 @@ class _AuthPageState extends State<AuthPage> {
             ),
 
             TextFormField(
-              controller: _passwordController,
+              controller: passwordController,
               decoration: const InputDecoration(hintText: 'Password'),
               obscureText: true,
               enableSuggestions: false,
@@ -115,7 +113,7 @@ class _AuthPageState extends State<AuthPage> {
               enableSuggestions: false,
               autocorrect: false,
               validator: (String? value) {
-                if (value != _passwordController.text) { return 'Please enter valid password!'; }
+                if (value != passwordController.text) { return 'Please enter valid password!'; }
                 else { return null; }
               },
             ),
@@ -123,8 +121,8 @@ class _AuthPageState extends State<AuthPage> {
 
             ElevatedButton(
               onPressed: (!_noAccount || _createAccount) ? () async {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
                   if (_noAccount) {
                     if (await proveEmail(email)) _showCodeConfirmationDialog();
                   } else {

@@ -4,6 +4,8 @@ import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 
 import 'package:client/views/main_drawer.dart';
 import 'package:client/misc/const.dart';
+import 'package:client/access/account.dart';
+import 'package:client/views/base_dialogs.dart';
 
 
 class AccountPage extends StatefulWidget {
@@ -17,6 +19,17 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
+  final _focusNode = FocusNode();
+  final TextEditingController nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) setup();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FocusWatcher(
@@ -33,27 +46,30 @@ class _AccountPageState extends State<AccountPage> {
             Row(
               children: [
                 CircleAvatar(
-                    radius: OFFSET * 2,
-                    backgroundImage: const NetworkImage('https://i.imgur.com/koOENqs.jpeg'),
-                    child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: FloatingActionButton(
-                          mini: true,
-                          onPressed: () {
-                            // TODO: change avatar
-                          },
-                          child: const Icon(Icons.edit),
-                        )
-                    )
+                  radius: OFFSET * 2,
+                  backgroundImage: const NetworkImage('https://i.imgur.com/koOENqs.jpeg'),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: FloatingActionButton(
+                      mini: true,
+                      onPressed: () {
+                        // TODO: change avatar
+                      },
+                      child: const Icon(Icons.edit),
+                    ),
+                  ),
                 ),
+
                 const SizedBox(width: MARGIN),
-                const Expanded(
+                Expanded(
                   child: TextField(
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       hintText: 'User name',
                     ),
                     textInputAction: TextInputAction.send,
+                    focusNode: _focusNode,
+                    controller: nameController,
                   ),
                 ),
               ],
@@ -72,7 +88,15 @@ class _AccountPageState extends State<AccountPage> {
             const SizedBox(height: GAP),
             ElevatedButton(
                 onPressed: () {
-                  // TODO: change email
+                  validationDialog(context, "Change your email", "Input your email, click 'Send code' and input the code below",
+                    firstTitle: "Email",
+                    secondTitle: "Code",
+                    firstHint: "Enter a valid email!",
+                    secondHint: "Enter a valid 8-digit code!",
+                    actionText: "Send code",
+                    addAction: (String email) => proveEmail(email),
+                    request: (String email, String code) => setup(email: email, code: code)
+                  );
                 },
                 child: const Text("Change email")
             ),
@@ -81,7 +105,14 @@ class _AccountPageState extends State<AccountPage> {
             const SizedBox(height: GAP),
             ElevatedButton(
                 onPressed: () {
-                  // TODO: change password
+                  validationDialog(context, "Change your password", "Input your password and retype it again below",
+                      firstTitle: "Password",
+                      secondTitle: "Confirmation",
+                      firstHint: "Enter a valid password!",
+                      secondHint: "Password and confirmation do not match!",
+                      obscure: true,
+                      request: (String password, String confirmation) => setup(password: password)
+                  );
                 },
                 child: const Text("Change password")
             ),
@@ -90,8 +121,9 @@ class _AccountPageState extends State<AccountPage> {
             Text("Dangerous", style: Theme.of(context).textTheme.headline5),
             const SizedBox(height: GAP),
             ElevatedButton(
-              onPressed: () {
-                // TODO: log out
+              onPressed: () async {
+                await logOut();
+                Navigator.of(context).pop();
               },
               child: const Text("Log out"),
               style: ButtonStyle(
@@ -100,8 +132,9 @@ class _AccountPageState extends State<AccountPage> {
             ),
             const SizedBox(height: GAP),
             ElevatedButton(
-              onPressed: () {
-                // TODO: delete account
+              onPressed: () async {
+                await leave();
+                Navigator.of(context).pop();
               },
               child: const Text("Delete account"),
               style: ButtonStyle(
@@ -116,5 +149,11 @@ class _AccountPageState extends State<AccountPage> {
         drawer: const MainDrawer(),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 }

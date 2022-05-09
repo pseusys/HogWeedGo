@@ -10,6 +10,8 @@ import 'package:client/pages/account.dart';
 import 'package:client/pages/auth.dart';
 import 'package:client/pages/none.dart';
 import 'package:client/pages/report.dart';
+import 'package:client/misc/utils.dart';
+import 'package:client/access/account.dart';
 
 
 void main() => runApp(const HogWeedGo());
@@ -17,7 +19,7 @@ void main() => runApp(const HogWeedGo());
 class HogWeedGo extends StatelessWidget {
   const HogWeedGo({Key? key}) : super(key: key);
 
-  static const server = String.fromEnvironment("SERVER", defaultValue: "https://localhost");
+  static final server = const String.fromEnvironment("SERVER", defaultValue: "https://localhost").urize();
   static const route = "/";
 
   @override
@@ -36,7 +38,11 @@ class HogWeedGo extends StatelessWidget {
           return FastRoute((_) => const MapPage(), settings);
 
         } else if (settings.name == AccountPage.route) {
-          return FastRoute((_) => const AccountPage(), settings);
+          if (authenticated) {
+            return FastRoute((_) => const AccountPage(), settings);
+          } else {
+            showAuthDialog(context);
+          }
 
         } else if (settings.name == AboutPage.route) {
           return FastRoute((_) => const AboutPage(), settings);
@@ -52,7 +58,9 @@ class HogWeedGo extends StatelessWidget {
           var me = settings.arguments as LatLng?;
           return MaterialPageRoute(builder: (_) => ReportPage(me), fullscreenDialog: true);
 
-        } else { return MaterialPageRoute(builder: (_) => const NonePage()); }
+        } else {
+          return MaterialPageRoute(builder: (_) => const NonePage());
+        }
       },
     );
   }

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 
 void _askForLocation(BuildContext c, bool serviceUnavailable) {
@@ -19,11 +19,11 @@ void _askForLocation(BuildContext c, bool serviceUnavailable) {
       onPressed: () {
         // TODO: call support if called once.
         if (kIsWeb) {
-          launch("https://docs.buddypunch.com/en/articles/919258-how-to-enable-location-services-for-chrome-safari-edge-and-android-ios-devices-gps-setting");
+          launchUrlString("https://docs.buddypunch.com/en/articles/919258-how-to-enable-location-services-for-chrome-safari-edge-and-android-ios-devices-gps-setting");
         } else if (Theme.of(c).platform == TargetPlatform.iOS) {
-          launch(serviceUnavailable ? "https://support.google.com/accounts/answer/6179507?hl=en&ref_topic=7189122" : "https://support.google.com/accounts/answer/6179507?hl=en&ref_topic=7189122");
+          launchUrlString(serviceUnavailable ? "https://support.google.com/accounts/answer/6179507?hl=en&ref_topic=7189122" : "https://support.google.com/accounts/answer/6179507?hl=en&ref_topic=7189122");
         } else if (Theme.of(c).platform == TargetPlatform.android) {
-          launch("https://support.apple.com/en-us/HT207092");
+          launchUrlString("https://support.apple.com/en-us/HT207092");
         }
       },
     ),

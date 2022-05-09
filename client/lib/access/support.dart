@@ -31,7 +31,7 @@ extension ResponseSupport on Response {
         print(body);
         return;
       case 400:
-        toastMessage = "request error: $generalErrorMessage!";
+        toastMessage = "request error, $generalErrorMessage!";
         break;
       case 401:
         toastMessage = "wrong or expired code!";
