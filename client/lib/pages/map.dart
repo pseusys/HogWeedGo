@@ -43,10 +43,14 @@ class _MapPageState extends State<MapPage> {
     _meStream = loc?.onLocationChanged.handleError((dynamic err) {
       _meStream?.cancel();
       _meStream = null;
-    }).listen((LocationData l) => setState(() {
-      _me!.latitude = l.latitude ?? _me!.latitude;
-      _me!.longitude = l.longitude ?? _me!.longitude;
-    }));
+    }).listen((LocationData l) {
+      if (mounted) {
+        setState(() {
+          _me!.latitude = l.latitude ?? _me!.latitude;
+          _me!.longitude = l.longitude ?? _me!.longitude;
+        });
+      }
+    });
   }
 
   @override
@@ -110,11 +114,11 @@ class _MapPageState extends State<MapPage> {
         ),
 
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (authenticated) {
+          onPressed: () async {
+            if (await Token.authenticated()) {
               Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me);
             } else {
-              showAuthDialog(context);
+              Navigator.of(context, rootNavigator: true).pushNamed(AuthDialog.route);
             }
           },
           tooltip: "Report!",

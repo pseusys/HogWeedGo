@@ -1,3 +1,4 @@
+import 'package:client/access/account.dart';
 import 'package:flutter/material.dart';
 
 import 'package:client/pages/fullscreen.dart';
@@ -23,7 +24,7 @@ class _MainDrawerState extends State<MainDrawer> {
   @override
   void initState() {
     super.initState();
-    healthcheck().timeout(const Duration(seconds: 5)).then((value) =>
+    healthCheck().timeout(const Duration(seconds: 5)).then((value) =>
         setState(() => _connected = value)
     ).onError((error, stackTrace) =>
         setState(() => _connected = false)
@@ -76,7 +77,13 @@ class _MainDrawerState extends State<MainDrawer> {
           ListTile(
             leading: const Icon(Icons.account_circle),
             title: const Text("Account"),
-            onTap: () => Navigator.of(context).popAllAndPushNamed(AccountPage.route),
+            onTap: () async {
+              if (await Token.authenticated()) {
+                Navigator.of(context).popAllAndPushNamed(AccountPage.route);
+              } else {
+                Navigator.of(context).pushNamed(AuthDialog.route);
+              }
+            },
           ),
 
           ListTile(

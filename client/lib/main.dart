@@ -14,10 +14,12 @@ import 'package:client/misc/utils.dart';
 import 'package:client/access/account.dart';
 
 
-void main() => runApp(const HogWeedGo());
+void main() => runApp(HogWeedGo());
 
 class HogWeedGo extends StatelessWidget {
-  const HogWeedGo({Key? key}) : super(key: key);
+  HogWeedGo({Key? key}) : super(key: key);
+
+  final navigatorKey = GlobalKey<NavigatorState>();
 
   static final server = const String.fromEnvironment("SERVER", defaultValue: "https://localhost").urize();
   static const route = "/";
@@ -26,6 +28,7 @@ class HogWeedGo extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HogWeedGo',
+      navigatorKey: navigatorKey,
 
       initialRoute: MapPage.route,
       theme: ThemeData(),
@@ -38,11 +41,7 @@ class HogWeedGo extends StatelessWidget {
           return FastRoute((_) => const MapPage(), settings);
 
         } else if (settings.name == AccountPage.route) {
-          if (authenticated) {
-            return FastRoute((_) => const AccountPage(), settings);
-          } else {
-            showAuthDialog(context);
-          }
+          return FastRoute((_) => const AccountPage(), settings);
 
         } else if (settings.name == AboutPage.route) {
           return FastRoute((_) => const AboutPage(), settings);
@@ -58,7 +57,10 @@ class HogWeedGo extends StatelessWidget {
           var me = settings.arguments as LatLng?;
           return MaterialPageRoute(builder: (_) => ReportPage(me), fullscreenDialog: true);
 
-        } else {
+        } else if (settings.name == AuthDialog.route) {
+          return DialogRoute(context: navigatorKey.currentState!.overlay!.context, builder: (_) => const AuthDialog(), settings: settings);
+
+        }  else {
           return MaterialPageRoute(builder: (_) => const NonePage());
         }
       },

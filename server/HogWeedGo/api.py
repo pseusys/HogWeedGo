@@ -45,6 +45,10 @@ class MeViewSet(ViewSet):
     def log_in(self, request):
         return auth(request, request.query_params.get('email'), request.query_params.get('password'))
 
+    @action(methods=['GET'], detail=False, permission_classes=[IsAuthenticated])
+    def profile(self, request):
+        return Response(UserSerializer(request.user).data)
+
     @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], throttle_classes=[UserRateThrottle], parser_classes=[MultiPartParser])
     def setup(self, request):
         results = {}

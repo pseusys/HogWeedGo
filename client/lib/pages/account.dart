@@ -6,6 +6,8 @@ import 'package:client/views/main_drawer.dart';
 import 'package:client/misc/const.dart';
 import 'package:client/access/account.dart';
 import 'package:client/views/base_dialogs.dart';
+import 'package:client/navigate/navigator_extension.dart';
+import 'package:client/pages/map.dart';
 
 
 class AccountPage extends StatefulWidget {
@@ -28,6 +30,16 @@ class _AccountPageState extends State<AccountPage> {
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) setup();
     });
+  }
+
+  Future<bool> validationDialog(BuildContext context, String title, String body, {String option = "Validate", String firstTitle = "", String secondTitle = "", String firstHint = "", String secondHint = "", bool obscure = false, String actionText = "", AsyncVoidCallback? addAction, AsyncBoolCallback? request}) async {
+    final action = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ValidationDialog(title, body, option: option, firstTitle: firstTitle, secondTitle: secondTitle, firstHint: firstHint, secondHint: secondHint, obscure: obscure, actionText: actionText, addAction: addAction, request: request);
+      },
+    );
+    return (action != null) ? action : false;
   }
 
   @override
@@ -123,7 +135,7 @@ class _AccountPageState extends State<AccountPage> {
             ElevatedButton(
               onPressed: () async {
                 await logOut();
-                Navigator.of(context).pop();
+                Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
               },
               child: const Text("Log out"),
               style: ButtonStyle(
@@ -134,7 +146,7 @@ class _AccountPageState extends State<AccountPage> {
             ElevatedButton(
               onPressed: () async {
                 await leave();
-                Navigator.of(context).pop();
+                Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
               },
               child: const Text("Delete account"),
               style: ButtonStyle(

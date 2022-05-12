@@ -366,6 +366,92 @@
 			"response": []
 		},
 		{
+			"name": "User Profile",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"last_login\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"date-time\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"first_name\": {",
+							"            \"type\": \"string\",",
+							"            \"maxLength\": 150,",
+							"            \"nullable\": true",
+							"        },",
+							"        \"is_staff\": {",
+							"            \"type\": \"boolean\"",
+							"        },",
+							"        \"photo\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"uri\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"thumbnail\": {",
+							"            \"type\": \"string\",",
+							"            \"format\": \"uri\",",
+							"            \"nullable\": true",
+							"        },",
+							"        \"additionalProperties\": false,",
+							"        \"required\": [ \"is_staff\" ]",
+							"    }",
+							"};",
+							"",
+							"pm.variables.set(\"schema\", JSON.stringify(schema));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Response schema is valid', function () {",
+							"    const schema = pm.variables.get(\"schema\");",
+							"    pm.expect(tv4.validate(pm.response.json(), schema)).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							"",
+							"pm.test('Response is valid', function () {",
+							"    pm.expect(pm.response.json()['first_name']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_NAME\"), \"User name is invalid!\");",
+							"});",
+							"",
+							"pm.test('Response photo is valid', function () {",
+							"    const port = pm.collectionVariables.get(\"SERVER_PORT\");",
+							"    pm.sendRequest(`http://localhost:${port}${pm.response.json()['thumbnail']}`, function (err, response) {",
+							"        pm.expect(response.code).to.be.equal(200, \"Response photo unavailable!\");",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:{{SERVER_PORT}}/api/me/profile",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "{{SERVER_PORT}}",
+					"path": [
+						"api",
+						"me",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Log out",
 			"event": [
 				{

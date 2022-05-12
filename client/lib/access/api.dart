@@ -11,7 +11,7 @@ import 'package:client/access/support.dart';
 import 'package:client/models/comment.dart';
 
 
-Future<bool> healthcheck() async {
+Future<bool> healthCheck() async {
   final response = await get(Uri.parse("${HogWeedGo.server}/healthcheck"));
   return response.statusCode == 200;
 }
@@ -24,15 +24,16 @@ Future<List<Report>> getReports() async {
 
 Future<Report> setReport(Report report, List<String> files) async {
   final request = MultipartRequest('POST', Uri.parse("${HogWeedGo.server}/reports"))
-    ..auth()
     ..fields['data'] = jsonEncode(report.toJson());
+  await request.auth();
   for (var file in files) {
     final type = lookupMimeType(file);
     if (type != null) {
       request.files.add(await MultipartFile.fromPath('photos', file, contentType: MediaType.parse(type)));
     }
   }
-  final response = await request.response();
+  final response = await request.response()
+    ..addExceptionHandler();
   return Report.fromJson(response.json());
 }
 
@@ -43,8 +44,9 @@ Future<User> getUser(int id) async {
 
 Future<Comment> setComment(int report, Comment comment) async {
   final request = Request('POST', Uri.parse("${HogWeedGo.server}/comments"))
-    ..auth()
     ..body = jsonEncode(comment.toJson());
-  final response = await request.response();
+  await request.auth();
+  final response = await request.response()
+    ..addExceptionHandler();
   return Comment.fromJson(response.json());
 }

@@ -152,6 +152,21 @@ paths:
         - me
         - unauth
 
+  /api/me/profile:
+    get:
+      operationId: profile
+      description: Endpoint for retrieving information about current user.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User profile.
+      tags:
+        - me
+        - auth
+
   /api/me/setup:
     post:
       operationId: setupMe

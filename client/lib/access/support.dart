@@ -9,8 +9,9 @@ import 'package:client/access/account.dart';
 Client base = Client();
 
 extension RequestSupport on BaseRequest {
-  void auth() {
-    headers.putIfAbsent("Authentication", () => token);
+  Future auth() async {
+    final token = await Token.token();
+    headers.putIfAbsent("Authorization", () => token);
   }
 
   Future<Response> response() async {
@@ -24,11 +25,11 @@ extension ResponseSupport on Response {
     return jsonDecode(body).cast<Map<String, dynamic>>();
   }
 
-  void addExceptionHandler(String generalErrorMessage) {
+  void addExceptionHandler({String generalErrorMessage = "unknown"}) {
     String toastMessage = "";
+    print(body);
     switch (statusCode) {
       case 200:
-        print(body);
         return;
       case 400:
         toastMessage = "request error, $generalErrorMessage!";
@@ -45,6 +46,6 @@ extension ResponseSupport on Response {
       default:
         toastMessage = "unknown!";
     }
-    Fluttertoast.showToast(msg: "API error: $toastMessage");
+    Fluttertoast.showToast(msg: "API error: $toastMessage", toastLength: Toast.LENGTH_LONG);
   }
 }

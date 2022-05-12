@@ -1,19 +1,40 @@
 import 'package:bloc/bloc.dart';
 
+import 'package:client/access/account.dart';
+import 'package:client/models/user.dart';
 
-/// The events which `CounterBloc` will react to.
-abstract class CounterEvent {}
 
-/// Notifies bloc to increment state.
-class CounterIncrementPressed extends CounterEvent {}
+abstract class UserEvent {}
 
-/// A `CounterBloc` which handles converting `CounterEvent`s into `int`s.
-class CounterBloc extends Bloc<CounterEvent, int> {
-  /// The initial state of the `CounterBloc` is 0.
-  CounterBloc() : super(0) {
-    /// When a `CounterIncrementPressed` event is added,
-    /// the current `state` of the bloc is accessed via the `state` property
-    /// and a new state is emitted via `emit`.
-    on<CounterIncrementPressed>((event, emit) => emit(state + 1));
+class ReloadUserEvent extends UserEvent {}
+
+class NameUserEvent extends UserEvent {
+  String name;
+  NameUserEvent(this.name);
+}
+
+class EmailUserEvent extends UserEvent {
+  String email;
+  EmailUserEvent(this.email);
+}
+
+class UnsetUserEvent extends UserEvent {}
+
+
+class UserBloc extends Bloc<UserEvent, User?> {
+  UserBloc() : super(null) {
+    on<ReloadUserEvent>((event, emit) async => emit(await profile()));
+
+    on<NameUserEvent>((event, emit) {
+      state?.firstName = event.name;
+      emit(state);
+    });
+
+    on<EmailUserEvent>((event, emit) {
+      state?.email = event.email;
+      emit(state);
+    });
+
+    on<UnsetUserEvent>((event, emit) => emit(null));
   }
 }

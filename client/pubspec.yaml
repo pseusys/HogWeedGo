@@ -18,6 +18,7 @@ dependencies:
   location: ^4.2.0
 
   cached_network_image: ^3.1.0
+  shared_preferences: ^2.0.14
   url_launcher: ^6.0.12
 
   gallery_saver: ^2.3.1

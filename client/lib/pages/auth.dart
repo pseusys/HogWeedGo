@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:client/misc/const.dart';
 import 'package:client/access/account.dart';
+import 'package:client/navigate/navigator_extension.dart';
+import 'package:client/pages/map.dart';
 
 
 class AuthPage extends StatefulWidget {
@@ -54,11 +56,13 @@ class _AuthPageState extends State<AuthPage> {
           actions: <Widget>[
             TextButton(
               child: const Text('Submit'),
-              onPressed: () {
+              onPressed: () async {
                 final text = codeController.text;
                 if (text.isNotEmpty && text.length == 8) {
-                  Navigator.of(context).pop();
-                  authenticate(email, password, codeController.text);
+                  if (await authenticate(email, password, codeController.text)) {
+                    Navigator.of(context, rootNavigator: true).pop();
+                    Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
+                  }
                 } else {
                   Fluttertoast.showToast(msg: "Code incorrect!");
                 }
@@ -126,7 +130,7 @@ class _AuthPageState extends State<AuthPage> {
                   if (_noAccount) {
                     if (await proveEmail(email)) _showCodeConfirmationDialog();
                   } else {
-                    logIn(email, password);
+                    if (await logIn(email, password)) Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
                   }
                 }
               } : null,
