@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:client/navigate/navigator_extension.dart';
 
 
-typedef AsyncBoolCallback = Future<bool> Function(String, String);
-typedef AsyncVoidCallback = Future<void> Function(String);
+typedef RequestCallback = void Function(String, String);
+typedef VoidCallback = void Function(String);
+
 
 class YesOrNoDialog extends StatelessWidget {
   final String title, body, yesOption, noOption, yesDestination, noDestination;
@@ -45,11 +46,12 @@ class YesOrNoDialog extends StatelessWidget {
   }
 }
 
+
 class ValidationDialog extends StatelessWidget {
   final String title, body, option, firstTitle, secondTitle, firstHint, secondHint, actionText;
   final bool obscure;
-  final AsyncVoidCallback? addAction;
-  final AsyncBoolCallback? request;
+  final VoidCallback? addAction;
+  final RequestCallback? request;
 
   const ValidationDialog(this.title, this.body, {Key? key, this.option = "Validate", this.firstTitle = "", this.secondTitle = "", this.firstHint = "", this.secondHint = "", this.obscure = false, this.actionText = "", this.addAction, this.request}) : super(key: key);
 
@@ -66,6 +68,7 @@ class ValidationDialog extends StatelessWidget {
       content: Form(
         key: formKey,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
               decoration: InputDecoration(hintText: firstTitle),
@@ -106,8 +109,8 @@ class ValidationDialog extends StatelessWidget {
           onPressed: () async {
             if (formKey.currentState!.validate()) {
               formKey.currentState!.save();
-              final result = await request?.call(firstValue, secondValue) ?? true;
-              Navigator.of(context).pop(result);
+              request?.call(firstValue, secondValue);
+              Navigator.of(context).pop();
             }
           },
           child: Text(option),

@@ -1,9 +1,10 @@
+\makeatletter
 \newcommand{\subscript}[1]{
 	\fontsize{12}{14.4}\centering{\textit{\textsuperscript{#1}}}
 }
 
 \newcommand{\emptydate}{
-	«\uline{\hspace{1cm}}» \uline{\hspace{3cm}} 20\uline{\hspace{1cm}} г.
+	\textquote{\uline{\hspace{1cm}}} \uline{\hspace{3cm}} 20\uline{\hspace{1cm}} г.
 }
 
 \newcommand{\worktitle}{
@@ -44,10 +45,6 @@
 \newcommand{\tab}{\hspace{0.5cm}}
 \newcommand{\nwln}{\vspace{\baselineskip}\tab}
 
-\newcommand{\sectionbreak}{\clearpage}
-\titleformat{\section}[display] {\centering\bfseries}{} {0pt}{\MakeUppercase}
-\titleformat{\subsection}[display] {\bfseries}{} {0pt}{}
-
 \newcommand{\longcaption}[1]{
 	\caption{#1}
 	\addtocounter{table}{-1}
@@ -56,5 +53,28 @@
 	\endhead
 }
 
-\renewcommand\bibname{\normalsize Список литературы}
+
+
+\newcommand{\sectionbreak}{\clearpage}
+\titleformat{\section}[hang] {\centering\bfseries}{\thesection\ } {0pt}{\MakeUppercase}
+\titleformat{\subsection}[hang] {\bfseries}{\thesubsection\ } {0pt}{}
+\renewcommand{\thesection}{\arabic{section}}
+
+\newcommand{\newcont}[1]{\label{sec:\jobname}\addcontentsline{toc}{section}{\nameref{sec:\jobname}#1}}
+\newcommand{\newcontsect}[1]{\section*{#1}\newcont{#1}}
+
+
+
+\titleformat{\chapter}[display] {\centering\bfseries}{} {0pt}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{-\baselineskip}{0pt}
+
+\let\@thebibliography\thebibliography
+\renewcommand\thebibliography[1]{
+	\@thebibliography{#1}
+	\setlength{\parskip}{0pt}
+	\setlength{\itemsep}{0pt plus 0.3ex}
+}
+
+\renewcommand\bibname{Список литературы}
 \newcommand{\webbibitem}[4]{\bibitem{#1} \href{#2}{#2} // #3, дата обращения: #4}
+\makeatother

@@ -3,12 +3,13 @@ import 'package:latlong2/latlong.dart';
 
 import 'package:client/misc/converters.dart';
 import 'package:client/models/comment.dart';
+import 'package:client/models/user.dart';
 
 part 'report.g.dart';
 
 
 enum ReportStatus {
-  RECEIVED
+  RECEIVED, APPROVED, INVALID
 }
 
 @JsonSerializable()
@@ -25,18 +26,17 @@ class Photo {
 class Report {
   @JsonKey(name: 'address') final String address;
   @JsonKey(name: 'init_comment') final String initComment;
+  @JsonKey(name: 'place', toJson: latLngToObject, fromJson: latLngFromObject) final LatLng place;
   @JsonKey(name: 'date', toJson: toNull, includeIfNull: false) final DateTime date;
   @JsonKey(name: 'status', toJson: toNull, includeIfNull: false) final ReportStatus status;
-  @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final String subs;
+  @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final int subsID;
+  @JsonKey(ignore: true, toJson: toNull, includeIfNull: false) User? subs;
+  @JsonKey(name: 'id') final int id;
   @JsonKey(name: 'type') final String type;
   @JsonKey(name: 'photos', toJson: toNull, includeIfNull: false) final List<Photo> photos;
   @JsonKey(name: 'comments', toJson: toNull, includeIfNull: false) final List<Comment> comments;
 
-  @JsonKey(name: 'lat') final double lat;
-  @JsonKey(name: 'lng') final double lng;
-  LatLng get place => LatLng(lat, lng);
-
-  Report(this.address, this.initComment, this.date, this.status, this.subs, this.type, this.lng, this.lat, this.photos, this.comments);
+  Report(this.address, this.initComment, this.place, this.date, this.status, this.subsID, this.type, this.id, this.photos, this.comments);
 
   factory Report.fromJson(Map<String, dynamic> json) => _$ReportFromJson(json);
   Map<String, dynamic> toJson() => _$ReportToJson(this);

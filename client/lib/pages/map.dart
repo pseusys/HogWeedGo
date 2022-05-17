@@ -1,6 +1,11 @@
 import 'dart:async';
 
+import 'package:client/blocs/reports/reports_bloc.dart';
+import 'package:client/blocs/reports/reports_event.dart';
+import 'package:client/blocs/reports/reports_state.dart';
+import 'package:client/models/report.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -13,7 +18,8 @@ import 'package:client/views/report_view.dart';
 import 'package:client/misc/const.dart';
 import 'package:client/access/location.dart';
 import 'package:client/misc/cached_provider.dart';
-import 'package:client/access/account.dart';
+import 'package:client/blocs/account/account_bloc.dart';
+import 'package:client/dialogs/auth_dialog.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -57,6 +63,7 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     _setupStream();
+    context.read<ReportsBloc>().add(const ReportsRequested());
   }
 
   @override
@@ -66,10 +73,10 @@ class _MapPageState extends State<MapPage> {
     super.dispose();
   }
 
-  Marker _generateMarker(BuildContext context) => Marker(
+  Marker _generateMarker(BuildContext context, Report report) => Marker(
     width: MARKER,
     height: MARKER,
-    point: STP,
+    point: report.place,
     builder: (ctx) => MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -78,7 +85,7 @@ class _MapPageState extends State<MapPage> {
           isScrollControlled: true,
           builder: (_) => const ReportView(),
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(GAP))
+            borderRadius: BorderRadius.vertical(top: Radius.circular(GAP)),
           ),
         ),
         child: const FlutterLogo(textColor: Colors.green),
@@ -87,44 +94,51 @@ class _MapPageState extends State<MapPage> {
   );
 
   Widget _showMap(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        body: FlutterMap(
-          options: MapOptions(
-            center: STP,
-            zoom: 9.0,
-            minZoom: 1.0,
-            interactiveFlags: InteractiveFlag.drag | InteractiveFlag.flingAnimation | InteractiveFlag.doubleTapZoom,
+    var reports = [];
+    return BlocListener<ReportsBloc, ReportsState>(
+      listener: (context, state) {
+        reports = state.reports;
+      },
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          body: FlutterMap(
+            options: MapOptions(
+              center: STP,
+              zoom: 9.0,
+              minZoom: 1.0,
+              interactiveFlags: InteractiveFlag.drag | InteractiveFlag.flingAnimation | InteractiveFlag.doubleTapZoom,
+            ),
+            layers: [
+              TileLayerOptions(
+                urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                subdomains: ["a", "b"],
+                attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
+                tileProvider: const CachedTileProvider(),
+              ),
+              MarkerLayerOptions(
+                markers: [
+                  for (var report in reports) _generateMarker(context, report),
+                  if (_me != null) Marker(width: MARKER, height: MARKER, point: _me!, builder: (c) => const FlutterLogo()),
+                ],
+              ),
+            ],
           ),
-          layers: [
-            TileLayerOptions(
-              urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-              subdomains: ["a", "b"],
-              attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
-              tileProvider: const CachedTileProvider(),
-            ),
-            MarkerLayerOptions(
-              markers: [
-                _generateMarker(context),
-                if (_me != null) Marker(width: MARKER, height: MARKER, point: _me!, builder: (c) => const FlutterLogo()),
-              ],
-            ),
-          ],
-        ),
 
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            if (await Token.authenticated()) {
-              Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me);
-            } else {
-              Navigator.of(context, rootNavigator: true).pushNamed(AuthDialog.route);
-            }
-          },
-          tooltip: "Report!",
-          child: const Icon(Icons.add),
-        ),
-      ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              final auth = context.select((AccountBloc bloc) => bloc.state.status);
+              if (auth) {
+                Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me);
+              } else {
+                Navigator.of(context, rootNavigator: true).pushNamed(AuthDialog.route);
+              }
+              },
+            tooltip: "Report!",
+            child: const Icon(Icons.add),
+          ),
+        )
+      )
     );
   }
 

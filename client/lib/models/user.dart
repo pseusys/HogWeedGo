@@ -6,7 +6,7 @@ part 'user.g.dart';
 @JsonSerializable()
 class User {
   @JsonKey(name: 'last_login') final DateTime? lastLogin;
-  @JsonKey(name: 'first_name') String firstName;
+  @JsonKey(name: 'first_name') String? firstName;
   @JsonKey(name: 'email') String? email;
   @JsonKey(name: 'is_staff') final bool isStaff;
   @JsonKey(name: 'photo') final Uri? photo;

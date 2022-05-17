@@ -1,7 +1,9 @@
-\renewcommand{\cfttoctitlefont}{\textbf}
-\renewcommand{\cftchapfont}{}
-\renewcommand{\cftchappagefont}{\textbf}
-\setcounter{secnumdepth}{0}
+\setlength{\cftbeforetoctitleskip}{-\baselineskip}
+\setlength{\cftaftertoctitleskip}{0pt}
+
+\renewcommand{\cfttoctitlefont}{\hfill\centering\bfseries\MakeUppercase}
+\renewcommand{\cftaftertoctitle}{\hfill\hfill}
+\setcounter{secnumdepth}{2}
 
 \tableofcontents
 

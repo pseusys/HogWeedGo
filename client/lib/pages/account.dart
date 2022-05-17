@@ -1,10 +1,12 @@
+import 'package:client/blocs/account/account_bloc.dart';
+import 'package:client/blocs/account/account_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 
 import 'package:client/views/main_drawer.dart';
 import 'package:client/misc/const.dart';
-import 'package:client/access/account.dart';
 import 'package:client/views/base_dialogs.dart';
 import 'package:client/navigate/navigator_extension.dart';
 import 'package:client/pages/map.dart';
@@ -28,18 +30,17 @@ class _AccountPageState extends State<AccountPage> {
   void initState() {
     super.initState();
     _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) setup();
+      if (!_focusNode.hasFocus) context.read<AccountBloc>().add(NameChangeRequested(nameController.text));
     });
   }
 
-  Future<bool> validationDialog(BuildContext context, String title, String body, {String option = "Validate", String firstTitle = "", String secondTitle = "", String firstHint = "", String secondHint = "", bool obscure = false, String actionText = "", AsyncVoidCallback? addAction, AsyncBoolCallback? request}) async {
-    final action = await showDialog(
+  Future<void> validationDialog(BuildContext context, String title, String body, {String option = "Validate", String firstTitle = "", String secondTitle = "", String firstHint = "", String secondHint = "", bool obscure = false, String actionText = "", VoidCallback? addAction, RequestCallback? request}) async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return ValidationDialog(title, body, option: option, firstTitle: firstTitle, secondTitle: secondTitle, firstHint: firstHint, secondHint: secondHint, obscure: obscure, actionText: actionText, addAction: addAction, request: request);
       },
     );
-    return (action != null) ? action : false;
   }
 
   @override
@@ -94,7 +95,12 @@ class _AccountPageState extends State<AccountPage> {
               children: [
                 const Text("E-mail:"),
                 const SizedBox(width: MARGIN),
-                Text("user e-mail", style: Theme.of(context).textTheme.headline6),
+                Builder(
+                  builder: (context) {
+                    final email = context.select((AccountBloc bloc) => bloc.state.user?.email);
+                    return Text("Current e-mail: $email", style: Theme.of(context).textTheme.headline6);
+                  },
+                ),
               ],
             ),
             const SizedBox(height: GAP),
@@ -106,8 +112,8 @@ class _AccountPageState extends State<AccountPage> {
                     firstHint: "Enter a valid email!",
                     secondHint: "Enter a valid 8-digit code!",
                     actionText: "Send code",
-                    addAction: (String email) => proveEmail(email),
-                    request: (String email, String code) => setup(email: email, code: code)
+                    addAction: (String email) => context.read<AccountBloc>().add(EmailProveRequested(email)),
+                    request: (String email, String code) => context.read<AccountBloc>().add(EmailChangeRequested(email, code))
                   );
                 },
                 child: const Text("Change email")
@@ -123,7 +129,7 @@ class _AccountPageState extends State<AccountPage> {
                       firstHint: "Enter a valid password!",
                       secondHint: "Password and confirmation do not match!",
                       obscure: true,
-                      request: (String password, String confirmation) => setup(password: password)
+                      request: (String password, String confirmation) => context.read<AccountBloc>().add(PasswordChangeRequested(password))
                   );
                 },
                 child: const Text("Change password")
@@ -134,7 +140,7 @@ class _AccountPageState extends State<AccountPage> {
             const SizedBox(height: GAP),
             ElevatedButton(
               onPressed: () async {
-                await logOut();
+                context.read<AccountBloc>().add(LogoutRequested());
                 Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
               },
               child: const Text("Log out"),
@@ -145,7 +151,7 @@ class _AccountPageState extends State<AccountPage> {
             const SizedBox(height: GAP),
             ElevatedButton(
               onPressed: () async {
-                await leave();
+                context.read<AccountBloc>().add(LeaveRequested());
                 Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
               },
               child: const Text("Delete account"),

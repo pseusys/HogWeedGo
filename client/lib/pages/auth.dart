@@ -1,12 +1,15 @@
+import 'package:client/blocs/account/account_bloc.dart';
+import 'package:client/blocs/account/account_event.dart';
+import 'package:client/blocs/account/account_state.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:client/misc/const.dart';
-import 'package:client/access/account.dart';
 import 'package:client/navigate/navigator_extension.dart';
 import 'package:client/pages/map.dart';
 
@@ -59,10 +62,7 @@ class _AuthPageState extends State<AuthPage> {
               onPressed: () async {
                 final text = codeController.text;
                 if (text.isNotEmpty && text.length == 8) {
-                  if (await authenticate(email, password, codeController.text)) {
-                    Navigator.of(context, rootNavigator: true).pop();
-                    Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
-                  }
+                  context.read<AccountBloc>().add(AuthenticationRequested(email, password, codeController.text));
                 } else {
                   Fluttertoast.showToast(msg: "Code incorrect!");
                 }
@@ -128,9 +128,10 @@ class _AuthPageState extends State<AuthPage> {
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
                   if (_noAccount) {
-                    if (await proveEmail(email)) _showCodeConfirmationDialog();
+                    context.read<AccountBloc>().add(EmailProveRequested(email));
+                    _showCodeConfirmationDialog();
                   } else {
-                    if (await logIn(email, password)) Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
+                    context.read<AccountBloc>().add(LoginRequested(email, password));
                   }
                 }
               } : null,
@@ -144,74 +145,79 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FocusWatcher(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
+    return BlocListener<AccountBloc, AccountState>(
+      listener: (context, state) {
+        if (state.status) Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
+      },
+      child: FocusWatcher(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
 
-        appBar: AppBar(
-          title: Text(widget.title),
-          automaticallyImplyLeading: false,
-        ),
+          appBar: AppBar(
+            title: Text(widget.title),
+            automaticallyImplyLeading: false,
+          ),
 
-        body: Container(
-          margin: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
-          child: Column(
-            children: [
-              Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
+          body: Container(
+            margin: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
+            child: Column(
+              children: [
+                Text("Become a volunteer!", style: Theme.of(context).textTheme.headline3),
 
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => setState(() => _noAccount = !_noAccount),
-                  child: Text(_noAccount ? 'Already have account?' : 'New to HogWeedGo?'),
-                ),
-              ),
-
-              Container(
-                margin: const EdgeInsets.only(top: MARGIN, bottom: MARGIN),
-                child: Card(child: _authForm()),
-              ),
-
-              if (_noAccount) Align(
-                alignment: Alignment.centerRight,
-                child: ListTile(
-                  leading: Checkbox(
-                    value: _createAccount,
-                    onChanged: (bool? value) => setState(() => _createAccount = value ?? false),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => setState(() => _noAccount = !_noAccount),
+                    child: Text(_noAccount ? 'Already have account?' : 'New to HogWeedGo?'),
                   ),
-                  title: RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Agree to ',
-                          style: Theme.of(context).textTheme.bodyText1,
-                        ),
-                        TextSpan(
-                          text: 'terms',
-                          style: const TextStyle(color: Colors.blue),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => launchUrlString('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
-                        ),
-                        TextSpan(
-                          text: ' and ',
-                          style: Theme.of(context).textTheme.bodyText1,
-                        ),
-                        TextSpan(
-                          text: 'conditions',
-                          style: const TextStyle(color: Colors.blue),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => launchUrlString('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
-                        ),
-                        TextSpan(
-                          text: '.',
-                          style: Theme.of(context).textTheme.bodyText1,
-                        ),
-                      ],
+                ),
+
+                Container(
+                  margin: const EdgeInsets.only(top: MARGIN, bottom: MARGIN),
+                  child: Card(child: _authForm()),
+                ),
+
+                if (_noAccount) Align(
+                  alignment: Alignment.centerRight,
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: _createAccount,
+                      onChanged: (bool? value) => setState(() => _createAccount = value ?? false),
+                    ),
+                    title: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Agree to ',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                          TextSpan(
+                            text: 'terms',
+                            style: const TextStyle(color: Colors.blue),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => launchUrlString('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                          ),
+                          TextSpan(
+                            text: ' and ',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                          TextSpan(
+                            text: 'conditions',
+                            style: const TextStyle(color: Colors.blue),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => launchUrlString('https://docs.flutter.io/flutter/services/UrlLauncher-class.html'),
+                          ),
+                          TextSpan(
+                            text: '.',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

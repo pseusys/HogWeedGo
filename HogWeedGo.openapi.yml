@@ -425,6 +425,18 @@ components:
           const: Saved!
           description: Describes whether user profile picture was changed.
       additionalProperties: false
+      
+    Location:
+      type: object
+        properties:
+          lng:
+            type: number
+          lat:
+            type: number
+        additionalProperties: false
+        required:
+          - lng
+          - lat
 
     ReportIn:
       type: object
@@ -439,7 +451,7 @@ components:
           description: User comment about the report.
           maxLength: 2048
         place:
-          type: string
+          $ref: '#/components/schemas/Location'
         type:
           type: string
           description: User guess for report.
@@ -485,7 +497,7 @@ components:
           description: Staff reply for the report.
           maxLength: 64
         place:
-          type: string
+          $ref: '#/components/schemas/Location'
         photos:
           type: array
           items:

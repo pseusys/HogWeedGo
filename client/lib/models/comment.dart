@@ -7,7 +7,7 @@ part 'comment.g.dart';
 
 @JsonSerializable()
 class Comment {
-  @JsonKey(name: 'report') final String report;
+  @JsonKey(name: 'report') final int report;
   @JsonKey(name: 'text') final String text;
   @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final int user;
 

@@ -1,16 +1,15 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
-
-import 'package:client/access/account.dart';
 
 
 Client base = Client();
 
 extension RequestSupport on BaseRequest {
-  Future auth() async {
-    final token = await Token.token();
+  auth(String? token) {
+    if (token == null) throw Exception("No token available for authorization!");
     headers.putIfAbsent("Authorization", () => token);
   }
 
@@ -22,12 +21,12 @@ extension RequestSupport on BaseRequest {
 
 extension ResponseSupport on Response {
   Map<String, dynamic> json() {
-    return jsonDecode(body).cast<Map<String, dynamic>>();
+    return jsonDecode(body) as Map<String, dynamic>;
   }
 
   void addExceptionHandler({String generalErrorMessage = "unknown"}) {
     String toastMessage = "";
-    print(body);
+    if (kDebugMode) print(body);
     switch (statusCode) {
       case 200:
         return;
