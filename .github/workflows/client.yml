@@ -1,6 +1,13 @@
 name: CLIENT
 
 on:
+  workflow_dispatch:
+    inputs:
+      server:
+        description: 'Server address for client to call API'     
+        required: true
+        default: 'https://localhost:8000/' 
+        type: string
   push:
     branches:
       - 'main'
@@ -30,7 +37,9 @@ jobs:
       run: |
         flutter pub get
         flutter pub run build_runner build
-        flutter build web --web-renderer html --base-href /HogWeedGo/ --dart-define SERVER=https://localhost:8000/
+        flutter build web --web-renderer html --base-href /HogWeedGo/ --dart-define SERVER=$SERVER
+      env:
+          SERVER: ${{ github.event.inputs.server || 'https://localhost:8000/' }}
         
     - name: NoJekyll ❌
       run: touch ./client/build/web/.nojekyll
