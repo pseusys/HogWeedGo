@@ -35,7 +35,7 @@ jobs:
     - name: Build 🛠
       working-directory: ./client/
       run: |
-        flutter pub upgrade --major-versions
+        flutter pub upgrade
         flutter pub run build_runner build
         flutter build web --web-renderer html --base-href /HogWeedGo/ --dart-define SERVER=$SERVER
       env:
