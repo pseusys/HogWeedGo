@@ -44,7 +44,7 @@ jobs:
           SERVER: ${{ github.event.inputs.server || 'https://localhost:8000/' }}
         
     - name: NoJekyll ❌
-      run: touch ./client/build/web/.nojekyll
+      run: touch ./build/web/.nojekyll
     
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4
