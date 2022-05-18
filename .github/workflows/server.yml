@@ -129,5 +129,6 @@ jobs:
       - name: Update release 📩
         uses: johnwbyrd/update-release@v1.0.0
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           release: Server bundle release
           files: ./bundled-server.zip
