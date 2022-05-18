@@ -1,1 +1,42 @@
- 
+% !TeX spellcheck = russian-aot
+
+\newcommand{\pictureone}{
+	\begin{figure}[!htbp]
+		\fontsize{10}{12}
+		\centering
+		\begin{tikzpicture}[thick, on grid]
+			% Server
+			\node [block] (server) {Сервер};
+			% Database
+			\node [block, right= of server] (bd) {База данных};
+			\draw[<->] (server) -- node[link, above] {Данные о растениях} (bd); 
+			% Receiver API
+			\node [block, below left= of server] (ext-api) {API для получения опубликованных данных};
+			\draw[->] (server) -- node[link, below right] {Обработанные данные} (ext-api);
+			
+			% Service site
+			\node [block, above= of server] (service-site) {Сервисный сайт};
+			\draw[<->] (server) -- node[link, right] {Модерация и изменение статуса данных} (service-site);
+			% Public site
+			\node [block, above left= of server] (public-site) {Сайт с опубликованными данными};
+			\draw[->] (ext-api) -- node[link, right] {Сортированные данные} (public-site);
+			
+			% Sender API
+			\node [block, below right= of server] (int-api) {API для получения данных};
+			\draw[<-] (server) -- node[link, below left] {Данные, полученные от пользователей} (int-api);
+			% WEB client
+			\node [block, below= of ext-api] (web-cli) {WEB клиент};
+			\draw[<-] (int-api) edge[bend left=35, looseness=1.8] node[link, below right] {Данные о найденном растении} (web-cli);
+			\draw[->] (ext-api) -- node[link, left] {Cортированные данные} (web-cli);
+			% Android client
+			\node [block, right= of web-cli] (and-cli) {Android клиент};
+			\draw[<-] (int-api) -- node[link, above left] {Данные о найденном растении} (and-cli);
+			\draw[->] (ext-api) -- node[link, above right] {Сортированные данные} (and-cli);
+			% iOS client
+			\node [block, right= of and-cli] (ios-cli) {iOS клиент};
+			\draw[<-] (int-api) -- node[link, right] {Данные о найденном растении} (ios-cli);
+			\draw[->] (ext-api) edge[bend right=35, looseness=1.8] node[link, below left] {Сортированные данные} (ios-cli);
+		\end{tikzpicture}
+		\caption{Схема архитектуры}
+	\end{figure}
+}

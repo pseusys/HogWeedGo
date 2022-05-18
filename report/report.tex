@@ -1,3 +1,6 @@
+% !TeX spellcheck = en_US
+% Here and after: russian-aot is available here: https://extensions.openoffice.org/de/download/18162
+
 \documentclass[14pt]{extreport}
 
 \usepackage[legalpaper, left=3cm, right=1.5cm, top=2.5cm, bottom=1.5cm, includefoot, footskip=1cm]{geometry}
@@ -15,17 +18,22 @@
 \usepackage{setspace}
 \usepackage{csquotes}
 
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+% \usepackage{showkeys}
 \usepackage[colorlinks=true, linkcolor=, urlcolor=blue, citecolor=]{hyperref}
+
+\input{support}
 
 \begin{document}
 	\setlength\parindent{0pt}
-	\input{support.tex}
 	
-	\input{title.tex}
-	\input{task.tex}
-	\input{plan.tex}
+	\include{title}
+	\include{task}
+	\include{plan}
 	
-	\input{tables.tex}
-	\input{images.tex}
-	\input{document.tex}
+	\include{tables}
+	\include{images}
+	\input{document}
 \end{document}

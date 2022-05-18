@@ -1,35 +1,46 @@
+% !TeX spellcheck = en_US
+
 \makeatletter
-\newcommand{\subscript}[1]{
+\def\trueonehalfspace{1.213}
+
+\newcommand{\titlelongtext}[1]{\begin{spacing}{\trueonehalfspace}#1\end{spacing}}
+
+\newcommand{\@subscript}[1]{
 	\fontsize{12}{14.4}\centering{\textit{\textsuperscript{#1}}}
 }
 
 \newcommand{\emptydate}{
-	\textquote{\uline{\hspace{1cm}}} \uline{\hspace{3cm}} 20\uline{\hspace{1cm}} г.
+	\textquote{\uline{\hspace{1cm}}} \uline{\hspace{3cm}} 2022 г.
 }
 
-\newcommand{\worktitle}{
+\newcommand{\worktitle}[1]{
 	\begin{tabularx}{\textwidth}{ X X }
 		Студент \hspace{1cm} Сергеев А. Д. & \raggedleft{Группа 8304}
 	\end{tabularx}
 	\begin{tabularx}{\textwidth}{ X }
-		Тема работы: Наименование темы
+		\titlelongtext{
+			Тема работы: Разработка программной системы наблюдения за распространением потенциально  опасных для человека видов растений
+		}
+		#1
 	\end{tabularx}
 }
 
 \newcommand{\subsblock}{
 	\begin{tabularx}{\textwidth}[t]{ X X X X }
 		Студент & & & Сергеев А. Д. \\ \cline{3-3}
-		& & \subscript{(подпись)} & \\
+		& & \@subscript{(подпись)} & \\
 		Руководитель & \centering{к.т.н., доцент} & & Заславский М. М. \\ \cline{3-3}
-		& \subscript{(Уч. степень, уч. звание)} & \subscript{(подпись)} & \\
+		& \@subscript{(Уч. степень, уч. звание)} & \@subscript{(подпись)} & \\
 		Консультант & & & Черепанов И. В. \\ \cline{3-3}
-		& \subscript{(Уч. степень, уч. звание)} & \subscript{(подпись)} & \\
+		& & \@subscript{(подпись)} & \\
+		Консультант & \centering{к.т.н., доцент} & & Заславский М. М. \\ \cline{3-3}
+		& \@subscript{(Уч. степень, уч. звание)} & \@subscript{(подпись)} & \\
 	\end{tabularx}
 }
 
 \newcommand{\confirmation}{
 	\setlength{\extrarowheight}{0.25cm}
-	\begin{tabularx}{\textwidth}{ X X }
+	\begin{tabularx}{\textwidth}{ X r }
 		& Утверждаю \\
 		& Зав. кафедрой МО ЭВМ \\
 		& \uline{\hspace{3cm}} Кринкин К. В. \\
@@ -39,8 +50,15 @@
 
 
 
-\newcommand{\defineterm}[2]{\label{"def_#1"}\hyperref["lnk_#1"]{#2}}
-\newcommand{\linkterm}[2]{\label{"lnk_#1"}\hyperref["def_#1"]{\textbf{#2}}}
+\let\latex@input\input
+\newcommand\current@input[1]{\def\currentfile{#1} \par\nobreak\latex@input{#1}%
+}
+\AtBeginDocument{\let\input\current@input}
+
+
+
+\newcommand{\defineterm}[2]{\label{def:#1}\hyperref[lnk:#1]{#2}}
+\newcommand{\linkterm}[2]{\label{lnk:#1}\hyperref[def:#1]{\textbf{#2}}}
 
 \newcommand{\tab}{\hspace{0.5cm}}
 \newcommand{\nwln}{\vspace{\baselineskip}\tab}
@@ -55,13 +73,23 @@
 
 
 
-\newcommand{\sectionbreak}{\clearpage}
 \titleformat{\section}[hang] {\centering\bfseries}{\thesection\ } {0pt}{\MakeUppercase}
 \titleformat{\subsection}[hang] {\bfseries}{\thesubsection\ } {0pt}{}
 \renewcommand{\thesection}{\arabic{section}}
 
-\newcommand{\newcont}[1]{\label{sec:\jobname}\addcontentsline{toc}{section}{\nameref{sec:\jobname}#1}}
-\newcommand{\newcontsect}[1]{\section*{#1}\newcont{#1}}
+\newcommand{\@newcont}[1]{\addcontentsline{toc}{section}{#1}}
+\newcommand{\@newcontsect}[1]{\phantomsection\section*{#1}\@newcont{#1}}
+\newcommand{\@newcontnosect}[1]{\phantomsection\@newcont{#1}}
+\newcommand{\newcont}{\@ifstar{\@newcontnosect}{\@newcontsect}}
+
+
+
+\addto\captionsrussian{\renewcommand{\figurename}{Рисунок}}
+
+\tikzset{node distance = 3.5cm and 5.5cm}
+\tikzset{block/.style = {draw, minimum height=1.5cm, text width=3cm, align=center}}
+\tikzset{block/.style = {draw, minimum height=1.5cm, text width=3cm, align=center}}
+\tikzset{link/.style = {minimum height=1cm, text width=2.25cm, midway, align=center}}
 
 
 

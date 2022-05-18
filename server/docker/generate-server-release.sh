@@ -13,4 +13,4 @@ cp docker/.env.production bundled-server
 mv bundled-server/.env.production bundled-server/system-config.env
 
 zip -r bundled-server.zip bundled-server
-rm -rf bundled-server
+rm -r bundled-server
