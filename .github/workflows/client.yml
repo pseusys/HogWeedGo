@@ -17,7 +17,7 @@ on:
 
 defaults:
   run:
-    working-directory: ./report
+    working-directory: ./client
 
 jobs:
   deploy-client-default:
