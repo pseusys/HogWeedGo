@@ -115,10 +115,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           
-      - name: Create new release file
+      - name: Create new release file 🧾
         run: cd ./server && ./docker/generate-server-release.sh
       
-      - name: Update release
-        uses: johnwbyrd/update-release@v1
+      - name: Update release 📩
+        uses: johnwbyrd/update-release@v1.0.0
         with:
-            files: ./server/bundled-server.zip
+          release: Server bundle release
+          files: ./server/bundled-server.zip
