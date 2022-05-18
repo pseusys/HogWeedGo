@@ -131,4 +131,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release: Server bundle release
-          files: ./bundled-server.zip
+          files: ./server/bundled-server.zip

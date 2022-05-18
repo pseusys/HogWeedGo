@@ -12,6 +12,10 @@ on:
     types:
       - completed
 
+defaults:
+  run:
+    working-directory: ./report
+
 jobs:
   compile-report:
     if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
@@ -28,9 +32,7 @@ jobs:
         working_directory: ./report/
         
     - name: Move PDF ✂️
-      run: |
-        mkdir ./report/build/
-        cp ./report/report.pdf ./report/build/report.pdf
+      run: mkdir ./build/ && cp ./report.pdf ./build/report.pdf
     
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4

@@ -8,6 +8,10 @@ on:
       - 'ml-helper/**'
       - '.github/workflows/ml-helper.yml'
 
+defaults:
+  run:
+    working-directory: ./ml-helper
+
 jobs:
   test-hogweed-detector:
     runs-on: ubuntu-latest
@@ -18,7 +22,6 @@ jobs:
 
     - name: Install Dependencies 🛠
       run: |
-        cd ./ml-helper
         pip3 install --user pipenv
         pipenv install --skip-lock --system
     
@@ -29,4 +32,4 @@ jobs:
         target: "./ml-helper/hogweed-detector.tflite"
 
     - name: Test Detector 🧪
-      run: python3 ./ml-helper/test.py -n ./ml-helper/hogweed-detector.tflite -s ./ml-helper/datasets/test.csv
+      run: python3 ./test.py -n ./hogweed-detector.tflite -s ./datasets/test.csv

@@ -15,6 +15,10 @@ on:
       - 'client/**'
       - '.github/workflows/client.yml'
 
+defaults:
+  run:
+    working-directory: ./report
+
 jobs:
   deploy-client-default:
     runs-on: ubuntu-latest
@@ -29,11 +33,9 @@ jobs:
         flutter-version: '2.10.5'
         
     - name: Verify with Doctor ⚕
-      working-directory: ./client/
       run: flutter doctor
 
     - name: Build 🛠
-      working-directory: ./client/
       run: |
         flutter pub upgrade
         flutter pub run build_runner build
