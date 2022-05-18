@@ -115,11 +115,19 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           
+  update-buldle-release:
+    runs-on: ubuntu-latest
+    needs: [publish-server-image]
+    
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+        
       - name: Create new release file 🧾
-        run: cd ./server && ./docker/generate-server-release.sh
+        run: ./docker/generate-server-release.sh
       
       - name: Update release 📩
         uses: johnwbyrd/update-release@v1.0.0
         with:
           release: Server bundle release
-          files: ./server/bundled-server.zip
+          files: ./bundled-server.zip
