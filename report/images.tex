@@ -40,3 +40,52 @@
 		\caption{Схема архитектуры}
 	\end{figure}
 }
+
+\newcommand{\picturetwo}{
+	\begin{figure}[!htbp]
+		\fontsize{10}{12}
+		\centering
+		\begin{tikzpicture}[thick, node distance = 9cm and 5cm, on grid]
+			% User
+			\node [block, text width=7.5cm, align=left] (user) {
+				\centering{\textbf{Пользователь}}
+				\begin{itemize}[parsep=0pt, leftmargin=*, labelindent=0cm]
+					\item \underline{Адрес электронной почты}
+					\item Хэш сумма пароля
+					\item Имя
+					\item Дата регистрации в системе
+					\item Время последнего входа в систему
+					\item Является ли пользователь администратором
+					\item Является ли пользователь специалистом
+					\item Активен ли аккаунт пользователя
+					\item Фото профиля
+					\item Уменьшенное фото профиля
+				\end{itemize}
+			};
+			% Report
+			\node [block, text width=4.5cm, align=left, below right= of user] (report) {
+				\centering{\textbf{Отчёт}}
+				\begin{itemize}[parsep=0pt, leftmargin=*, labelindent=0cm]
+					\item \underline{Номер отчёта}
+					\item Дата и время наблюдения
+					\item Адрес
+					\item Первый комментарий
+					\item Координаты
+					\item Статус
+					\item Вид растения
+				\end{itemize}
+			};
+			\draw[<-] (user) edge ($(user)!0.55!(report)$) edge[dashed] (report);
+			% Comment
+			\node [block, text width=4cm, align=left, below left= of user] (comment) {
+				\centering{\textbf{Комментарий}}
+				\begin{itemize}[parsep=0pt, leftmargin=*, labelindent=0cm]
+					\item Текст комментария
+				\end{itemize}
+			};
+			\draw[<-] (user) edge ($(user)!0.65!(comment)$) edge[dashed] (comment);
+			\draw[<-] (report) edge (comment);
+		\end{tikzpicture}
+		\caption{ER диаграмма модели}
+	\end{figure}
+}

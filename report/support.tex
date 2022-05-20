@@ -19,7 +19,7 @@
 	\end{tabularx}
 	\begin{tabularx}{\textwidth}{ X }
 		\titlelongtext{
-			Тема работы: Разработка программной системы наблюдения за распространением потенциально  опасных для человека видов растений
+			Тема работы: Разработка программной системы наблюдения за распространением потенциально  опасных для человека видов растений.
 		}
 		#1
 	\end{tabularx}
@@ -53,8 +53,7 @@
 
 
 \let\latex@input\input
-\newcommand\current@input[1]{\def\currentfile{#1} \par\nobreak\latex@input{#1}%
-}
+\newcommand\current@input[1]{\def\currentfile{#1} \par\nobreak\latex@input{#1}}
 \AtBeginDocument{\let\input\current@input}
 
 
@@ -81,6 +80,7 @@
 
 \titleformat{\section}[hang] {\centering\bfseries}{\thesection\ } {0pt}{\MakeUppercase}
 \titleformat{\subsection}[hang] {\bfseries}{\thesubsection\ } {0pt}{}
+\titleformat{\subsubsection}[hang] {\bfseries}{\thesubsubsection\ } {0pt}{}
 \renewcommand{\thesection}{\arabic{section}}
 
 \newcommand{\@newcont}[1]{\addcontentsline{toc}{section}{#1}}
@@ -93,7 +93,6 @@
 \addto\captionsrussian{\renewcommand{\figurename}{Рисунок}}
 
 \tikzset{node distance = 3.5cm and 5.5cm}
-\tikzset{block/.style = {draw, minimum height=1.5cm, text width=3cm, align=center}}
 \tikzset{block/.style = {draw, minimum height=1.5cm, text width=3cm, align=center}}
 \tikzset{link/.style = {minimum height=1cm, text width=2.25cm, midway, align=center}}
 
