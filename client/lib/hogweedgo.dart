@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:latlong2/latlong.dart';
-
 import 'package:client/navigate/fast_route.dart';
 import 'package:client/pages/about.dart';
 import 'package:client/pages/fullscreen.dart';
@@ -31,6 +29,7 @@ class HogWeedGo extends StatelessWidget {
       initialRoute: MapPage.route,
       theme: ThemeData(),
 
+      // TODO: fix back pressing -> migrate to navigator 2.0
       onGenerateRoute: (RouteSettings settings) {
         if (settings.name == route) {
           return FastRoute((_) => const NonePage(), settings);
@@ -57,7 +56,7 @@ class HogWeedGo extends StatelessWidget {
         } else if (settings.name == AuthDialog.route) {
           return DialogRoute(context: navigatorKey.currentState!.overlay!.context, builder: (_) => const AuthDialog(), settings: settings);
 
-        }  else {
+        } else {
           return MaterialPageRoute(builder: (_) => const NonePage());
         }
       },

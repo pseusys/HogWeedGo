@@ -11,8 +11,7 @@ class ViewChanged extends ViewEvent {
 }
 
 class InfoRequested extends ViewEvent {
-  final Report current;
-  const InfoRequested(this.current);
+  const InfoRequested();
 }
 
 class CommentLeft extends ViewEvent {

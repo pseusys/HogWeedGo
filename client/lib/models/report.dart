@@ -40,4 +40,10 @@ class Report {
 
   factory Report.fromJson(Map<String, dynamic> json) => _$ReportFromJson(json);
   Map<String, dynamic> toJson() => _$ReportToJson(this);
+
+  Report copyWithUser(User subs) {
+    var report = Report(address, initComment, place, date, status, subsID, type, id, photos, comments);
+    report.subs = subs;
+    return report;
+  }
 }

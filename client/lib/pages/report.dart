@@ -1,4 +1,5 @@
 import 'package:client/blocs/location/location_event.dart';
+import 'package:client/repositories/location_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,7 +8,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:client/views/photo_gallery.dart';
-import 'package:client/misc/access.dart';
 import 'package:client/misc/const.dart';
 import 'package:client/misc/cached_provider.dart';
 import 'package:client/blocs/location/location_bloc.dart';
@@ -41,7 +41,8 @@ class _ReportPageState extends State<ReportPage> {
     super.initState();
     me = context.select((LocationBloc bloc) => bloc.state.me);
     if (me != null && _addressController.text == "") {
-      getAddress(me!).then((String? value) => setState(() {
+      // TODO: add nominatim container to server (authenticated use), add address ti LocationRepository.
+      context.read<LocationRepository>().getAddress(me!).then((String? value) => setState(() {
         if (value != null) _addressController.text = value;
       }));
     }
@@ -86,11 +87,11 @@ class _ReportPageState extends State<ReportPage> {
               Text("Report!", style: Theme.of(context).textTheme.headline3),
               const SizedBox(height: MARGIN),
 
-              Text("What have you found?", style: Theme.of(context).textTheme.headline5),
+              Text("Initial comment", style: Theme.of(context).textTheme.headline5),
               TextFormField(
-                maxLines: 4,
+                maxLines: 3,
                 decoration: const InputDecoration(hintText: "Description: a few words about the subject of your report: its size, color, etc."),
-                onSaved: (String? value) => description = value ?? "",
+                onSaved: (String? value) => comment = value ?? "",
               ),
               const SizedBox(height: MARGIN),
 
@@ -172,14 +173,6 @@ class _ReportPageState extends State<ReportPage> {
                   const SizedBox(width: MARGIN),
                   Text("${date.year}-${date.month}-${date.day} ${time.hour}:${time.minute}")
                 ],
-              ),
-              const SizedBox(height: MARGIN),
-
-              Text("Initial comment", style: Theme.of(context).textTheme.headline5),
-              TextFormField(
-                maxLines: 3,
-                decoration: const InputDecoration(hintText: "Initial comment: what else do you want to add to your report?"),
-                onSaved: (String? value) => comment = value ?? "",
               ),
               const SizedBox(height: MARGIN),
 

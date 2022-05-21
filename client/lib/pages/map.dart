@@ -1,7 +1,6 @@
-import 'package:client/blocs/location/location_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 
@@ -12,10 +11,14 @@ import 'package:client/misc/const.dart';
 import 'package:client/misc/cached_provider.dart';
 import 'package:client/blocs/account/account_bloc.dart';
 import 'package:client/dialogs/auth_dialog.dart';
-import 'package:client/blocs/reports/reports_bloc.dart';
-import 'package:client/blocs/reports/reports_event.dart';
-import 'package:client/blocs/reports/reports_state.dart';
+import 'package:client/blocs/status/status_bloc.dart';
+import 'package:client/blocs/status/status_event.dart';
+import 'package:client/blocs/status/status_state.dart';
 import 'package:client/models/report.dart';
+import 'package:client/blocs/location/location_bloc.dart';
+import 'package:client/blocs/view/view_bloc.dart';
+import 'package:client/repositories/account_repository.dart';
+import 'package:client/repositories/view_repository.dart';
 
 
 class MapPage extends StatefulWidget {
@@ -32,7 +35,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    context.read<ReportsBloc>().add(const ReportsRequested());
+    context.read<StatusBloc>().add(const ReportsRequested());
   }
 
   Marker _generateMarker(BuildContext context, Report report) => Marker(
@@ -45,7 +48,10 @@ class _MapPageState extends State<MapPage> {
         onTap: () => showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (_) => const ReportView(),
+          builder: (_) => BlocProvider(
+            create: (_) => ViewBloc(report, ViewRepository(), context.read<AccountRepository>()),
+            child: const ReportView(),
+          ),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(GAP)),
           ),
@@ -59,7 +65,7 @@ class _MapPageState extends State<MapPage> {
     var reports = [];
     final auth = context.select((AccountBloc bloc) => bloc.state.status);
     final me = context.select((LocationBloc bloc) => bloc.state.me);
-    return BlocListener<ReportsBloc, ReportsState>(
+    return BlocListener<StatusBloc, StatusState>(
       listener: (context, state) {
         setState(() => reports = state.reports);
       },
