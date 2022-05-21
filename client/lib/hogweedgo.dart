@@ -52,8 +52,7 @@ class HogWeedGo extends StatelessWidget {
           return MaterialPageRoute(builder: (_) => FullscreenPage(args[0] as String, args[1] as bool), fullscreenDialog: true);
 
         } else if (settings.name == ReportPage.route) {
-          var me = settings.arguments as LatLng?;
-          return MaterialPageRoute(builder: (_) => ReportPage(me), fullscreenDialog: true);
+          return MaterialPageRoute(builder: (_) => const ReportPage(), fullscreenDialog: true);
 
         } else if (settings.name == AuthDialog.route) {
           return DialogRoute(context: navigatorKey.currentState!.overlay!.context, builder: (_) => const AuthDialog(), settings: settings);

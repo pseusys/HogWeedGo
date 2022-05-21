@@ -14,6 +14,6 @@ class ReportsRequested extends ReportsEvent {
 }
 
 class ReportsAdded extends ReportsEvent {
-  const ReportsAdded(this.report);
   final Report report;
+  const ReportsAdded(this.report);
 }

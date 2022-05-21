@@ -17,8 +17,6 @@ class ApiRepository {
   final reportController = StreamController<Report>();
   final viewController = StreamController<Report>();
 
-  final List<Report> reports = [];
-
   Report? _view;
 
 

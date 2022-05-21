@@ -1,23 +1,21 @@
+import 'package:client/blocs/location/location_event.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:client/views/photo_gallery.dart';
-import 'package:client/access/location.dart';
+import 'package:client/misc/access.dart';
 import 'package:client/misc/const.dart';
 import 'package:client/misc/cached_provider.dart';
-import 'package:client/blocs/reports/reports_bloc.dart';
-import 'package:client/blocs/reports/reports_event.dart';
-import 'package:client/models/report.dart';
+import 'package:client/blocs/location/location_bloc.dart';
 
 
 class ReportPage extends StatefulWidget {
-  const ReportPage(this._me, {Key? key}): super(key: key);
+  const ReportPage({Key? key}): super(key: key);
 
-  final LatLng? _me;
   final String title = "Report";
   static const String route = "/report";
 
@@ -26,7 +24,8 @@ class ReportPage extends StatefulWidget {
 }
 
 class _ReportPageState extends State<ReportPage> {
-  LatLng? _me;
+  late LatLng? me;
+  late LatLng? current;
 
   var description = "";
   var location = "";
@@ -40,12 +39,13 @@ class _ReportPageState extends State<ReportPage> {
   @override
   void initState() {
     super.initState();
-    _me = widget._me;
-    if (_me != null) {
-      getAddress(_me!).then((String? value) => setState(() {
-        if ((value != null) && (_addressController.text == "")) { _addressController.text = value; }
+    me = context.select((LocationBloc bloc) => bloc.state.me);
+    if (me != null && _addressController.text == "") {
+      getAddress(me!).then((String? value) => setState(() {
+        if (value != null) _addressController.text = value;
       }));
     }
+    current = me;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -106,11 +106,11 @@ class _ReportPageState extends State<ReportPage> {
                 child: FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
-                    center: _me ?? STP,
-                    zoom: _me == null ? 10.0 : 14.0,
+                    center: current ?? STP,
+                    zoom: current == null ? 10.0 : 14.0,
                     minZoom: 10.0,
                     interactiveFlags: InteractiveFlag.drag | InteractiveFlag.flingAnimation | InteractiveFlag.doubleTapZoom,
-                    onTap: (_, LatLng point) => setState(() => _me = point),
+                    onTap: (_, LatLng point) => setState(() => current = point),
                   ),
                   layers: [
                     TileLayerOptions(
@@ -121,7 +121,7 @@ class _ReportPageState extends State<ReportPage> {
                     ),
                     MarkerLayerOptions(
                       markers: [
-                        Marker(width: MARKER, height: MARKER, point: _me ?? STP, builder: (c) => const FlutterLogo())
+                        Marker(width: MARKER, height: MARKER, point: current ?? STP, builder: (c) => const FlutterLogo())
                       ],
                     ),
                   ],
@@ -130,11 +130,11 @@ class _ReportPageState extends State<ReportPage> {
               const SizedBox(height: GAP),
               OutlinedButton(
                 onPressed: () async {
-                  await ensureLocation(context);
+                  context.read<LocationBloc>().add(const EnsureLocation());
                   setState(() {
-                    if (widget._me != null) {
-                      _me = widget._me;
-                      _mapController.move(_me!, _mapController.zoom);
+                    if (me != null) {
+                      current = me;
+                      _mapController.move(current!, _mapController.zoom);
                     }
                   });
                 },
