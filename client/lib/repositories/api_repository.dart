@@ -23,14 +23,14 @@ class ApiRepository {
 
 
   Future<void> getReports() async {
-    final response = await get(Uri.parse("${HogWeedGo.server}/reports"));
+    final response = await get(Uri.parse("${HogWeedGo.server}/api/reports"));
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
     resetController.add(null);
     parsed.map<Report>((json) => Report.fromJson(json)).toList().forEach((elem) => reportController.add(elem));
   }
 
   Future<void> setReport(String token, Report report, List<String> files) async {
-    final request = MultipartRequest('POST', Uri.parse("${HogWeedGo.server}/reports"))
+    final request = MultipartRequest('POST', Uri.parse("${HogWeedGo.server}/api/reports"))
       ..fields['data'] = jsonEncode(report.toJson());
     await request.auth(token);
     for (var file in files) {
@@ -46,13 +46,13 @@ class ApiRepository {
 
   Future<void> loadView(Report view) async {
     _view = view;
-    final response = await get(Uri.parse("${HogWeedGo.server}/users/${_view!.subs}"));
+    final response = await get(Uri.parse("${HogWeedGo.server}/api/users/${_view!.subs}"));
     _view!.subs = User.fromJson(response.json());
     viewController.add(_view!);
   }
 
   Future<void> setComment(String token, Comment comment) async {
-    final request = Request('POST', Uri.parse("${HogWeedGo.server}/comments"))
+    final request = Request('POST', Uri.parse("${HogWeedGo.server}/api/comments"))
       ..body = jsonEncode(comment.toJson());
     await request.auth(token);
     final response = await request.response()

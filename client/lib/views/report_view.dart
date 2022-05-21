@@ -78,7 +78,7 @@ class ReportView extends StatelessWidget {
             ),
             const SizedBox(height: MARGIN),
 
-            const PhotoGallery(false),
+            PhotoGallery(false),
             const SizedBox(height: MARGIN),
 
             Row(

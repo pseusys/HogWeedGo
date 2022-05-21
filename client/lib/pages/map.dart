@@ -95,6 +95,7 @@ class _MapPageState extends State<MapPage> {
 
   Widget _showMap(BuildContext context) {
     var reports = [];
+    final auth = context.select((AccountBloc bloc) => bloc.state.status);
     return BlocListener<ReportsBloc, ReportsState>(
       listener: (context, state) {
         reports = state.reports;
@@ -127,7 +128,6 @@ class _MapPageState extends State<MapPage> {
 
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
-              final auth = context.select((AccountBloc bloc) => bloc.state.status);
               if (auth) {
                 Navigator.of(context, rootNavigator: true).pushNamed(ReportPage.route, arguments: _me);
               } else {

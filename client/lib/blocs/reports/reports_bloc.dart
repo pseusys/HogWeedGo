@@ -4,11 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:client/blocs/reports/reports_event.dart';
 import 'package:client/blocs/reports/reports_state.dart';
 
-import 'package:client/blocs/view/view_event.dart';
-import 'package:client/blocs/view/view_state.dart';
-import 'package:client/models/comment.dart';
 import 'package:client/models/report.dart';
-import 'package:client/repositories/account_repository.dart';
 import 'package:client/repositories/api_repository.dart';
 
 

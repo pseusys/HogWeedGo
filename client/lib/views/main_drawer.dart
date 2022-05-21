@@ -37,6 +37,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.select((AccountBloc bloc) => bloc.state.status);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -53,7 +54,6 @@ class _MainDrawerState extends State<MainDrawer> {
             leading: const Icon(Icons.account_circle),
             title: const Text("Account"),
             onTap: () async {
-              final auth = context.select((AccountBloc bloc) => bloc.state.status);
               if (auth) {
                 Navigator.of(context).popAllAndPushNamed(AccountPage.route);
               } else {
@@ -76,7 +76,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
           ListTile(
             title: const Center(child: Text("fullscreen...")),
-            onTap: () => Navigator.of(context).pushNamed(FullscreenPage.route, arguments: 'https://i.imgur.com/VuDy0D9.jpg'),
+            onTap: () => Navigator.of(context).pushNamed(FullscreenPage.route, arguments: ['https://i.imgur.com/VuDy0D9.jpg', true]),
           ),
 
           ListTile(

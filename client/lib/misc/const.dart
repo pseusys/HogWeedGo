@@ -11,3 +11,4 @@ const OFFSET = 40.0;
 final STP = LatLng(59.937500, 30.308611);
 
 const DANGER = Colors.red;
+const REGULAR = Colors.blueAccent;

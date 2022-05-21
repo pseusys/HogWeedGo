@@ -48,8 +48,8 @@ class HogWeedGo extends StatelessWidget {
           return FastRoute((_) => const AuthPage(), settings);
 
         } else if (settings.name == FullscreenPage.route) {
-          var link = settings.arguments as String;
-          return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
+          final args = settings.arguments as List<Object>;
+          return MaterialPageRoute(builder: (_) => FullscreenPage(args[0] as String, args[1] as bool), fullscreenDialog: true);
 
         } else if (settings.name == ReportPage.route) {
           var me = settings.arguments as LatLng?;

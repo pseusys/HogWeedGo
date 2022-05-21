@@ -1,19 +1,29 @@
+import 'package:cross_file_image/cross_file_image.dart';
 import 'package:flutter/material.dart';
 
+import 'package:image_picker/image_picker.dart';
+
 import 'package:client/misc/const.dart';
+import 'package:client/pages/fullscreen.dart';
 
 
 class PhotoGallery extends StatefulWidget {
-  const PhotoGallery(this._editable, {Key? key}): super(key: key);
+  PhotoGallery(this._editable, {Key? key}): super(key: key);
 
   final bool _editable;
+  final List<XFile?> photos = [];
 
   @override
   State<PhotoGallery> createState() => _PhotoGalleryState();
 }
 
 class _PhotoGalleryState extends State<PhotoGallery> {
-  final List<String> _photos = [];
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _getImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source, maxWidth: 1800, maxHeight: 1800);
+    if (image != null) widget.photos.add(image);
+  }
 
   Widget _buildChild(int index, bool isEditable, bool isFinal) {
     return SizedBox(
@@ -25,21 +35,44 @@ class _PhotoGalleryState extends State<PhotoGallery> {
           SizedBox(
             width: OFFSET * 3,
             height: OFFSET * 3,
-            child: Card(
-              semanticContainer: true,
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: isFinal ? const Icon(Icons.camera_alt) : Image.network(_photos[index]),
-              )
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () async {
+                  if (isFinal) {
+                    await _getImage(ImageSource.camera);
+                    setState(() {});
+                  } else {
+                    Navigator.of(context).pushNamed(FullscreenPage.route, arguments: [widget.photos[index]!.path, false]);
+                  }
+                },
+                child: Card(
+                  semanticContainer: true,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: isFinal ? const Icon(Icons.camera_alt) : Image(image: XFileImage(widget.photos[index]!)),
+                  ),
+                ),
+              ),
             ),
           ),
           if (isEditable) Align(
             alignment: Alignment.topRight,
             child: FloatingActionButton(
               mini: true,
-              onPressed: () => setState(() => isFinal ? _photos.add('https://i.imgur.com/koOENqs.jpeg') : _photos.removeAt(index)),
+              onPressed: () {
+                setState(() async {
+                  if (isFinal) {
+                    await _getImage(ImageSource.gallery);
+                    setState(() {});
+                  } else {
+                    widget.photos.removeAt(index);
+                  }
+                });
+              },
               child: Icon(isFinal ? Icons.add : Icons.close),
+              backgroundColor: isFinal ? REGULAR : DANGER,
             ),
           ),
         ],
@@ -53,8 +86,8 @@ class _PhotoGalleryState extends State<PhotoGallery> {
       height: OFFSET * 4,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: widget._editable ? _photos.length + 1 : _photos.length,
-        itemBuilder: (BuildContext context, int i) => _buildChild(i, widget._editable, i == _photos.length),
+        itemCount: widget._editable ? widget.photos.length + 1 : widget.photos.length,
+        itemBuilder: (BuildContext context, int i) => _buildChild(i, widget._editable, i == widget.photos.length),
       ),
     );
   }

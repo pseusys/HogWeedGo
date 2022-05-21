@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -8,6 +9,9 @@ import 'package:client/views/photo_gallery.dart';
 import 'package:client/access/location.dart';
 import 'package:client/misc/const.dart';
 import 'package:client/misc/cached_provider.dart';
+import 'package:client/blocs/reports/reports_bloc.dart';
+import 'package:client/blocs/reports/reports_event.dart';
+import 'package:client/models/report.dart';
 
 
 class ReportPage extends StatefulWidget {
@@ -68,6 +72,7 @@ class _ReportPageState extends State<ReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final photoGallery = PhotoGallery(true);
     return FocusWatcher(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -147,7 +152,7 @@ class _ReportPageState extends State<ReportPage> {
               const SizedBox(height: MARGIN),
 
               Text("Photos", style: Theme.of(context).textTheme.headline5),
-              const PhotoGallery(true),
+              photoGallery,
               const SizedBox(height: MARGIN),
 
               Text("Date and Time", style: Theme.of(context).textTheme.headline5),
@@ -179,9 +184,7 @@ class _ReportPageState extends State<ReportPage> {
               const SizedBox(height: MARGIN),
 
               ElevatedButton(
-                onPressed: () {
-                  //TODO: send report!
-                },
+                onPressed: () {},
                 child: const Text("Send!"),
               ),
             ],
