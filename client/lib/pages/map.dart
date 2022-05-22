@@ -56,13 +56,13 @@ class _MapPageState extends State<MapPage> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(GAP)),
           ),
         ),
-        child: const FlutterLogo(textColor: Colors.green),
+        child: const FlutterLogo(),
       ),
     ),
   );
 
   Widget _showMap(BuildContext context) {
-    var reports = [];
+    var reports = context.select((StatusBloc bloc) => bloc.state.reports);
     final auth = context.select((AccountBloc bloc) => bloc.state.status);
     final me = context.select((LocationBloc bloc) => bloc.state.me);
     return BlocListener<StatusBloc, StatusState>(
