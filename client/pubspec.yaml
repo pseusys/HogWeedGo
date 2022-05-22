@@ -13,6 +13,7 @@ dependencies:
 
   bloc: ^8.0.3
   flutter_bloc: ^8.0.1
+  formz: ^0.4.1
 
   flutter_map: ^0.14.0
   location: ^4.2.0

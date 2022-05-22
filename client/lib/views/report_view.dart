@@ -81,7 +81,7 @@ class _ReportViewState extends State<ReportView> {
                   const SizedBox(width: MARGIN),
                   Column(
                     children: [
-                      Text(_report!.address, style: Theme.of(context).textTheme.headline6),
+                      Text(_report!.address ?? "Place unknown", style: Theme.of(context).textTheme.headline6),
                       Text(_report!.place.toString()),
                     ],
                   ),
@@ -118,6 +118,7 @@ class _ReportViewState extends State<ReportView> {
                   hintText: 'Comment',
                 ),
                 textInputAction: TextInputAction.send,
+                // TODO: send comment.
               ),
               const SizedBox(height: MARGIN),
             ],

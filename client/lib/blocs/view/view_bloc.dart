@@ -18,9 +18,6 @@ class ViewBloc extends Bloc<ViewEvent, ViewState> {
 
   ViewBloc(Report report, this._viewRepository, this._accountRepository) : super(ViewState(report)) {
     on<ViewChanged>((event, emit) => emit(ViewState(event.current)));
-
-    on<InfoRequested>((event, emit) => _viewRepository.loadView(state.current));
-
     on<CommentLeft>((event, emit) {
       final comment = Comment(state.current.id, event.comment, state.current.subsID);
       _viewRepository.setComment(state.current, _accountRepository.getToken() ?? "", comment);
@@ -28,7 +25,7 @@ class ViewBloc extends Bloc<ViewEvent, ViewState> {
 
     _currentViewSubscription = _viewRepository.viewController.stream.listen((current) => add(ViewChanged(current)));
 
-    add(const InfoRequested());
+    _viewRepository.loadView(state.current);
   }
 
   @override

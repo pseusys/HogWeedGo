@@ -10,10 +10,6 @@ class ViewChanged extends ViewEvent {
   const ViewChanged(this.current);
 }
 
-class InfoRequested extends ViewEvent {
-  const InfoRequested();
-}
-
 class CommentLeft extends ViewEvent {
   final String comment;
   const CommentLeft(this.comment);

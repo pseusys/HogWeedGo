@@ -24,10 +24,10 @@ class Photo {
 
 @JsonSerializable(explicitToJson: true)
 class Report {
-  @JsonKey(name: 'address') final String address;
+  @JsonKey(name: 'address') final String? address;
   @JsonKey(name: 'init_comment') final String initComment;
   @JsonKey(name: 'place', toJson: latLngToObject, fromJson: latLngFromObject) final LatLng place;
-  @JsonKey(name: 'date', toJson: toNull, includeIfNull: false) final DateTime date;
+  @JsonKey(name: 'date', toJson: toNull, fromJson: dateTimeFromNumber, includeIfNull: false) final DateTime date;
   @JsonKey(name: 'status', toJson: toNull, includeIfNull: false) final ReportStatus status;
   @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final int subsID;
   @JsonKey(ignore: true, toJson: toNull, includeIfNull: false) User? subs;
@@ -37,6 +37,7 @@ class Report {
   @JsonKey(name: 'comments', toJson: toNull, includeIfNull: false) final List<Comment> comments;
 
   Report(this.address, this.initComment, this.place, this.date, this.status, this.subsID, this.type, this.id, this.photos, this.comments);
+  Report.send(this.address, this.initComment, this.place, this.type): date = DateTime.now(), status = ReportStatus.RECEIVED, subsID = 0, id = 0, photos = [], comments = [];
 
   factory Report.fromJson(Map<String, dynamic> json) => _$ReportFromJson(json);
   Map<String, dynamic> toJson() => _$ReportToJson(this);
