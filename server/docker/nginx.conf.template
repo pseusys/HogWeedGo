@@ -4,7 +4,7 @@ server {
     server_name _;
     charset utf-8;
 
-    client_max_body_size 75M;
+    client_max_body_size 1024M;
 
     ssl_certificate /run/secrets/ssl-cert.pem;
     ssl_certificate_key /run/secrets/ssl-key.pem;
@@ -18,10 +18,12 @@ server {
     }
 
     location ~ ^/media/(?<filename>.+\.(?:gif|jpe?g|png|svg|ico|bmp|GIF|JPE?G|PNG|SVG|ICO|BMP))$ {
+        add_header Access-Control-Allow-Origin *;
         alias /app/media/$filename;
     }
 
     location /static/ {
+        add_header Access-Control-Allow-Origin *;
         root /app;
     }
 }
