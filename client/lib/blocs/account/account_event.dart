@@ -3,38 +3,38 @@ abstract class AccountEvent {
 }
 
 class StatusChanged extends AccountEvent {
-  const StatusChanged(this.status);
   final bool status;
+  const StatusChanged(this.status);
 }
 
 class AuthenticationRequested extends AccountEvent {
-  const AuthenticationRequested(this.email, this.password, this.code);
   final String email, password, code;
+  const AuthenticationRequested(this.email, this.password, this.code);
 }
 
 class LoginRequested extends AccountEvent {
-  const LoginRequested(this.email, this.password);
   final String email, password;
+  const LoginRequested(this.email, this.password);
 }
 
 class EmailProveRequested extends AccountEvent {
-  const EmailProveRequested(this.email);
   final String email;
+  const EmailProveRequested(this.email);
 }
 
 class NameChangeRequested extends AccountEvent {
-  const NameChangeRequested(this.name);
   final String name;
+  const NameChangeRequested(this.name);
 }
 
 class EmailChangeRequested extends AccountEvent {
-  const EmailChangeRequested(this.email, this.code);
   final String email, code;
+  const EmailChangeRequested(this.email, this.code);
 }
 
 class PasswordChangeRequested extends AccountEvent {
-  const PasswordChangeRequested(this.password);
   final String password;
+  const PasswordChangeRequested(this.password);
 }
 
 class LogoutRequested extends AccountEvent {}

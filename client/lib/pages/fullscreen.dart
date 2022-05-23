@@ -5,17 +5,19 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cross_file_image/cross_file_image.dart';
 
 import 'package:client/download_image/none.dart'
   if (dart.library.io) 'package:client/download_image/mobile.dart'
   if (dart.library.html) 'package:client/download_image/web.dart';
+import 'package:image_picker/image_picker.dart';
 
 
 class FullscreenPage extends StatefulWidget {
-  const FullscreenPage(this.link, {Key? key}) : super(key: key);
+  const FullscreenPage(this.link, this.webLink, {Key? key}) : super(key: key);
 
   final String link;
-  static const domain = "";
+  final bool webLink;
   static const route = "/fullscreen:";
 
   @override
@@ -24,6 +26,7 @@ class FullscreenPage extends StatefulWidget {
 
 class _FullscreenPageState extends State<FullscreenPage> {
   late final String _link;
+  late final bool _webLink;
 
   var _imageSize = Offset.zero;
   var _position = Offset.zero;
@@ -35,7 +38,8 @@ class _FullscreenPageState extends State<FullscreenPage> {
   @override
   void initState() {
     super.initState();
-    _link = FullscreenPage.domain + widget.link;
+    _link = widget.link;
+    _webLink = widget.webLink;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
@@ -105,7 +109,7 @@ class _FullscreenPageState extends State<FullscreenPage> {
 
         body: Center(
           child: Image(
-            image: CachedNetworkImageProvider(_link),
+            image: (_webLink ? CachedNetworkImageProvider(_link) : XFileImage(XFile(_link))) as ImageProvider,
             fit: BoxFit.cover,
             errorBuilder: (_, Object exception, StackTrace? stackTrace) => const Icon(Icons.error),
             loadingBuilder: (_, Widget child, ImageChunkEvent? p) {
@@ -122,10 +126,11 @@ class _FullscreenPageState extends State<FullscreenPage> {
                     ),
                   ),
                 );
-              } else { return CircularProgressIndicator(value: _bytes(p)); }
+              } else {
+                return CircularProgressIndicator(value: _bytes(p));
+              }
             },
           )
-
             ..image.resolve(const ImageConfiguration()).addListener(
               ImageStreamListener((ImageInfo image, bool synchronousCall) {
                 final imageSize = Offset(image.image.width.toDouble(), image.image.height.toDouble());
@@ -135,11 +140,11 @@ class _FullscreenPageState extends State<FullscreenPage> {
             ),
         ),
 
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: _webLink ? FloatingActionButton(
           onPressed: () => saveFileFromUri(widget.link, _link),
           tooltip: "Save",
           child: const Icon(Icons.save),
-        ),
+        ) : null,
       ),
     );
   }

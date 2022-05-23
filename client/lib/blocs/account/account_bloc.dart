@@ -21,7 +21,19 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     on<PasswordChangeRequested>((event, emit) => _accountRepository.setup(password: event.password));
     on<LogoutRequested>((event, emit) => _accountRepository.logOut());
     on<LeaveRequested>((event, emit) => _accountRepository.leave());
-    _authenticationStatusSubscription = _accountRepository.status.listen((status) => add(StatusChanged(status)));
+
+    _authenticationStatusSubscription = _accountRepository.controller.stream.listen((status) => add(StatusChanged(status)));
+
+    _accountRepository.checkAuth();
+  }
+
+  void _onStatusChanged(StatusChanged event, Emitter<AccountState> emit) async {
+    if (event.status && !state.status) {
+      final user = await _accountRepository.profile();
+      return emit(user != null ? AccountState.authenticated(user) : const AccountState.unauthenticated());
+    } else if (!event.status && state.status) {
+      return emit(const AccountState.unauthenticated());
+    }
   }
 
   @override
@@ -29,14 +41,5 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     _authenticationStatusSubscription.cancel();
     _accountRepository.dispose();
     return super.close();
-  }
-
-  void _onStatusChanged(StatusChanged event, Emitter<AccountState> emit) async {
-    if (event.status) {
-      final user = await _accountRepository.profile();
-      return emit(user != null ? AccountState.authenticated(user) : const AccountState.unauthenticated());
-    } else {
-      return emit(const AccountState.unauthenticated());
-    }
   }
 }

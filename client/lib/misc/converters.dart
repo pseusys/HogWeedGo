@@ -9,4 +9,6 @@ LatLng latLngFromObject(Map<String, dynamic> obj) => LatLng(obj['lat'] as double
 
 Map<String, dynamic> latLngToObject(LatLng latlng) => { 'lat': latlng.latitude, 'lng': latlng.longitude };
 
+DateTime dateTimeFromNumber(int dateTime) => DateTime.fromMillisecondsSinceEpoch(dateTime);
+
 toNull(_) => null;

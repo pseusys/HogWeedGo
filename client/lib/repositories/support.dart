@@ -5,7 +5,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 
 
+//TODO: create my cookiejar.
 Client base = Client();
+Map<String, String> _cookies = {};
+Map<String, String> _headers = {};
 
 extension RequestSupport on BaseRequest {
   auth(String? token) {
@@ -13,9 +16,51 @@ extension RequestSupport on BaseRequest {
     headers.putIfAbsent("Authorization", () => token);
   }
 
+  head() {
+    headers.addAll(_headers);
+  }
+
   Future<Response> response() async {
     final stream = await base.send(this);
-    return await Response.fromStream(stream);
+    final response = await Response.fromStream(stream);
+    _updateCookie(response);
+    return response;
+  }
+
+  void _updateCookie(Response response) {
+    String? allSetCookie = response.headers['set-cookie'];
+    if (allSetCookie != null) {
+      var setCookies = allSetCookie.split(',');
+      for (var setCookie in setCookies) {
+        var cookies = setCookie.split(';');
+        for (var cookie in cookies) {
+          _setCookie(cookie);
+        }
+      }
+      _headers['cookie'] = _generateCookieHeader();
+    }
+  }
+
+  void _setCookie(String rawCookie) {
+    if (rawCookie.isNotEmpty) {
+      var keyValue = rawCookie.split('=');
+      if (keyValue.length == 2) {
+        var key = keyValue[0].trim();
+        var value = keyValue[1];
+        // ignore keys that aren't cookies
+        if (key == 'path' || key == 'expires') return;
+        _cookies[key] = value;
+      }
+    }
+  }
+
+  String _generateCookieHeader() {
+    String cookie = "";
+    for (var key in _cookies.keys) {
+      if (cookie.isNotEmpty) cookie += ";";
+      cookie += key + "=" + _cookies[key]!;
+    }
+    return cookie;
   }
 }
 
@@ -24,12 +69,11 @@ extension ResponseSupport on Response {
     return jsonDecode(body) as Map<String, dynamic>;
   }
 
+  // TODO: check if all request surrounded with try .. catch + add exception handlers depending on error code.
   void addExceptionHandler({String generalErrorMessage = "unknown"}) {
     String toastMessage = "";
     if (kDebugMode) print(body);
     switch (statusCode) {
-      case 200:
-        return;
       case 400:
         toastMessage = "request error, $generalErrorMessage!";
         break;
@@ -43,7 +87,7 @@ extension ResponseSupport on Response {
         toastMessage = "requesting too fast!";
         break;
       default:
-        toastMessage = "unknown!";
+        return;
     }
     Fluttertoast.showToast(msg: "API error: $toastMessage", toastLength: Toast.LENGTH_LONG);
   }

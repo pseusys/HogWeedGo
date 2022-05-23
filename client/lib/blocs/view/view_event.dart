@@ -6,16 +6,15 @@ abstract class ViewEvent {
 }
 
 class ViewChanged extends ViewEvent {
+  final Report current;
   const ViewChanged(this.current);
-  final Report current;
 }
 
-class InfoRequested extends ViewEvent {
-  const InfoRequested(this.current);
-  final Report current;
+class ViewNoteChanged extends ViewEvent {
+  final String note;
+  const ViewNoteChanged(this.note);
 }
 
-class CommentLeft extends ViewEvent {
-  const CommentLeft(this.comment);
-  final String comment;
+class ViewNoteSubmitted extends ViewEvent {
+  const ViewNoteSubmitted();
 }

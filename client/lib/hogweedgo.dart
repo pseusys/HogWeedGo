@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:latlong2/latlong.dart';
-
 import 'package:client/navigate/fast_route.dart';
 import 'package:client/pages/about.dart';
 import 'package:client/pages/fullscreen.dart';
@@ -31,6 +29,7 @@ class HogWeedGo extends StatelessWidget {
       initialRoute: MapPage.route,
       theme: ThemeData(),
 
+      // TODO: fix back pressing -> migrate to navigator 2.0
       onGenerateRoute: (RouteSettings settings) {
         if (settings.name == route) {
           return FastRoute((_) => const NonePage(), settings);
@@ -48,17 +47,16 @@ class HogWeedGo extends StatelessWidget {
           return FastRoute((_) => const AuthPage(), settings);
 
         } else if (settings.name == FullscreenPage.route) {
-          var link = settings.arguments as String;
-          return MaterialPageRoute(builder: (_) => FullscreenPage(link), fullscreenDialog: true);
+          final args = settings.arguments as List<Object>;
+          return MaterialPageRoute(builder: (_) => FullscreenPage(args[0] as String, args[1] as bool), fullscreenDialog: true);
 
         } else if (settings.name == ReportPage.route) {
-          var me = settings.arguments as LatLng?;
-          return MaterialPageRoute(builder: (_) => ReportPage(me), fullscreenDialog: true);
+          return MaterialPageRoute(builder: (_) => const ReportPage(), fullscreenDialog: true);
 
         } else if (settings.name == AuthDialog.route) {
           return DialogRoute(context: navigatorKey.currentState!.overlay!.context, builder: (_) => const AuthDialog(), settings: settings);
 
-        }  else {
+        } else {
           return MaterialPageRoute(builder: (_) => const NonePage());
         }
       },
