@@ -15,6 +15,7 @@ class LocationRepository {
   Stream<LatLng?> get location async* {
     Location? loc = await ensureLocation();
     if (loc == null) yield null;
+    //TODO: fix yields.
 
     final l = await loc!.getLocation();
     if (l.latitude != null && l.longitude != null) _prev = LatLng(l.latitude!, l.longitude!);

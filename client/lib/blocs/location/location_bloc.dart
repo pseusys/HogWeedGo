@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:client/repositories/location_repository.dart';
-import 'package:client/misc/const.dart';
 import 'package:client/blocs/location/location_event.dart';
 import 'package:client/blocs/location/location_state.dart';
 
@@ -14,7 +13,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
 
   late StreamSubscription<LatLng?> _locationSubscription;
 
-  LocationBloc(this._locationRepository) : super(LocationState(STP, "")) {
+  LocationBloc(this._locationRepository) : super(LocationState(null, "")) {
     on<EnsureLocation>((event, emit) => _locationRepository.ensureLocation());
     on<LocationChanged>((event, emit) => emit(state.setMe(event.current)));
 

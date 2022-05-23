@@ -1,4 +1,5 @@
 import 'package:formz/formz.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:client/misc/pair.dart';
 
@@ -27,15 +28,13 @@ class Comment extends FormzInput<String, CommentValidationError> {
 }
 
 
-enum ImageValidationError { empty, uncertain }
+enum ImageValidationError { uncertain }
 
-class Image extends FormzInput<Pair<String, int>, ImageValidationError> {
-  Image.pure() : super.pure(const Pair('', 100));
-  Image.dirty([String value = '']) : super.dirty(Pair(value, 100));
+class Image extends FormzInput<Pair<XFile, int>, ImageValidationError> {
+  Image.dirty(XFile value) : super.dirty(Pair(value, 100));
 
   @override
-  ImageValidationError? validator(Pair<String, int>? value) {
-    if (value?.first.isEmpty == true) return ImageValidationError.empty;
+  ImageValidationError? validator(Pair<XFile, int>? value) {
     if (value?.second != null && value!.second < 50) return ImageValidationError.uncertain;
     return null;
   }

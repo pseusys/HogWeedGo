@@ -126,10 +126,11 @@ class _FullscreenPageState extends State<FullscreenPage> {
                     ),
                   ),
                 );
-              } else { return CircularProgressIndicator(value: _bytes(p)); }
+              } else {
+                return CircularProgressIndicator(value: _bytes(p));
+              }
             },
           )
-
             ..image.resolve(const ImageConfiguration()).addListener(
               ImageStreamListener((ImageInfo image, bool synchronousCall) {
                 final imageSize = Offset(image.image.width.toDouble(), image.image.height.toDouble());

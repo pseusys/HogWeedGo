@@ -7,18 +7,11 @@ class StatusState {
 
   StatusState(this.reports, this.status);
 
-  StatusState addReport(Report report) {
-    reports.add(report);
-    return this;
-  }
+  StatusState addReport(Report report) => StatusState(reports.followedBy([report]).toList(), status);
 
-  StatusState resetReports() {
-    reports.clear();
-    return this;
-  }
+  StatusState setReports(List<Report> current) => StatusState(current, status);
 
-  StatusState setStatus(bool current) {
-    status = current;
-    return this;
-  }
+  StatusState resetReports() => StatusState([], status);
+
+  StatusState setStatus(bool current) => StatusState(reports, current);
 }

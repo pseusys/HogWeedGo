@@ -11,13 +11,19 @@ class StatusRepository {
   final statusController = StreamController<bool>();
   final resetController = StreamController();
   final reportController = StreamController<Report>();
+  final reportsController = StreamController<List<Report>>();
 
 
-  Future<void> getReports() async {
+  Future<void> getReports(bool sync) async {
     final response = await get(Uri.parse("${HogWeedGo.server}/api/reports"));
     final parsed = jsonDecode(response.body).cast<Map<String, dynamic>>();
     resetController.add(null);
-    parsed.map<Report>((json) => Report.fromJson(json)).toList().forEach((elem) => reportController.add(elem));
+    final reports = parsed.map<Report>((json) => Report.fromJson(json)).toList();
+    if (sync) {
+      reports.forEach((elem) => reportController.add(elem));
+    } else {
+      reportsController.add(reports);
+    }
   }
 
   Future<void> healthCheck() async {
@@ -26,8 +32,9 @@ class StatusRepository {
   }
 
   void dispose() {
+    statusController.close();
     resetController.close();
     reportController.close();
-    statusController.close();
+    reportsController.close();
   }
 }

@@ -13,11 +13,17 @@ import 'package:client/repositories/support.dart';
 class AccountRepository {
   static const _TOKEN_KEY = "authorization";
 
-  final _controller = StreamController<bool>();
+  final controller = StreamController<bool>();
   String? _token;
 
 
-  String? getToken() => _token;
+  Future<String?> getToken() async {
+    if (_token == null) {
+      final prefs = await SharedPreferences.getInstance();
+      _token = prefs.getString(_TOKEN_KEY) ?? "";
+    }
+    return _token;
+  }
 
   Future<void> _setToken (String? value) async {
     _token = value ?? "";
@@ -27,23 +33,17 @@ class AccountRepository {
     } else {
       prefs.remove(_TOKEN_KEY);
     }
-    _controller.add(_token != "");
+    controller.add(_token != "");
   }
 
-  Stream<bool> get status async* {
-    if (_token == null) {
-      final prefs = await SharedPreferences.getInstance();
-      _token = prefs.getString(_TOKEN_KEY) ?? "";
-    }
-    yield* _controller.stream;
-  }
+  Future<void> checkAuth() async => controller.add(await getToken() != "");
 
 
   Future<void> proveEmail(String email) => base.get(Uri.parse("${HogWeedGo.server}/api/me/prove_email?email=$email"));
 
   Future<User?> profile() async {
     final request = Request('GET', Uri.parse("${HogWeedGo.server}/api/me/profile"))
-      ..auth(getToken());
+      ..auth(await getToken());
     final response = await request.response()
       ..addExceptionHandler();
     return User.fromJson(response.json());
@@ -67,19 +67,19 @@ class AccountRepository {
     final passwordPart = "password=$password";
     final namePart = "name=$name";
     final request = MultipartRequest('POST', Uri.parse("${HogWeedGo.server}/api/me/setup?${[if (email != null) emailPart, if (password != null) passwordPart, if (name != null) namePart].join("&")}"))
-      ..auth(getToken());
+      ..auth(await getToken());
     if (image != null) {
       final type = lookupMimeType(image);
       if (type != null) request.files.add(await MultipartFile.fromPath('photo', image, contentType: MediaType.parse(type)));
     }
     final response = await request.response()
       ..addExceptionHandler(generalErrorMessage: "at least one of the requested properties could not be changed");
-    _controller.add(response.statusCode == 200);
+    controller.add(response.statusCode == 200);
   }
 
   Future<void> logOut() async {
     final request = Request('DELETE', Uri.parse("${HogWeedGo.server}/api/me/log_out"))
-      ..auth(getToken());
+      ..auth(await getToken());
     final response = await request.response()
       ..addExceptionHandler();
     if (response.statusCode == 200) _setToken(null);
@@ -87,11 +87,11 @@ class AccountRepository {
 
   Future<void> leave() async {
     final request = Request('DELETE', Uri.parse("${HogWeedGo.server}/api/me/leave"))
-      ..auth(getToken());
+      ..auth(await getToken());
     final response = await request.response()
       ..addExceptionHandler();
     if (response.statusCode == 200) _setToken(null);
   }
 
-  void dispose() => _controller.close();
+  void dispose() => controller.close();
 }

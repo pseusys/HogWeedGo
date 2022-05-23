@@ -1,3 +1,4 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 
 
@@ -21,7 +22,7 @@ class ReportPlaceChanged extends ReportEvent {
 }
 
 class ReportPhotosChanged extends ReportEvent {
-  final List<String> photos;
+  final List<XFile> photos;
   const ReportPhotosChanged(this.photos);
 }
 

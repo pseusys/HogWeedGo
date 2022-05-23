@@ -7,13 +7,7 @@ class LocationState {
 
   LocationState(this.me, this.address);
 
-  LocationState setMe(LatLng? current) {
-    me = current;
-    return this;
-  }
+  LocationState setMe(LatLng? current) => LocationState(current, address);
 
-  LocationState setAddress(String? current) {
-    address = current;
-    return this;
-  }
+  LocationState setAddress(String? current) => LocationState(me, current);
 }

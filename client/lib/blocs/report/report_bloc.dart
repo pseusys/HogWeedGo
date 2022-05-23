@@ -1,11 +1,10 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:formz/formz.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'package:client/blocs/report/report_event.dart';
 import 'package:client/blocs/report/report_state.dart';
-import 'package:client/misc/const.dart';
 import 'package:client/models/report.dart';
 import 'package:client/repositories/account_repository.dart';
 import 'package:client/repositories/report_repository.dart';
@@ -16,7 +15,7 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
   final ReportRepository _reportRepository;
   final AccountRepository _accountRepository;
 
-  ReportBloc(this._reportRepository, this._accountRepository) : super(ReportState(STP, [])) {
+  ReportBloc(LatLng place, this._reportRepository, this._accountRepository) : super(ReportState(place, [])) {
     on<ReportAddressChanged>(_onAddressChanged);
     on<ReportCommentChanged>(_onCommentChanged);
     on<ReportPhotosChanged>(_onPhotosChanged);
@@ -55,17 +54,12 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
         final photos = state.photos.map((e) => e.value.first).toList();
         // TODO: get species name from detector.
         final type = "Hogweed | ${state.probability}";
-        await _reportRepository.setReport(_accountRepository.getToken() ?? "", Report.send(state.address.value, state.comment.value, state.place, type), photos);
-        emit(state.copyWith(status: FormzStatus.submissionSuccess));
+        await _reportRepository.setReport(await _accountRepository.getToken() ?? "", Report.send(state.address.value, state.comment.value, state.place, type), photos);
+        return emit(state.copyWith(status: FormzStatus.submissionSuccess));
       } catch (_) {
-        emit(state.copyWith(status: FormzStatus.submissionFailure));
+        Fluttertoast.showToast(msg: "API error: image size too large (max. 1GB)!", toastLength: Toast.LENGTH_LONG);
+        return emit(state.copyWith(status: FormzStatus.submissionFailure));
       }
     }
-  }
-
-  @override
-  Future<void> close() {
-    _accountRepository.dispose();
-    return super.close();
   }
 }

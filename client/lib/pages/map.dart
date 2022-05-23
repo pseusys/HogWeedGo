@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -35,7 +36,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    context.read<StatusBloc>().add(const ReportsRequested());
+    context.read<StatusBloc>().add(const ReportsRequested(false));
   }
 
   Marker _generateMarker(BuildContext context, Report report) => Marker(
@@ -56,20 +57,17 @@ class _MapPageState extends State<MapPage> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(GAP)),
           ),
         ),
-        child: const FlutterLogo(),
+        child: Image.asset(report.status.asset),
       ),
     ),
   );
 
   Widget _showMap(BuildContext context) {
-    var reports = context.select((StatusBloc bloc) => bloc.state.reports);
     final auth = context.select((AccountBloc bloc) => bloc.state.status);
     final me = context.select((LocationBloc bloc) => bloc.state.me);
-    return BlocListener<StatusBloc, StatusState>(
-      listener: (context, state) {
-        setState(() => reports = state.reports);
-      },
-      child: GestureDetector(
+    return BlocBuilder<StatusBloc, StatusState>(
+      buildWhen: (previous, current) => !const ListEquality().equals(previous.reports, current.reports),
+      builder: (context, state) => GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           body: FlutterMap(
@@ -88,8 +86,8 @@ class _MapPageState extends State<MapPage> {
               ),
               MarkerLayerOptions(
                 markers: [
-                  for (var report in reports) _generateMarker(context, report),
-                  if (me != null) Marker(width: MARKER, height: MARKER, point: me, builder: (c) => const FlutterLogo()),
+                  for (var report in state.reports) _generateMarker(context, report),
+                  if (me != null) Marker(width: MARKER, height: MARKER, point: me, builder: (c) => const Icon(Icons.directions_run)),
                 ],
               ),
             ],
@@ -100,8 +98,8 @@ class _MapPageState extends State<MapPage> {
             tooltip: "Report!",
             child: const Icon(Icons.add),
           ),
-        )
-      )
+        ),
+      ),
     );
   }
 
@@ -111,7 +109,15 @@ class _MapPageState extends State<MapPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
 
-        appBar: AppBar(title: Text(widget.title)),
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: <Widget>[
+            IconButton(
+              onPressed: () =>context.read<StatusBloc>().add(const ReportsRequested(false)),
+              icon: const Icon(Icons.sync),
+            ),
+          ],
+        ),
 
         body: Navigator(
           onGenerateRoute: (RouteSettings s) => MaterialPageRoute(builder: (BuildContext c) => _showMap(c), settings: s),

@@ -25,6 +25,6 @@ class ReportState {
     status: status ?? this.status,
     address: address ?? this.address,
     comment: comment ?? this.comment,
-    probability: photos != null ? (photos.fold<int>(0, (previousValue, element) => previousValue + element.value.second) / photos.length).round() : probability,
+    probability: photos != null ? (photos.isEmpty ? 100 : (photos.fold<int>(0, (previousValue, element) => previousValue + element.value.second) / photos.length).round()) : probability,
   );
 }

@@ -21,25 +21,18 @@ class MainDrawer extends StatefulWidget {
 }
 
 class _MainDrawerState extends State<MainDrawer> {
-  bool? _connected;
-
-  @override
-  void initState() {
-    super.initState();
-    // TODO: add to network state change listener.
-    _connected = context.select((StatusBloc bloc) => bloc.state.status);
-  }
+  // TODO: add StatusBloc to network state change listener.
 
   @override
   Widget build(BuildContext context) {
     final auth = context.select((AccountBloc bloc) => bloc.state.status);
-    return BlocListener<StatusBloc, StatusState>(
-      listener: (context, state) => setState(() => _connected = state.status),
-      child: Drawer(
+    return BlocBuilder<StatusBloc, StatusState>(
+      buildWhen: (previous, current) => previous.status != current.status,
+      builder: (context, state) => Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            _MainDrawerHeader(_connected),
+            _MainDrawerHeader(state.status),
 
             ListTile(
               leading: const Icon(Icons.map),

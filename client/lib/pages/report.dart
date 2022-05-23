@@ -2,6 +2,8 @@ import 'package:client/blocs/location/location_event.dart';
 import 'package:client/blocs/report/report_bloc.dart';
 import 'package:client/blocs/report/report_event.dart';
 import 'package:client/blocs/report/report_state.dart';
+import 'package:client/navigate/navigator_extension.dart';
+import 'package:client/pages/map.dart';
 import 'package:client/repositories/account_repository.dart';
 import 'package:client/repositories/location_repository.dart';
 import 'package:client/repositories/report_repository.dart';
@@ -32,7 +34,9 @@ class ReportPage extends StatefulWidget {
 class _ReportPageState extends State<ReportPage> {
   @override
   Widget build(BuildContext context) {
-    final photoGallery = PhotoGallery(true);
+    final _mapController = MapController();
+    final me = context.select((LocationBloc bloc) => bloc.state.me) ?? STP;
+    final photoGallery = PhotoGallery.editable();
     return FocusWatcher(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -40,7 +44,7 @@ class _ReportPageState extends State<ReportPage> {
         appBar: AppBar(title: Text(widget.title)),
 
         body: BlocProvider(
-          create: (_) => ReportBloc(ReportRepository(), context.read<AccountRepository>()),
+          create: (_) => ReportBloc(me, ReportRepository(), context.read<AccountRepository>()),
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: MARGIN, horizontal: OFFSET),
             children: [
@@ -55,10 +59,10 @@ class _ReportPageState extends State<ReportPage> {
               _AddressInput(),
               const SizedBox(height: GAP),
 
-              _Map(),
+              _Map(_mapController),
               const SizedBox(height: GAP),
 
-              _LocationInput(),
+              _LocationInput(_mapController),
               const SizedBox(height: MARGIN),
 
               Text("Photos", style: Theme.of(context).textTheme.headline5),
@@ -79,17 +83,15 @@ class _CommentInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ReportBloc, ReportState>(
       buildWhen: (previous, current) => previous.comment != current.comment,
-      builder: (context, state) {
-        return TextField(
-          maxLines: 3,
-          key: const Key('reportForm_commentInput_textField'),
-          onChanged: (comment) => context.read<ReportBloc>().add(ReportCommentChanged(comment)),
-          decoration: InputDecoration(
-            hintText: "Description: a few words about the subject of your report: its size, color, etc.",
-            errorText: state.comment.invalid ? 'Invalid initial comment' : null,
-          ),
-        );
-      },
+      builder: (context, state) => TextField(
+        maxLines: 3,
+        key: const Key('reportForm_commentInput_textField'),
+        onChanged: (comment) => context.read<ReportBloc>().add(ReportCommentChanged(comment)),
+        decoration: InputDecoration(
+          hintText: "Description: a few words about the subject of your report: its size, color, etc.",
+          errorText: state.comment.invalid ? 'Invalid initial comment' : null,
+        ),
+      ),
     );
   }
 }
@@ -110,83 +112,82 @@ class _AddressInput extends StatelessWidget {
     }
     return BlocBuilder<ReportBloc, ReportState>(
       buildWhen: (previous, current) => previous.address != current.address,
-      builder: (context, state) {
-        return TextField(
-          key: const Key('reportForm_addressInput_textField'),
-          controller: _addressController,
-          onChanged: (comment) => context.read<ReportBloc>().add(ReportAddressChanged(comment)),
-          decoration: InputDecoration(
-            hintText: "Address of tour report, how to get there, some visible landmarks, etc.",
-            errorText: state.comment.invalid ? 'Invalid address' : null,
-          ),
-        );
-      },
+      builder: (context, state) => TextField(
+        key: const Key('reportForm_addressInput_textField'),
+        controller: _addressController,
+        onChanged: (comment) => context.read<ReportBloc>().add(ReportAddressChanged(comment)),
+        decoration: InputDecoration(
+          hintText: "Address of tour report, how to get there, some visible landmarks, etc.",
+          errorText: state.comment.invalid ? 'Invalid address' : null,
+        ),
+      ),
     );
   }
 }
 
 class _Map extends StatelessWidget {
+  final MapController _controller;
+  const _Map(this._controller, {Key? key}): super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final me = context.select((LocationBloc bloc) => bloc.state.me);
     return BlocBuilder<ReportBloc, ReportState>(
       buildWhen: (previous, current) => previous.place != current.place,
-      builder: (context, state) {
-        return SizedBox(
-          height: OFFSET * 5,
-          child: FlutterMap(
-            options: MapOptions(
-              center: me ?? STP,
-              zoom: me == null ? 10.0 : 14.0,
-              minZoom: 10.0,
-              interactiveFlags: InteractiveFlag.drag | InteractiveFlag.flingAnimation | InteractiveFlag.doubleTapZoom,
-              onTap: (_, LatLng point) => context.read<ReportBloc>().add(ReportPlaceChanged(point)),
-            ),
-            layers: [
-              TileLayerOptions(
-                urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-                subdomains: ["a", "b"],
-                attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
-                tileProvider: const CachedTileProvider(),
-              ),
-              MarkerLayerOptions(
-                markers: [
-                  Marker(width: MARKER, height: MARKER, point: me ?? STP, builder: (c) => const FlutterLogo())
-                ],
-              ),
-            ],
+      builder: (context, state) => SizedBox(
+        height: OFFSET * 5,
+        child: FlutterMap(
+          mapController: _controller,
+          options: MapOptions(
+            center: state.place,
+            zoom: 14.0,
+            minZoom: 10.0,
+            interactiveFlags: InteractiveFlag.drag | InteractiveFlag.flingAnimation | InteractiveFlag.doubleTapZoom,
+            onTap: (_, LatLng point) => context.read<ReportBloc>().add(ReportPlaceChanged(point)),
           ),
-        );
-      },
+          layers: [
+            TileLayerOptions(
+              urlTemplate: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+              subdomains: ["a", "b"],
+              attributionBuilder: (_) => const Text("© Humanitarian OSM Team"),
+              tileProvider: const CachedTileProvider(),
+            ),
+            MarkerLayerOptions(
+              markers: [
+                Marker(width: MARKER, height: MARKER, point: state.place, builder: (c) => const Icon(Icons.location_on))
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class _LocationInput extends StatelessWidget {
+  final MapController _controller;
+  const _LocationInput(this._controller, {Key? key}): super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ReportBloc, ReportState>(
       buildWhen: (previous, current) => previous.place != current.place,
-      builder: (context, state) {
-        return OutlinedButton(
-          key: const Key('reportForm_locationInput_button'),
-          onPressed: () async {
-            context.read<LocationBloc>().add(const EnsureLocation());
-            final me = context.select((LocationBloc bloc) => bloc.state.me);
-            context.read<ReportBloc>().add(ReportPlaceChanged(me!));
-          },
-          child: Row(
-            children: const [
-              Text("Use my location"),
-              SizedBox(width: GAP),
-              Icon(Icons.gps_fixed),
-            ],
-          ),
-          style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all(Theme.of(context).textTheme.bodyText1?.color),
-          ),
-        );
-      }
+      builder: (context, state) => OutlinedButton(
+        key: const Key('reportForm_locationInput_button'),
+        onPressed: () async {
+          context.read<LocationBloc>().add(const EnsureLocation());
+          final me = context.select((LocationBloc bloc) => bloc.state.me) ?? STP;
+          context.read<ReportBloc>().add(ReportPlaceChanged(me));
+          _controller.move(me, _controller.zoom);
+        },
+        child: Row(
+          children: const [
+            Text("Use my location"),
+            SizedBox(width: GAP),
+            Icon(Icons.gps_fixed),
+          ],
+        ),
+        style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Theme.of(context).textTheme.bodyText1?.color)),
+      ),
     );
   }
 }
@@ -197,6 +198,7 @@ class _SubmitButton extends StatelessWidget {
     return BlocBuilder<ReportBloc, ReportState>(
       buildWhen: (previous, current) => previous.status != current.status,
       builder: (context, state) {
+        if (state.status == FormzStatus.submissionSuccess) Navigator.of(context, rootNavigator: true).popAllAndPushNamed(MapPage.route);
         return state.status.isSubmissionInProgress ? const CircularProgressIndicator() : ElevatedButton(
           key: const Key('reportForm_submit_button'),
           child: const Text('Submit'),

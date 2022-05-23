@@ -10,12 +10,18 @@ class ReportsReset extends StatusEvent {
 }
 
 class ReportsRequested extends StatusEvent {
-  const ReportsRequested();
+  final bool sync;
+  const ReportsRequested(this.sync);
 }
 
 class ReportAdded extends StatusEvent {
   final Report report;
   const ReportAdded(this.report);
+}
+
+class ReportsAdded extends StatusEvent {
+  final List<Report> reports;
+  const ReportsAdded(this.reports);
 }
 
 class StatusRequest extends StatusEvent {

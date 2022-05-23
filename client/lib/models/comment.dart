@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'package:client/misc/converters.dart';
@@ -7,20 +8,21 @@ part 'comment.g.dart';
 
 
 @JsonSerializable()
-class Comment {
+class Comment extends Equatable {
   @JsonKey(name: 'report') final int report;
   @JsonKey(name: 'text') final String text;
   @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final int subsID;
-  @JsonKey(ignore: true, toJson: toNull, includeIfNull: false) User? subs;
+  @JsonKey(ignore: true, toJson: toNull, includeIfNull: false) final User? subs;
 
-  Comment(this.report, this.text, this.subsID);
+  const Comment(this.report, this.text, this.subsID): subs = null;
+  const Comment._(this.report, this.text, this.subsID, this.subs);
+  const Comment.send(this.report, this.text, this.subsID): subs = null;
 
   factory Comment.fromJson(Map<String, dynamic> json) => _$CommentFromJson(json);
   Map<String, dynamic> toJson() => _$CommentToJson(this);
 
-  Comment copyWithUser(User subs) {
-    var comment = Comment(report, text, subsID);
-    comment.subs = subs;
-    return comment;
-  }
+  Comment copyWithUser(User subs) => Comment._(report, text, subsID, subs);
+
+  @override
+  List<Object> get props => [report, text, subsID];
 }

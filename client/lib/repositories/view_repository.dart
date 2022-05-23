@@ -30,8 +30,7 @@ class ViewRepository {
     final request = Request('POST', Uri.parse("${HogWeedGo.server}/api/comments"))
       ..body = jsonEncode(comment.toJson());
     await request.auth(token);
-    final response = await request.response()
-      ..addExceptionHandler();
+    final response = await request.response();
     view.comments.add(Comment.fromJson(response.json()));
     viewController.add(view);
   }
