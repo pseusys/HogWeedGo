@@ -45,7 +45,7 @@ class ViewBloc extends Bloc<ViewEvent, ViewState> {
     if (state.status.isValidated) {
       emit(state.copyWith(status: FormzStatus.submissionInProgress));
       try {
-        await _viewRepository.setComment(state.current, await _accountRepository.getToken() ?? "", Comment.send(state.current.id, state.note.value, state.current.subsID));
+        await _viewRepository.setComment(state.current, await _accountRepository.getToken() ?? "", Comment.send(state.current.id, state.note.value));
         return emit(state.copyWith(status: FormzStatus.submissionSuccess));
       } catch (_) {
         Fluttertoast.showToast(msg: "API error: comment can not be set!", toastLength: Toast.LENGTH_LONG);

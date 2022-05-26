@@ -45,6 +45,7 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final email = context.select((AccountBloc bloc) => bloc.state.user?.email) ?? "Unknown";
     return FocusWatcher(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -74,52 +75,45 @@ class _AccountPageState extends State<AccountPage> {
                 ),
 
                 const SizedBox(width: MARGIN),
-                Expanded(
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'User name',
-                    ),
-                    textInputAction: TextInputAction.send,
-                    focusNode: _focusNode,
-                    controller: nameController,
+
+                Flexible(
+                  child: Column(
+                    children: [
+                      Flexible(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'User name',
+                          ),
+                          textInputAction: TextInputAction.send,
+                          focusNode: _focusNode,
+                          controller: nameController,
+                        ),
+                      ),
+
+                      const SizedBox(height: MARGIN / 2),
+
+                      Flexible(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            hintText: 'User email (current: $email)',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+
+                const SizedBox(width: MARGIN),
+                ElevatedButton(
+                    onPressed: () {},
+                    child: const Text("Save")
                 ),
               ],
             ),
             const SizedBox(height: MARGIN),
 
-            Text("Profile", style: Theme.of(context).textTheme.headline5),
-            const SizedBox(height: GAP),
-            Row(
-              children: [
-                const Text("E-mail:"),
-                const SizedBox(width: MARGIN),
-                Builder(
-                  builder: (context) {
-                    final email = context.select((AccountBloc bloc) => bloc.state.user?.email);
-                    return Text("Current e-mail: $email", style: Theme.of(context).textTheme.headline6);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: GAP),
-            ElevatedButton(
-                onPressed: () {
-                  validationDialog(context, "Change your email", "Input your email, click 'Send code' and input the code below",
-                    firstTitle: "Email",
-                    secondTitle: "Code",
-                    firstHint: "Enter a valid email!",
-                    secondHint: "Enter a valid 8-digit code!",
-                    actionText: "Send code",
-                    addAction: (String email) => context.read<AccountBloc>().add(EmailProveRequested(email)),
-                    request: (String email, String code) => context.read<AccountBloc>().add(EmailChangeRequested(email, code))
-                  );
-                },
-                child: const Text("Change email")
-            ),
-            const SizedBox(height: GAP / 2),
-            Text("A verification e-mail will be sent to the address.", style: Theme.of(context).textTheme.caption),
             const SizedBox(height: GAP),
             ElevatedButton(
                 onPressed: () {

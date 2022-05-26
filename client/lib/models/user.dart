@@ -1,12 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'package:client/misc/converters.dart';
+
 part 'user.g.dart';
 
 
 @JsonSerializable()
 class User extends Equatable {
-  @JsonKey(name: 'last_login') final DateTime? lastLogin;
+  @JsonKey(name: 'last_login', fromJson: dateTimeFromNumber) final DateTime? lastLogin;
   @JsonKey(name: 'first_name') final String? firstName;
   @JsonKey(name: 'email') final String? email;
   @JsonKey(name: 'is_staff') final bool isStaff;
