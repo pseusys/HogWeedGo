@@ -28,7 +28,7 @@ jobs:
     - name: Fetch Github Release Asset 🦞
       uses: dsaltares/fetch-gh-release-asset@0.0.8
       with:
-        version: "tags/v0.0.1-server"
+        version: "tags/v0.0.1-ml-helper"
         file: "hogweed-detector.tflite"
         target: "./ml-helper/hogweed-detector.tflite"
 
