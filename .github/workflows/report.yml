@@ -25,6 +25,11 @@ jobs:
     steps:
     - name: Checkout 🛎️
       uses: actions/checkout@v3
+
+    - name: Validate OpenAPI definition ✔️
+      uses: char0n/swagger-editor-validate@v1
+      with:
+        definition-file: HogWeedGo.openapi.yml
       
     - name: Compile 📄
       uses: xu-cheng/latex-action@v2

@@ -1,4 +1,4 @@
-openapi: 3.0.2
+openapi: 3.0.3
 
 info:
   title: HogWeedGo service openapi specification
@@ -10,14 +10,14 @@ paths:
   /healthcheck:
     get:
       operationId: healthcheck
-      description: Endpoint to check whether the HogWeed server is alive.
+      description: "Endpoint to check whether the HogWeed server is alive."
       responses:
         '200':
           content:
             text/plain:
               schema:
-                const: healthy
-          description: Server is up and healthy.
+                pattern: '^healthy$'
+          description: "Server is up and healthy."
       tags:
         - health
         - unauth
@@ -25,27 +25,26 @@ paths:
   /api/me/prove_email:
     get:
       operationId: proveEmail
-      description: Endpoint to generate a unique code for given email. It is required for authentication and stays valid for 10 minutes.
+      description: "Endpoint to generate a unique code for given email. It is required for authentication and stays valid for 10 minutes."
       parameters:
-        - in: path
+        - in: query
           name: email
           schema:
             type: string
             format: email
           required: true
-          description: Email the code is requested for.
+          description: "Email the code is requested for."
       responses:
         '200':
           content:
             text/plain:
               schema:
-                const: Code was sent
-                description: Response of server in production environment.
+                pattern: '^Code was sent$'
+                description: "Response of server in production environment."
             application/json:
               schema:
                 $ref: '#/components/schemas/Email'
-                description: Response of server in debug environment (environment variable MOCK_SMTP_SERVER is set to True).
-          description: The code was successfully generated and sent (by email or in response body - depending on server settings).
+          description: "The code was successfully generated and sent. If environment variable MOCK_SMTP_SERVER is set to True response will be sent as JSON. Otherwise it will be sent to specified email."
       tags:
         - me
         - unauth
@@ -53,59 +52,58 @@ paths:
   /api/me/auth:
     get:
       operationId: auth
-      description: Endpoint for creating new user (with given email).
+      description: "Endpoint for creating new user (with given email)."
       parameters:
-        - in: path
+        - in: query
           name: email
           schema:
             type: string
             format: email
           required: true
-          description: Email user account is created with.
-        - in: path
+          description: "Email user account is created with."
+        - in: query
           name: code
           schema:
             type: string
           required: true
-          description: Special unique registration code (usually received by email from '/api/me/prove_email' endpoint).
-        - in: path
+          description: "Special unique registration code (usually received by email from '/api/me/prove_email' endpoint)."
+        - in: query
           name: password
           schema:
             type: string
           required: true
-          description: Password of newly created user.
+          description: "Password of newly created user."
       responses:
         '200':
           content:
             application/json:
               schema:
-                const: Token [TOKEN]
-          description: New user is successfully created. TOKEN stands for user session auth token. To log in user should add 'Authentication: Token [TOKEN]' header to his request.
+                pattern: '^Token (?<TOKEN>[a-zA-Z0-9]*)$'
+          description: "New user is successfully created. TOKEN stands for user session auth token. To log in user should add Authentication: Token TOKEN' header to his request."
         '401':
           content:
             text/plain:
               schema:
-                const: Wrong or expired code!
-          description: Provided code was wrong or expired (sent more than 10 minutes after being requested).
+                pattern: '^Wrong or expired code!$'
+          description: "Provided code was wrong or expired (sent more than 10 minutes after being requested)."
         '403':
           content:
             text/plain:
               schema:
-                const: User already exists!
-          description: User with provided email already exists.
+                pattern: '^User already exists!$'
+          description: "User with provided email already exists."
         '400':
           content:
             text/plain:
               schema:
-                const: Can not authenticate user with email: [EMAIL], password: [PASSWORD]!
-          description: User can not be created for unknown reason. EMAIL and PASSWORD stand for email and password provided in params.
+                pattern: '^Can not authenticate user with email: (?<EMAIL>[a-zA-Z0-9]*), password: (?<PASSWORD>[a-zA-Z0-9]*)!$'
+          description: "User can not be created for unknown reason. EMAIL and PASSWORD stand for email and password provided in params."
         '429':
           content:
             application/json:
               schema:
-                type: object
-                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
-          description: This endpoint may be called maximum 4 times per minute.
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+          description: "This endpoint may be called maximum 4 times per minute."
       tags:
         - me
         - unauth
@@ -113,41 +111,40 @@ paths:
   /api/me/log_in:
     get:
       operationId: logIn
-      description: Endpoint for logging existing user in.
+      description: "Endpoint for logging existing user in."
       parameters:
-        - in: path
+        - in: query
           name: email
           schema:
             type: string
             format: email
           required: true
-          description: Email user account is created with.
-        - in: path
+          description: "Email user account is created with."
+        - in: query
           name: password
           schema:
             type: string
           required: true
-          description: Password of newly created user.
+          description: "Password of newly created user."
       responses:
         '200':
           content:
             application/json:
               schema:
-                const: Token [TOKEN]
-          description: User is successfully logged in. TOKEN stands for user session auth token. To log in user should add 'Authentication: Token [TOKEN]' header to his request.
+                pattern: '^Token (?<TOKEN>[a-zA-Z0-9]*)$'
+          description: "User is successfully logged in. TOKEN stands for user session auth token. To log in user should add 'Authentication: Token [TOKEN]' header to his request."
         '400':
           content:
             text/plain:
               schema:
-                const: Can not log in user with email: [EMAIL], password: [PASSWORD]!
-          description: User can not be logged in. EMAIL and PASSWORD stand for email and password provided in params.
+                pattern: '^Can not log in user with email: (?<EMAIL>[a-zA-Z0-9]*), password: (?<PASSWORD>[a-zA-Z0-9]*)!$'
+          description: "User can not be logged in. EMAIL and PASSWORD stand for email and password provided in params."
         '429':
           content:
             application/json:
               schema:
-                type: object
-                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
-          description: This endpoint may be called maximum 4 times per minute.
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+          description: "This endpoint may be called maximum 4 times per minute."
       tags:
         - me
         - unauth
@@ -155,14 +152,16 @@ paths:
   /api/me/profile:
     get:
       operationId: profile
-      description: Endpoint for retrieving information about current user.
+      description: "Endpoint for retrieving information about current user."
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-          description: User profile.
+          description: "Current user profile."
+      security:
+        - HogWeedAuth: []
       tags:
         - me
         - auth
@@ -170,29 +169,29 @@ paths:
   /api/me/setup:
     post:
       operationId: setupMe
-      description: Endpoint for altering user information (such as email, password, name or profile picture).
+      description: "Endpoint for altering user information (such as email, password, name or profile picture)."
       parameters:
-        - in: path
+        - in: query
           name: email
           schema:
             type: string
             format: email
-          description: New email for current user.
-        - in: path
+          description: "New email for current user."
+        - in: query
           name: code
           schema:
             type: string
-          description: Special unique registration code (usually received by email from '/api/me/prove_email' endpoint). Required for email changing only.
-        - in: path
+          description: "Special unique registration code (usually received by email from '/api/me/prove_email' endpoint). Required for email changing only."
+        - in: query
           name: password
           schema:
             type: string
-          description: New password for current user.
-        - in: path
+          description: "New password for current user."
+        - in: query
           name: name
           schema:
             type: string
-          description: New name of current user.
+          description: "New name of current user."
       requestBody:
         content:
           multipart/form-data:
@@ -203,27 +202,28 @@ paths:
                   type: string
                   format: binary
               additionalProperties: false
-        description: New profile picture of current user.
+        description: "New profile picture of current user."
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Setup'
-          description: All requested user properties were successfully changed.
+          description: "All requested user properties were successfully changed."
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Setup'
-          description: At least one of the requested properties could not be changed.
+          description: "At least one of the requested properties could not be changed."
         '429':
           content:
             application/json:
               schema:
-                type: object
-                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
-          description: This endpoint may be called maximum 4 times per minute.
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+          description: "This endpoint may be called maximum 4 times per minute."
+      security:
+        - HogWeedAuth: []
       tags:
         - me
         - auth
@@ -231,14 +231,16 @@ paths:
   /api/me/log_out:
     delete:
       operationId: logOut
-      description: Endpoint for logging current user out (finishing his session and deleting token).
+      description: "Endpoint for logging current user out (finishing his session and deleting token)."
       responses:
         '200':
           content:
             text/plain:
               schema:
-                const: Logged out successfully
-          description: User was logged out successfully, his token is valid no more.
+                pattern: '^Logged out successfully$'
+          description: "User was logged out successfully, his token is valid no more."
+      security:
+        - HogWeedAuth: []
       tags:
         - me
         - auth
@@ -246,14 +248,16 @@ paths:
   /api/me/leave:
     delete:
       operationId: leave
-      description: Endpoint for deleting current user.
+      description: "Endpoint for deleting current user."
       responses:
         '200':
           content:
             text/plain:
               schema:
-                const: User deleted successfully
-          description: User was deleted successfully, all his information removed from server.
+                pattern: '^User deleted successfully$'
+          description: "User was deleted successfully, all his information removed from server."
+      security:
+        - HogWeedAuth: []
       tags:
         - me
         - auth
@@ -261,9 +265,9 @@ paths:
   /api/reports:
     get:
       operationId: listReports
-      description: Endpoint for getting all reports ever sent.
+      description: "Endpoint for getting all reports ever sent."
       parameters:
-        - in: path
+        - in: query
           name: filter
           schema:
             enum:
@@ -271,7 +275,7 @@ paths:
               - APPROVED
               - INVALID
             type: string
-          description: Optional filter for requested reports (returns all if not set).
+          description: "Optional filter for requested reports (returns all if not set)."
       responses:
         '200':
           content:
@@ -280,12 +284,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportOut'
-          description: Reports list.
+          description: "Reports list."
       tags:
         - api
     post:
       operationId: createReport
-      description: Endpoint for creating a new report.
+      description: "Endpoint for creating a new report."
       requestBody:
         content:
           multipart/form-data:
@@ -308,41 +312,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReportOut'
-          description: New added report.
+          description: "New added report."
         '400':
           content:
             application/json:
               schema:
                 type: string
-          description: Report can not be created because of data integrity validation failure.
+          description: "Report can not be created because of data integrity validation failure."
         '429':
           content:
             application/json:
               schema:
-                type: object
-                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
-          description: This endpoint may be called maximum 4 times per minute.
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+          description: "This endpoint may be called maximum 4 times per minute."
+      security:
+        - HogWeedAuth: []
       tags:
         - auth
 
   /api/users/{id}:
     get:
       operationId: retrieveUser
-      description: Endpoint for retrieving information about particular service user.
+      description: "Endpoint for retrieving information about particular service user."
       parameters:
         - in: path
           name: id
           schema:
             type: integer
           required: true
-          description: A unique integer value identifying this User.
+          description: "A unique integer value identifying this User."
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-          description: User profile.
+          description: "User profile."
       tags:
         - api
         - user
@@ -350,7 +355,7 @@ paths:
   /api/comments:
     post:
       operationId: createComment
-      description: Endpoint for creating a new comment.
+      description: "Endpoint for creating a new comment."
       requestBody:
         content:
           application/json:
@@ -362,20 +367,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentOut'
-          description: Comment was successfully created.
+          description: "Comment was successfully created."
         '400':
           content:
             application/json:
               schema:
                 type: string
-          description: Report can not be created because of data integrity validation failure.
+          description: "Report can not be created because of data integrity validation failure."
         '429':
           content:
             application/json:
               schema:
-                type: object
-                description: See: https://github.com/encode/django-rest-framework/blob/86673a337a4fe8861c090b4532379b97e3921fef/rest_framework/exceptions.py#L223
-          description: This endpoint may be called maximum 4 times per minute.
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+          description: "This endpoint may be called maximum 4 times per minute."
+      security:
+        - HogWeedAuth: []
       tags:
         - comment
         - auth
@@ -388,17 +394,18 @@ components:
       type: object
       properties:
         subject:
-          const: HogWeedGo authentication
+          pattern: '^HogWeedGo authentication$'
         message:
-          const: Your confirmation code is: '[TOKEN]'\nIt will be valid for 10 minutes.
-          description: TOKEN stands for a token, unique for given server and email, valid for 10 minutes.
+          pattern: '^Your confirmation code is: "(?<TOKEN>[a-zA-Z0-9]*)"\nIt will be valid for 10 minutes\.$'
+          description: "TOKEN stands for a token, unique for given server and email, valid for 10 minutes."
         recipients:
           type: array
-          prefixItems:
-            - type: string
-              format: email
-          items: false
-          description: Email the code is generated for.
+          items:
+            type: string
+            format: email
+          minItems: 1
+          maxItems: 1
+          description: "Email the code is generated for."
       additionalProperties: false
       required:
         - subject
@@ -414,29 +421,29 @@ components:
             - Saved!
             - User with given email already exists!
           type: string
-          description: Describes whether user email was altered and if not why.
+          description: "Describes whether user email was altered and if not why."
         password:
-          const: Saved!
-          description: Describes whether user password was changed.
+          pattern: '^Saved!$'
+          description: "Describes whether user password was changed."
         name:
-          const: Saved!
-          description: Describes whether user name was changed.
+          pattern: '^Saved!$'
+          description: "Describes whether user name was changed."
         photo:
-          const: Saved!
-          description: Describes whether user profile picture was changed.
+          pattern: '^Saved!$'
+          description: "Describes whether user profile picture was changed."
       additionalProperties: false
       
     Location:
       type: object
-        properties:
-          lng:
-            type: number
-          lat:
-            type: number
-        additionalProperties: false
-        required:
-          - lng
-          - lat
+      properties:
+        lng:
+          type: number
+        lat:
+          type: number
+      additionalProperties: false
+      required:
+        - lng
+        - lat
 
     ReportIn:
       type: object
@@ -444,17 +451,17 @@ components:
         address:
           type: string
           nullable: true
-          description: Address defined by user. May be just a geo-related recommendation.
+          description: "Address defined by user. May be just a geo-related recommendation."
           maxLength: 128
         init_comment:
           type: string
-          description: User comment about the report.
+          description: "User comment about the report."
           maxLength: 2048
         place:
           $ref: '#/components/schemas/Location'
         type:
           type: string
-          description: User guess for report.
+          description: "User guess for report."
           maxLength: 64
       additionalProperties: false
       required:
@@ -468,33 +475,33 @@ components:
         address:
           type: string
           nullable: true
-          description: Address defined by user. May be just a geo-related recommendation.
+          description: "Address defined by user. May be just a geo-related recommendation."
           maxLength: 128
         init_comment:
           type: string
-          description: User comment about the report.
+          description: "User comment about the report."
           maxLength: 2048
         date:
           type: string
-          format: date-time
-          description: Date specified by user for his observation.
+          format: number
+          description: "Date specified by user for his observation."
         status:
           enum:
             - RECEIVED
             - APPROVED
             - INVALID
           type: string
-          description: Report status.
+          description: "Report status."
         subs:
           type: integer
           nullable: true
-          description: The sender of the report, subscription.
+          description: "The sender of the report, subscription."
         id:
           type: integer
-          description: Unique identifier of this report.
+          description: "Unique identifier of this report."
         type:
           type: string
-          description: Staff reply for the report.
+          description: "Staff reply for the report."
           maxLength: 64
         place:
           $ref: '#/components/schemas/Location'
@@ -542,7 +549,7 @@ components:
           nullable: true
         is_staff:
           type: boolean
-          description: Designates whether the user can log into this admin site.
+          description: "Designates whether the user can log into this admin site."
         photo:
           type: string
           format: uri
@@ -560,10 +567,10 @@ components:
       properties:
         report:
           type: integer
-          description: Report this comment is attached to
+          description: "Report this comment is attached to."
         text:
           type: string
-          description: A comment, added to a report by another user.
+          description: "A comment, added to a report by another user."
           maxLength: 2048
       additionalProperties: false
       required:
@@ -575,16 +582,23 @@ components:
       properties:
         report:
           type: integer
-          description: Report this comment is attached to
+          description: "Report this comment is attached to."
         text:
           type: string
-          description: A comment, added to a report by another user.
+          description: "A comment, added to a report by another user."
           maxLength: 2048
         subs:
           type: integer
           nullable: true
-          description: Author of the comment
+          description: "Author of the comment."
       additionalProperties: false
       required:
         - report
         - text
+  
+  securitySchemes:
+    HogWeedAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: 'Header value should be: "Token [TOKEN]"'
