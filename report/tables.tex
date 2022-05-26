@@ -127,3 +127,97 @@
 		& Уменьшенная фотография & \inlinedSD{Удаляется}{Создаётся} & \inlinedSD{Меняется на URL}{Создаётся} & \inlinedSD{Удаляется}{-} \\
 	\end{xltabular}
 }
+
+\newcommand{\tablefive}{
+	\begin{xltabular}[!htbp]{\textwidth}{ | c | Y | }
+		\longcaption{Быстродействие пустой системы}
+		Путь запроса & Время ответа \\
+		\hline
+		\code{/healthcheck} & 18 ms \\
+		\hline
+		\code{/api/me/prove\-\_email} & 28 ms \\
+		\hline
+		\code{/api/me/auth} & 719 ms \\
+		\hline
+		\code{/api/me/setup} & 571 ms \\
+		\hline
+		\code{/api/me/profile} & 60 ms \\
+		\hline
+		\code{/api/me/log\-\_out} & 56 ms \\
+		\hline
+		\code{/api/me/log\-\_in} & 523 ms \\
+		\hline
+		\code{/api/reports} & 197 ms \\
+		\hline
+		\code{/api/users/\{id\}} & 74 ms \\
+		\hline
+		\code{/api/comments} & 65 ms \\
+		\hline
+		\code{/api/reports} & 92 ms \\
+		\hline
+		\code{/api/me/leave} & 85 ms \\
+	\end{xltabular}
+}
+
+
+\newcommand{\tablesix}{
+	\begin{xltabular}[!htbp]{\textwidth}{ | c | Y | }
+		\longcaption{Быстродействие системы с отчётами}
+		Путь запроса & Время ответа \\
+		\hline
+		\code{/healthcheck} & 31 ms \\
+		\hline
+		\code{/api/me/prove\-\_email} & 23 ms \\
+		\hline
+		\code{/api/me/auth} & 709 ms \\
+		\hline
+		\code{/api/me/setup} & 409 ms \\
+		\hline
+		\code{/api/me/profile} & 44 ms \\
+		\hline
+		\code{/api/me/log\-\_out} & 59 ms \\
+		\hline
+		\code{/api/me/log\-\_in} & 390 ms \\
+		\hline
+		\code{/api/reports} & 205 ms \\
+		\hline
+		\code{/api/users/\{id\}} & 57 ms \\
+		\hline
+		\code{/api/comments} & 87 ms \\
+		\hline
+		\code{/api/reports} & 25119 ms \\
+		\hline
+		\code{/api/me/leave} & 110 ms \\
+	\end{xltabular}
+}
+
+\newcommand{\tableseven}{
+	\begin{xltabular}[!htbp]{\textwidth}{ | c | Y | }
+		\longcaption{Быстродействие системы с отчётами}
+		Путь запроса & Время ответа \\
+		\hline
+		\code{/healthcheck} & 31 ms \\
+		\hline
+		\code{/api/me/prove\-\_email} & 23 ms \\
+		\hline
+		\code{/api/me/auth} & 709 ms \\
+		\hline
+		\code{/api/me/setup} & 409 ms \\
+		\hline
+		\code{/api/me/profile} & 44 ms \\
+		\hline
+		\code{/api/me/log\-\_out} & 59 ms \\
+		\hline
+		\code{/api/me/log\-\_in} & 390 ms \\
+		\hline
+		\code{/api/reports} & 205 ms \\
+		\hline
+		\code{/api/users/\{id\}} & 57 ms \\
+		\hline
+		\code{/api/comments} & 87 ms \\
+		\hline
+		\code{/api/reports} & 25119 ms \\
+		\hline
+		\code{/api/me/leave} & 110 ms \\
+	\end{xltabular}
+}
