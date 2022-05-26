@@ -224,3 +224,35 @@
 		\caption{Описание данных, которыми осуществляется обмен}
 	\end{figure}
 }
+
+\newcommand{\picturefive}{
+	\begin{figure}[!htbp]
+		\fontsize{10}{12}
+		\centering
+		\begin{tikzpicture}[thick, node distance = 0.75cm, on grid]
+			\node[inner, text width=12cm, label={[name=nn]Модель \textquote{\en{hogweed\_detector}}}] (nn0) {Cлой изменения размера и аугментации \textquote{\en{re\_shaper}}};
+			\node[inner, text width=12cm, below= of nn0] (nn1) {Слои предварительной обработки изображения};
+			\node[inner, text width=12cm, below= of nn1] (nn2) {Модель \textquote{XCeption} без \textquote{головы}};
+			\node[inner, text width=12cm, below= of nn2] (nn3) {Слой исключения - \textquote{\en{dropout}}};
+			\node[inner, text width=12cm, below= of nn3] (nn4) {Полносвязный слой, осуществляющий классификацию - \textquote{\en{predictor}}};
+			\node[fit={(nn) (nn0) (nn4)}, draw] (ext_nn) {};
+		\end{tikzpicture}
+		\caption{Схема модели нейронной сети}
+	\end{figure}
+}
+
+\newcommand{\picturesix}{
+	\begin{figure}[!htbp]
+		\includegraphics[width=12cm]{head_training}
+		\centering
+		\caption{График обучения верхних слоёв модели}
+	\end{figure}
+}
+
+\newcommand{\pictureseven}{
+	\begin{figure}[!htbp]
+		\includegraphics[width=12cm]{full_training}
+		\centering
+		\caption{График дообучения модели}
+	\end{figure}
+}
