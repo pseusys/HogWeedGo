@@ -12,17 +12,25 @@
 
 \usepackage{tabularx, xltabular, multirow, makecell}
 \usepackage[compact]{titlesec}
-\usepackage{enumitem, tocloft}
+\usepackage[inline]{enumitem}
+\usepackage{tocloft}
 
 \usepackage{ulem}
+\usepackage{contour}
 \usepackage{setspace}
 \usepackage{csquotes}
 
+\usepackage{totcount}
+\usepackage{listings}
+
+\usepackage{array}
+\usepackage{xinttools}
+
 \usepackage{tikz}
-\usetikzlibrary{positioning, calc}
+\usetikzlibrary{positioning, fit, backgrounds, calc}
 
 % \usepackage{showkeys}
-\usepackage[colorlinks=true, linkcolor=, urlcolor=blue, citecolor=]{hyperref}
+\usepackage[unicode, colorlinks=true, linkcolor=, urlcolor=blue, citecolor=]{hyperref}
 
 \input{support}
 
@@ -36,4 +44,6 @@
 	\include{tables}
 	\include{images}
 	\input{document}
+	
+	\include{additions}
 \end{document}

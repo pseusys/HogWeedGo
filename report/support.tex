@@ -1,9 +1,16 @@
 % !TeX spellcheck = en_US
 
 \makeatletter
+
+% Font related commands:
+
 \def\trueonehalfspace{1.213}
 
 \newcommand{\titlelongtext}[1]{\begin{spacing}{\trueonehalfspace}#1\end{spacing}}
+
+
+
+% Title sheets related commands:
 
 \newcommand{\@subscript}[1]{
 	\fontsize{12}{14.4}\centering{\textit{\textsuperscript{#1}}}
@@ -52,34 +59,81 @@
 
 
 
+% Special items in text definition commands:
+
 \let\latex@input\input
 \newcommand\current@input[1]{\def\currentfile{#1} \par\nobreak\latex@input{#1}}
 \AtBeginDocument{\let\input\current@input}
 
-
-
 \newcommand{\defineterm}[2]{\label{def:#1}\hyperref[lnk:#1]{#2}}
 \newcommand{\linkterm}[2]{\label{lnk:#1}\hyperref[def:#1]{\textbf{#2}}}
 
-\newcommand{\tab}{\hspace{0.5cm}}
-\newcommand{\nwln}{\vspace{\baselineskip}\tab}
+
+
+% General text commands:
+
+\newcommand{\tab}{\hspace{1.25cm}}
 
 \newcommand{\en}[1]{\foreignlanguage{english}{#1}}
 \newcommand{\de}[1]{\foreignlanguage{german}{#1}}
 \newcommand{\la}[1]{\foreignlanguage{latin}{#1}}
 
-\newcommand{\longcaption}[1]{
-	\caption{#1}
-	\addtocounter{table}{-1}
-	\endfirsthead
-	\caption*{Продолжение таблицы \arabic{table}}
-	\endhead
+\newcommand{\code}[1]{\texttt{\en{#1}}}
+
+\renewcommand{\ULdepth}{1.8pt}
+\contourlength{0.8pt}
+\newcommand{\under}[1]{%
+	\uline{\phantom{#1}}%
+	\llap{\contour{white}{#1}}%
 }
 
 
 
+% Table formatting commands:
+
+\renewcommand\tabularxcolumn[1]{m{#1}}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+\newcommand{\longcaption}[1]{
+	\caption{#1}
+	\addtocounter{table}{-1}
+	\\\hline
+	\endfirsthead
+	\caption*{Продолжение таблицы \arabic{table}}
+	\\\hline
+	\endhead
+	\hline
+	\endfoot
+}
+
+\newcommand{\rota}[1]{\makecell{\rotatebox[origin=c]{90}{#1}}}
+
+\newcommand{\inlined}[1]{
+	\begin{itemize*}[itemjoin={\newline}]
+		\xintFor ##1 in #1 \do {\item ##1}
+	\end{itemize*}
+}
+
+\newcommand{\inlinedSD}[2]{
+	\begin{itemize*}[itemjoin={\newline}]
+		\item [S.] #1
+		\item [D.] #2
+	\end{itemize*}
+}
+
+
+
+% List formatting commands:
+
+\setlist[itemize]{topsep=0pt, parsep=0pt, itemsep=0pt, leftmargin=*, labelindent=0.5cm}
+\setlist[enumerate]{topsep=0pt, parsep=0pt, itemsep=0pt, leftmargin=*, labelindent=0.5cm}
+
+
+
+% Section formatting commands:
+
 \titleformat{\section}[hang] {\centering\bfseries}{\thesection\ } {0pt}{\MakeUppercase}
-\titleformat{\subsection}[hang] {\bfseries}{\thesubsection\ } {0pt}{}
+\titleformat{\subsection}[hang] {\vspace{\baselineskip}\bfseries}{\thesubsection\ } {0pt}{}
 \titleformat{\subsubsection}[hang] {\bfseries}{\thesubsubsection\ } {0pt}{}
 \renewcommand{\thesection}{\arabic{section}}
 
@@ -90,13 +144,18 @@
 
 
 
+% Picture formatting commands:
+
 \addto\captionsrussian{\renewcommand{\figurename}{Рисунок}}
 
 \tikzset{node distance = 3.5cm and 5.5cm}
 \tikzset{block/.style = {draw, minimum height=1.5cm, text width=3cm, align=center}}
+\tikzset{inner/.style = {draw, minimum height=0.5cm, align=center, text width=4.5cm,fill=white, rounded corners}}
 \tikzset{link/.style = {minimum height=1cm, text width=2.25cm, midway, align=center}}
 
 
+
+% Bibliorgaphy related commands:
 
 \titleformat{\chapter}[display] {\centering\bfseries}{} {0pt}{\MakeUppercase}
 \titlespacing*{\chapter}{0pt}{-\baselineskip}{0pt}
@@ -109,5 +168,31 @@
 }
 
 \renewcommand\bibname{Список литературы}
-\newcommand{\webbibitem}[4]{\bibitem{#1} \href{#2}{#2} // #3, дата обращения: #4}
+
+\newcommand{\@webnobibitem}[3]{\href{#1}{#1} // #2, дата обращения: #3}
+\newcommand{\@webbibitem}[4]{\bibitem{#1}\@webnobibitem{#2}{#3}{#4}}
+\newcommand{\weblink}{\@ifstar{\@webbibitem}{\@webnobibitem}}
+
+
+
+% Additions related commands:
+
+\newcounter{addition}
+\newcommand{\additionref}[2]{\hyperref[add:#1]{#2}}
+\newcommand{\addition}[2]{\stepcounter{addition}\newcont{Приложение \russian@Alph{\value{addition}}: #2}\label{add:#1}}
+
+
+
+% Statistics calculation commands:
+
+\def\pagescount{\the\numexpr\getpagerefnumber{document-end}-1\relax}
+
+\regtotcounter{figure}
+\regtotcounter{table}
+\regtotcounter{addition}
+
+\newtotcounter{citate}
+\let\@@bibitem\bibitem
+\renewcommand\bibitem{\stepcounter{citate}\@@bibitem}
+
 \makeatother
