@@ -15,15 +15,23 @@ class ViewRepository {
 
 
   Future<void> loadView(Report view) async {
-    var response = await get(Uri.parse("${HogWeedGo.server}/api/users/${view.subsID}"));
-    final report = view.copyWithUser(User.fromJson(response.json()));
-    final comments = report.comments;
-    report.comments.clear();
-    for (var comment in comments) {
-      response = await get(Uri.parse("${HogWeedGo.server}/api/users/${comment.subsID}"));
-      report.comments.add(comment.copyWithUser(User.fromJson(response.json())));
+    if (view.subsID != null) {
+      var response = await get(Uri.parse("${HogWeedGo.server}/api/users/${view.subsID}"));
+      view = view.copyWithUser(User.fromJson(response.json()));
     }
-    viewController.add(report);
+    final comments = List<Comment>.empty(growable: true)
+        ..addAll(view.comments);
+    view.comments.clear();
+    for (var comment in comments) {
+      if (comment.subsID != null) {
+        final response = await get(Uri.parse("${HogWeedGo.server}/api/users/${comment.subsID}"));
+        view.comments.add(comment.copyWithUser(User.fromJson(response.json())));
+      } else {
+        view.comments.add(comment);
+      }
+    }
+    // TODO: added for the second time!
+    viewController.add(view);
   }
 
   Future<void> setComment(Report view, String token, Comment comment) async {

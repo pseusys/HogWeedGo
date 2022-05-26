@@ -32,6 +32,31 @@ class ReportPage extends StatefulWidget {
 }
 
 class _ReportPageState extends State<ReportPage> {
+  var date = DateTime.now();
+  var time = TimeOfDay.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(3000),
+    );
+    if (picked != null) {
+      setState(() { date = picked; });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: time,
+    );
+    if (picked != null) {
+      setState(() { time = picked; });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final _mapController = MapController();
@@ -67,6 +92,26 @@ class _ReportPageState extends State<ReportPage> {
 
               Text("Photos", style: Theme.of(context).textTheme.headline5),
               photoGallery,
+              const SizedBox(height: MARGIN),
+
+              Text("Date and Time", style: Theme.of(context).textTheme.headline5),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => _selectDate(context),
+                    tooltip: "Select date",
+                    icon: const Icon(Icons.calendar_today),
+                  ),
+                  const SizedBox(width: GAP),
+                  IconButton(
+                    onPressed: () => _selectTime(context),
+                    tooltip: "Select time",
+                    icon: const Icon(Icons.access_time),
+                  ),
+                  const SizedBox(width: MARGIN),
+                  Text("${date.year}-${date.month}-${date.day} ${time.hour}:${time.minute}")
+                ],
+              ),
               const SizedBox(height: MARGIN),
 
               _SubmitButton()

@@ -46,7 +46,7 @@ class Report extends Equatable {
   @JsonKey(name: 'place', toJson: latLngToObject, fromJson: latLngFromObject) final LatLng place;
   @JsonKey(name: 'date', toJson: toNull, fromJson: dateTimeFromNumber, includeIfNull: false) final DateTime date;
   @JsonKey(name: 'status', toJson: toNull, includeIfNull: false) final ReportStatus status;
-  @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final int subsID;
+  @JsonKey(name: 'subs', toJson: toNull, includeIfNull: false) final int? subsID;
   @JsonKey(ignore: true, toJson: toNull, includeIfNull: false) final User? subs;
   @JsonKey(name: 'id', toJson: toNull, includeIfNull: false) final int id;
   @JsonKey(name: 'type') final String type;

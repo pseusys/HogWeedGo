@@ -129,10 +129,9 @@ class _ReportViewState extends State<ReportView> {
               if (state.current.initComment.isNotEmpty) _comment(state.current.initComment, context, username: state.current.subs?.firstName ?? "Anonymous"),
 
               if (auth) Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _CommentInput(),
-                  const SizedBox(height: MARGIN),
+                  const SizedBox(width: MARGIN),
                   _SubmitButton(),
                 ],
               ) else _CommentUnavailable(),
@@ -175,13 +174,15 @@ class _CommentInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ViewBloc, ViewState>(
       buildWhen: (previous, current) => previous.note != current.note,
-      builder: (context, state) => TextField(
-        maxLines: 3,
-        key: const Key('commentForm_commentInput_textField'),
-        onChanged: (comment) => context.read<ViewBloc>().add(ViewNoteChanged(comment)),
-        decoration: InputDecoration(
-          hintText: "Description: a few words about to add to the report",
-          errorText: state.note.invalid ? 'Invalid comment' : null,
+      builder: (context, state) => Flexible(
+        child: TextField(
+          maxLines: 1,
+          key: const Key('commentForm_commentInput_textField'),
+          onChanged: (comment) => context.read<ViewBloc>().add(ViewNoteChanged(comment)),
+          decoration: InputDecoration(
+            hintText: "Description: a few words about to add to the report",
+            errorText: state.note.invalid ? 'Invalid comment' : null,
+          ),
         ),
       ),
     );
