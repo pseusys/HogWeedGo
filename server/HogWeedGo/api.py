@@ -14,6 +14,7 @@ from rest_framework.viewsets import ViewSet, GenericViewSet
 from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth, send_email, MultiPartJSONParser
 from HogWeedGo.models import User, Report, Comment
 from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer, ReportPhotoSerializer
+from HogWeedGo.settings import DEBUG
 
 
 # TODO: make async with Django async support.
@@ -25,9 +26,9 @@ class MeViewSet(ViewSet):
     def prove_email(self, request):
         email = request.query_params.get('email')
         token = random_token(email=email)
-        return send_email("HogWeedGo authentication", f"Your confirmation code is: '{token}'\nIt will be valid for 10 minutes.", None, recipient_list=[email])
+        return send_email("HogWeedGo authentication", f"Your confirmation code is: \"{token}\"\nIt will be valid for 10 minutes.", None, recipient_list=[email])
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle], renderer_classes=[PlainTextRenderer])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle] if DEBUG else [], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email", "code", "password")
     def auth(self, request):
         email = request.query_params.get('email')
@@ -40,7 +41,7 @@ class MeViewSet(ViewSet):
             return Response("User already exists!", status.HTTP_403_FORBIDDEN)
         return auth(request, email, request.query_params.get('password'))
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle], renderer_classes=[PlainTextRenderer])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle] if DEBUG else [], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email", "password")
     def log_in(self, request):
         return auth(request, request.query_params.get('email'), request.query_params.get('password'))
@@ -49,7 +50,7 @@ class MeViewSet(ViewSet):
     def profile(self, request):
         return Response(UserSerializer(request.user).data)
 
-    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], throttle_classes=[UserRateThrottle], parser_classes=[MultiPartParser])
+    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], throttle_classes=[UserRateThrottle] if DEBUG else [], parser_classes=[MultiPartParser])
     def setup(self, request):
         results = {}
         if 'email' in request.query_params and 'code' in request.query_params:
@@ -93,7 +94,7 @@ class ReportViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     parser_classes = [MultiPartJSONParser]
 
     def get_throttles(self):
-        if self.action == 'create':
+        if self.action == 'create' and not DEBUG:
             return [UserRateThrottle()]
         return super(ReportViewSet, self).get_throttles()
 
@@ -125,7 +126,7 @@ class UserViewSet(RetrieveModelMixin, GenericViewSet):
 
 class CommentViewSet(CreateModelMixin, GenericViewSet):
     schema = AutoSchema(tags=['comment'])
-    throttle_classes = [UserRateThrottle]
+    throttle_classes = [UserRateThrottle] if DEBUG else []
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
 

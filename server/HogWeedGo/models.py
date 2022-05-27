@@ -44,7 +44,6 @@ class ReportStatuses(models.TextChoices):
 
 class Report(models.Model):
     class Meta:
-        unique_together = [["subs", "date"]]
         verbose_name = "Report"
 
     address = models.CharField(max_length=128, null=True, help_text=_("Address defined by user. May be just a geo-related recommendation."))

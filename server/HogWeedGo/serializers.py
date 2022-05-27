@@ -51,15 +51,15 @@ class UserSerializer(StateModelSerializer):
             rep.pop('email', None)
             rep.pop('is_active', None)
             rep.pop('date_joined', None)
-            rep['photo'] = f'{settings.MEDIA_URL}{instance.photo.name}'
-            rep['thumbnail'] = f'{settings.MEDIA_URL}{instance.thumbnail.name}'
+            rep['photo'] = f'{settings.CURRENT_HOST}{settings.MEDIA_URL}{instance.photo.name}'
+            rep['thumbnail'] = f'{settings.CURRENT_HOST}{settings.MEDIA_URL}{instance.thumbnail.name}'
         return rep
 
     def to_internal_value(self, data):
         data['last_login'] = _to_datetime(data['last_login']) if data['last_login'] else None
         data['date_joined'] = _to_datetime(data['date_joined'])
         if self.mode == 'backup':
-            data.pop('password', None)
+            data.pop('password', None)  # TODO: check if this works
             data.pop('thumbnail', None)
             if data['photo']:
                 data['photo'] = restore_file(data['photo']['data'], data['photo']['name'])
@@ -76,11 +76,12 @@ class ReportSerializer(StateModelSerializer):
 
     def to_representation(self, instance):
         rep = super(ReportSerializer, self).to_representation(instance)
-        rep['subs'] = (instance.subs.email if self.mode == 'backup' else instance.subs.id) if instance.subs else None
+        rep['subs'] = (instance.subs.email if self.mode != 'user' else instance.subs.id) if instance.subs else None
         if self.mode == 'table':
             rep['longitude'] = instance.place[0]
             rep['latitude'] = instance.place[1]
             del rep['place']
+            rep['photos'] = ", ".join([ReportPhotoSerializer(photo, mode='user').data['photo'] for photo in ReportPhoto.objects.filter(report=instance)])
         else:
             rep['date'] = _from_datetime(instance.date)
             rep['place'] = {'lng': instance.place[0], 'lat': instance.place[1]}
@@ -92,7 +93,7 @@ class ReportSerializer(StateModelSerializer):
 
     def to_internal_value(self, data):
         if self.mode == 'user':
-            data['date'] = datetime.now()
+            data['date'] = _to_datetime(data['date'])
             data['status'] = ReportStatuses.RECEIVED
             data['subs'] = self.context['request'].user.pk
         else:
@@ -116,8 +117,8 @@ class ReportPhotoSerializer(StateModelSerializer):
             data, name = store_file(instance.photo)
             rep['photo'] = {'data': data, 'name': name}
         else:
-            rep['photo'] = f'{settings.MEDIA_URL}{instance.photo.name}'
-            rep['thumbnail'] = f'{settings.MEDIA_URL}{instance.thumbnail.name}'
+            rep['photo'] = f'{settings.CURRENT_HOST}{settings.MEDIA_URL}{instance.photo.name}'
+            rep['thumbnail'] = f'{settings.CURRENT_HOST}{settings.MEDIA_URL}{instance.thumbnail.name}'
         return rep
 
     def to_internal_value(self, data):
@@ -135,7 +136,6 @@ class CommentSerializer(StateModelSerializer):
 
     def to_representation(self, instance):
         rep = super(CommentSerializer, self).to_representation(instance)
-        rep.pop('report', None)
         rep['subs'] = (instance.subs.email if self.mode == 'backup' else instance.subs.id) if instance.subs else None
         return rep
 

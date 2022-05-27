@@ -18,7 +18,7 @@ DEBUG = os.getenv('ENV', 'development') == 'development'
 DOCKER = os.getenv('DOCKER', 'False') == 'True'
 
 ALLOWED_HOSTS = ['::1', '127.0.0.1', 'localhost'] + os.getenv('DJANGO_HOST', "").split(" ")
-CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
+CSRF_TRUSTED_ORIGINS = []
 
 
 if not DEBUG:
@@ -36,6 +36,7 @@ if not DEBUG:
 else:
     CSRF_TRUSTED_ORIGINS += [f"http://{host}:{os.getenv('SERVER_PORT_HTTP', 80)}" for host in ALLOWED_HOSTS]
 
+CURRENT_HOST = CSRF_TRUSTED_ORIGINS[-1]
 
 # Application definition
 
