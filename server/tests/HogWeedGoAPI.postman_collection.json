@@ -850,6 +850,13 @@
 							"    pm.sendRequest(`${server}?filter=INVALID`, function (err, response) {",
 							"        pm.expect(response.json()['results'].length == 0).to.be.equal(true, \"Invalid number of invalid reports!\");",
 							"    });",
+							"});",
+							"",
+							"pm.test('Pagination works', function () {",
+							"    const server = `http://localhost:${pm.collectionVariables.get(\"SERVER_PORT\")}/api/reports`;",
+							"    pm.sendRequest(`${server}?offset=0&limit=10`, function (err, response) {",
+							"        pm.expect(response.json()['results'].length == 1).to.be.equal(true, \"Invalid number of received reports!\");",
+							"    });",
 							"});"
 						],
 						"type": "text/javascript"
