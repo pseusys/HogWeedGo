@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.utils.encoding import smart_str
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, ParseError
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
@@ -71,7 +72,7 @@ def auth(request, email, password):
         token, _ = Token.objects.get_or_create(user=user)
         return Response(f'Token {str(token)}')
     else:
-        return Response(f'Can not authenticate user with email: {email}, password: {password}!', status.HTTP_400_BAD_REQUEST)
+        return Response(f'Can not log in user with email: {email}, password: {password}!', status.HTTP_400_BAD_REQUEST)
 
 
 # FD: when other auth methods added, transfer this to user model.
@@ -81,3 +82,27 @@ def send_email(subject, message, from_email, recipient_list, fail_silently=False
     else:
         send_mail(subject, message, from_email, recipient_list, fail_silently, auth_user, auth_password, connection, html_message)
         return Response("Code was sent")
+
+
+class OptionalLimitOffsetPagination(LimitOffsetPagination):
+    def __init__(self):
+        self.request = None
+        self.offset = None
+        self.count = None
+        self.limit = None
+
+    def paginate_queryset(self, queryset, request, view=None):
+        self.count = self.get_count(queryset)
+
+        self.limit = self.get_limit(request)
+        if self.limit is None:
+            self.limit = self.count
+
+        self.offset = self.get_offset(request)
+        self.request = request
+        if self.count > self.limit and self.template is not None:
+            self.display_page_controls = True
+
+        if self.count == 0 or self.offset > self.count:
+            return []
+        return list(queryset[self.offset:self.offset + self.limit])

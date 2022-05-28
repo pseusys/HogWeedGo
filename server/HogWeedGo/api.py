@@ -1,7 +1,9 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import validate_email
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action, schema, renderer_classes
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -11,13 +13,10 @@ from rest_framework.schemas.openapi import AutoSchema
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import ViewSet, GenericViewSet
 
-from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth, send_email, MultiPartJSONParser
+from HogWeedGo.api_support import PlainTextRenderer, verify_params, random_token, auth, send_email, MultiPartJSONParser, OptionalLimitOffsetPagination
 from HogWeedGo.models import User, Report, Comment
 from HogWeedGo.serializers import UserSerializer, ReportSerializer, CommentSerializer, ReportPhotoSerializer
 from HogWeedGo.settings import DEBUG
-
-
-# TODO: make async with Django async support.
 
 
 class MeViewSet(ViewSet):
@@ -28,20 +27,24 @@ class MeViewSet(ViewSet):
         token = random_token(email=email)
         return send_email("HogWeedGo authentication", f"Your confirmation code is: \"{token}\"\nIt will be valid for 10 minutes.", None, recipient_list=[email])
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle] if DEBUG else [], renderer_classes=[PlainTextRenderer])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle] if not DEBUG else [], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email", "code", "password")
     def auth(self, request):
         email = request.query_params.get('email')
+        password = request.query_params.get('password')
         token = random_token(email=email)
         if token != request.query_params.get('code'):
             return Response("Wrong or expired code!", status.HTTP_401_UNAUTHORIZED)
         try:
+            validate_email(email)
             User.objects.create_user(email, request.query_params.get('password'))
         except IntegrityError:
             return Response("User already exists!", status.HTTP_403_FORBIDDEN)
-        return auth(request, email, request.query_params.get('password'))
+        except DjangoValidationError:
+            return Response(f'Can not authenticate user with email: {email}, password: {password}!', status.HTTP_400_BAD_REQUEST)
+        return auth(request, email, password)
 
-    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle] if DEBUG else [], renderer_classes=[PlainTextRenderer])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny], throttle_classes=[UserRateThrottle] if not DEBUG else [], renderer_classes=[PlainTextRenderer])
     @verify_params('GET', "email", "password")
     def log_in(self, request):
         return auth(request, request.query_params.get('email'), request.query_params.get('password'))
@@ -50,7 +53,7 @@ class MeViewSet(ViewSet):
     def profile(self, request):
         return Response(UserSerializer(request.user).data)
 
-    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], throttle_classes=[UserRateThrottle] if DEBUG else [], parser_classes=[MultiPartParser])
+    @action(methods=['POST'], detail=False, permission_classes=[IsAuthenticated], throttle_classes=[UserRateThrottle] if not DEBUG else [], parser_classes=[MultiPartParser])
     def setup(self, request):
         results = {}
         if 'email' in request.query_params and 'code' in request.query_params:
@@ -65,6 +68,10 @@ class MeViewSet(ViewSet):
                     results |= {'email': "Saved!"}
             else:
                 results |= {'email': "User with given email already exists!"}
+        if 'email' in request.query_params and 'code' not in request.query_params:
+            results |= {'email': "Code required!"}
+        if 'email' not in request.query_params and 'code' in request.query_params:
+            results |= {'code': "Email required!"}
         if 'password' in request.query_params:
             request.user.set_password(request.query_params.get('password'))
             results |= {'password': "Saved!"}
@@ -92,6 +99,7 @@ class MeViewSet(ViewSet):
 class ReportViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     serializer_class = ReportSerializer
     parser_classes = [MultiPartJSONParser]
+    pagination_class = OptionalLimitOffsetPagination
 
     def get_throttles(self):
         if self.action == 'create' and not DEBUG:
@@ -114,7 +122,7 @@ class ReportViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
             serializer = self.get_serializer(instance=Report.objects.get(pk=pk))
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        except ValidationError as e:
+        except RestFrameworkValidationError as e:
             return Response(e.detail, status.HTTP_400_BAD_REQUEST)
 
 
@@ -126,14 +134,14 @@ class UserViewSet(RetrieveModelMixin, GenericViewSet):
 
 class CommentViewSet(CreateModelMixin, GenericViewSet):
     schema = AutoSchema(tags=['comment'])
-    throttle_classes = [UserRateThrottle] if DEBUG else []
+    throttle_classes = [UserRateThrottle] if not DEBUG else []
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
 
     def create(self, request, *args, **kwargs):
         try:
             return super().create(request, *args, **kwargs)
-        except ValidationError as e:
+        except RestFrameworkValidationError as e:
             return Response(e.detail, status.HTTP_400_BAD_REQUEST)
 
 

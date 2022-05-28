@@ -60,6 +60,6 @@ for label, URL in test_data:
 
 # Print testing result.
 test_prob = sum(matches) / len(matches)
-print(f"Model average execution time is: {round(time_total / len(matches), 1)} sec")
+print(f"Model average execution time is: {round(time_total / len(matches) * 1000)} ms")
 print(f"Test probability of model is: {round(test_prob, 3)} {'❌' if test_prob < DESIRED_RESULT else '✅'}")
 exit(1 if test_prob < DESIRED_RESULT else 0)

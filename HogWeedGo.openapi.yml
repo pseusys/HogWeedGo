@@ -78,7 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                pattern: '^Token (?<TOKEN>[a-zA-Z0-9]*)$'
+                pattern: '^Token (?<TOKEN>[a-z0-9]*)$'
           description: "New user is successfully created. TOKEN stands for user session auth token. To log in user should add Authentication: Token TOKEN' header to his request."
         '401':
           content:
@@ -96,13 +96,13 @@ paths:
           content:
             text/plain:
               schema:
-                pattern: '^Can not authenticate user with email: (?<EMAIL>[a-zA-Z0-9]*), password: (?<PASSWORD>[a-zA-Z0-9]*)!$'
+                pattern: '^Can not (?:authenticate|log in) user with email: (?<EMAIL>\S*), password: (?<PASSWORD>\S*)!$'
           description: "User can not be created for unknown reason. EMAIL and PASSWORD stand for email and password provided in params."
         '429':
           content:
             application/json:
               schema:
-                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[0-9]*) seconds?\.$'
           description: "This endpoint may be called maximum 4 times per minute."
       tags:
         - me
@@ -131,19 +131,19 @@ paths:
           content:
             application/json:
               schema:
-                pattern: '^Token (?<TOKEN>[a-zA-Z0-9]*)$'
+                pattern: '^Token (?<TOKEN>[a-z0-9]*)$'
           description: "User is successfully logged in. TOKEN stands for user session auth token. To log in user should add 'Authentication: Token [TOKEN]' header to his request."
         '400':
           content:
             text/plain:
               schema:
-                pattern: '^Can not log in user with email: (?<EMAIL>[a-zA-Z0-9]*), password: (?<PASSWORD>[a-zA-Z0-9]*)!$'
+                pattern: '^Can not (?:authenticate|log in) user with email: (?<EMAIL>\S*), password: (?<PASSWORD>\S*)!$'
           description: "User can not be logged in. EMAIL and PASSWORD stand for email and password provided in params."
         '429':
           content:
             application/json:
               schema:
-                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[0-9]*) seconds?\.$'
           description: "This endpoint may be called maximum 4 times per minute."
       tags:
         - me
@@ -220,7 +220,7 @@ paths:
           content:
             application/json:
               schema:
-                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[0-9]*) seconds?\.$'
           description: "This endpoint may be called maximum 4 times per minute."
       security:
         - HogWeedAuth: []
@@ -281,9 +281,28 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ReportOut'
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type: string
+                    format: uri
+                    nullable: true
+                  previous:
+                    type: string
+                    format: uri
+                    nullable: true
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReportOut'
+                additionalProperties: false
+                required:
+                  - count
+                  - next
+                  - previous
+                  - results
           description: "Reports list."
       tags:
         - api
@@ -323,7 +342,7 @@ paths:
           content:
             application/json:
               schema:
-                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[0-9]*) seconds?\.$'
           description: "This endpoint may be called maximum 4 times per minute."
       security:
         - HogWeedAuth: []
@@ -378,7 +397,7 @@ paths:
           content:
             application/json:
               schema:
-                description: '^Request was throttled\. Expected available in (?<SECONDS>[a-zA-Z0-9]*) seconds?\.$'
+                description: '^Request was throttled\. Expected available in (?<SECONDS>[0-9]*) seconds?\.$'
           description: "This endpoint may be called maximum 4 times per minute."
       security:
         - HogWeedAuth: []
@@ -396,7 +415,7 @@ components:
         subject:
           pattern: '^HogWeedGo authentication$'
         message:
-          pattern: '^Your confirmation code is: "(?<TOKEN>[a-zA-Z0-9]*)"\nIt will be valid for 10 minutes\.$'
+          pattern: '^Your confirmation code is: "(?<TOKEN>[0-9]*)"\nIt will be valid for 10 minutes\.$'
           description: "TOKEN stands for a token, unique for given server and email, valid for 10 minutes."
         recipients:
           type: array
@@ -420,8 +439,12 @@ components:
             - Wrong or expired code!
             - Saved!
             - User with given email already exists!
+            - Code required!
           type: string
           description: "Describes whether user email was altered and if not why."
+        token:
+          pattern: '^Email required!$'
+          description: "Describes that confirmation code was sent without email."
         password:
           pattern: '^Saved!$'
           description: "Describes whether user password was changed."

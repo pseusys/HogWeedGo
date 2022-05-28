@@ -13,7 +13,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"Server is healthy\", function () {",
-							"    pm.expect(pm.response.text()).to.be.equal(\"healthy\", \"Server is not available!\");",
+							"    pm.expect(pm.response.text()).to.match(/^healthy$/g);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -47,13 +47,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.collectionVariables.set(\"EMAIL_CODE\", pm.response.json()['message'].split(\"\\\"\")[1]);",
-							"",
 							"pm.test('Response schema is valid', function () {",
 							"    const schema = pm.variables.get(\"schema\");",
 							"    pm.expect(tv4.validate(pm.response.json(), JSON.parse(schema))).to.be.equal(true, \"Response could not be validated!\");",
 							"});",
-							""
+							"",
+							"const { groups: { TOKEN } } = /^Your confirmation code is: \"(?<TOKEN>[a-zA-Z0-9]*)\"\\nIt will be valid for 10 minutes\\.$/g.exec(pm.response.json()['message']);",
+							"pm.collectionVariables.set(\"EMAIL_CODE\", TOKEN);"
 						],
 						"type": "text/javascript"
 					}
@@ -129,10 +129,34 @@
 					"script": {
 						"exec": [
 							"pm.test('Response text is valid', function () {",
-							"    pm.expect(pm.response.text()).to.be.a(\"string\").and.satisfy(text => text.startsWith(\"Token \"), \"Response does not contain auth token!\");",
+							"    pm.expect(pm.response.text()).to.match(/^Token (?<TOKEN>[a-zA-Z0-9]*)$/g);",
 							"});",
 							"",
-							"pm.collectionVariables.set(\"AUTH_TOKEN\", pm.response.text());"
+							"pm.collectionVariables.set(\"AUTH_TOKEN\", pm.response.text());",
+							"",
+							"pm.test('Error codes valid', function () {",
+							"    const server = `http://localhost:${pm.collectionVariables.get(\"SERVER_PORT\")}/api/me`;",
+							"    const password = pm.collectionVariables.get(\"TEST_USER_PASSWORD\");",
+							"    const code = pm.collectionVariables.get(\"EMAIL_CODE\");",
+							"    let email = pm.collectionVariables.get(\"TEST_USER_EMAIL\");",
+							"    pm.sendRequest(`${server}/auth?email=${email}&password=${password}&code=wrongcode`, function (err, response) {",
+							"        pm.expect(response.code).to.be.equal(401);",
+							"        pm.expect(response.text()).to.match(/^Wrong or expired code!$/g);",
+							"    });",
+							"    pm.sendRequest(`${server}/auth?email=${email}&password=${password}&code=${code}`, function (err, response) {",
+							"        pm.expect(response.code).to.be.equal(403);",
+							"        pm.expect(response.text()).to.match(/^User already exists!$/g);",
+							"    });",
+							"",
+							"    email = \"not?properly|formatted,email!\";",
+							"    pm.sendRequest(`${server}/prove_email?email=${email}`, function (err, response) {",
+							"        const { groups: { TOKEN } } = /^Your confirmation code is: \"(?<TOKEN>[a-zA-Z0-9]*)\"\\nIt will be valid for 10 minutes\\.$/g.exec(response.json()['message']);",
+							"        pm.sendRequest(`${server}/auth?email=${email}&password=${password}&code=${TOKEN}`, function (err, response) {",
+							"            pm.expect(response.code).to.be.equal(400);",
+							"            pm.expect(response.text()).to.match(/^Can not (?:authenticate|log in) user with email: (?<EMAIL>\\S*), password: (?<PASSWORD>\\S*)!$/g);",
+							"        });",
+							"    });",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -184,96 +208,21 @@
 			"response": []
 		},
 		{
-			"name": "Request code",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.collectionVariables.set(\"EMAIL_CODE\", pm.response.json()['message'].split(\"\\\"\")[1]);",
-							"",
-							"pm.test('Response schema is valid', function () {",
-							"    const schema = pm.variables.get(\"schema\");",
-							"    pm.expect(tv4.validate(pm.response.json(), JSON.parse(schema))).to.be.equal(true, \"Response could not be validated!\");",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"pm.collectionVariables.set(\"TEST_USER_EMAIL\", \"toast@site.com\");",
-							"",
-							"const schema = {",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"subject\": {",
-							"            \"const\": \"HogWeedGo authentication\"",
-							"        },",
-							"        \"message\": {",
-							"            \"pattern\": '^Your confirmation code is: \"(?<TOKEN>[a-zA-Z0-9]*)\"\\nIt will be valid for 10 minutes\\.$',",
-							"            \"description\": \"TOKEN stands for a token, unique for given server and email, valid for 10 minutes.\"",
-							"        },",
-							"        \"recipients\": {",
-							"            \"type\": \"array\",",
-							"            \"items\": {",
-							"                \"type\": \"string\",",
-							"                \"format\": \"email\"",
-							"            },",
-							"            \"minItems\": 1,",
-							"            \"maxItems\": 1,",
-							"            \"description\": \"Email the code is generated for.\"",
-							"        },",
-							"        \"additionalProperties\": false,",
-							"        \"required\": [ \"subject\", \"message\", \"recipients\" ]",
-							"    }",
-							"};",
-							"",
-							"pm.variables.set(\"schema\", JSON.stringify(schema));"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:{{SERVER_PORT}}/api/me/prove_email?email={{TEST_USER_EMAIL}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "{{SERVER_PORT}}",
-					"path": [
-						"api",
-						"me",
-						"prove_email"
-					],
-					"query": [
-						{
-							"key": "email",
-							"value": "{{TEST_USER_EMAIL}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Setup User",
 			"event": [
 				{
 					"listen": "prerequest",
 					"script": {
 						"exec": [
+							"const email = \"toast@site.com\";",
+							"pm.collectionVariables.set(\"TEST_USER_EMAIL\", email);",
 							"pm.collectionVariables.set(\"TEST_USER_PASSWORD\", \"98765\");",
+							"",
+							"const server = `http://localhost:${pm.collectionVariables.get(\"SERVER_PORT\")}/api/me/prove_email`;",
+							"pm.sendRequest(`${server}?email=${email}`, function (err, response) {",
+							"    const { groups: { TOKEN } } = /^Your confirmation code is: \"(?<TOKEN>[a-zA-Z0-9]*)\"\\nIt will be valid for 10 minutes\\.$/g.exec(response.json()['message']);",
+							"    pm.collectionVariables.set(\"EMAIL_CODE\", TOKEN);",
+							"});",
 							"",
 							"const schema = {",
 							"    \"type\": \"object\",",
@@ -307,6 +256,22 @@
 							"pm.test('Response schema is valid', function () {",
 							"    const schema = pm.variables.get(\"schema\");",
 							"    pm.expect(tv4.validate(pm.response.json(), JSON.parse(schema))).to.be.equal(true, \"Response could not be validated!\");",
+							"});",
+							"",
+							"pm.test('Error codes valid', function () {",
+							"    const server = `http://localhost:${pm.collectionVariables.get(\"SERVER_PORT\")}/api/me/setup`;",
+							"    const email = pm.collectionVariables.get(\"TEST_USER_EMAIL\");",
+							"    const code = pm.collectionVariables.get(\"EMAIL_CODE\");",
+							"    pm.sendRequest({",
+							"        url: `${server}?email=${email}&code=${code}`,",
+							"        method: 'POST',",
+							"        header: {",
+							"            'authorization': request.headers[\"authorization\"]",
+							"        }",
+							"    }, function (err, response) {",
+							"        pm.expect(response.code).to.be.equal(400);",
+							"        pm.expect(response.json()['email']).to.match(/^User with given email already exists!$/g);",
+							"    });",
 							"});"
 						],
 						"type": "text/javascript"
@@ -412,7 +377,6 @@
 							"});",
 							"",
 							"pm.test('Response photo is valid', function () {",
-							"    const port = pm.collectionVariables.get(\"SERVER_PORT\");",
 							"    pm.sendRequest(pm.response.json()['thumbnail'], function (err, response) {",
 							"        pm.expect(response.code).to.be.equal(200, \"Response photo unavailable!\");",
 							"    });",
@@ -723,7 +687,6 @@
 							"});",
 							"",
 							"pm.test('Response photo is valid', function () {",
-							"    const port = pm.collectionVariables.get(\"SERVER_PORT\");",
 							"    pm.sendRequest(pm.response.json()['thumbnail'], function (err, response) {",
 							"        pm.expect(response.code).to.be.equal(200, \"Response photo unavailable!\");",
 							"    });",
@@ -868,24 +831,24 @@
 						"exec": [
 							"pm.test('Response schema is valid', function () {",
 							"    const schema = pm.variables.get(\"schema\");",
-							"    pm.expect(tv4.validate(pm.response.json()[0], JSON.parse(schema))).to.be.equal(true, \"Response could not be validated!\");",
+							"    pm.expect(tv4.validate(pm.response.json()['results'][0], JSON.parse(schema))).to.be.equal(true, \"Response could not be validated!\");",
 							"});",
 							"",
 							"pm.test('Response is valid', function () {",
-							"    pm.expect(pm.response.json()[0]['subs']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_ID\"), \"Response subs is invalid!\");",
-							"    pm.expect(pm.response.json()[0]['comments'][0]['subs']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_ID\"), \"Response comment subs is invalid!\");",
+							"    pm.expect(pm.response.json()['results'][0]['subs']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_ID\"), \"Response subs is invalid!\");",
+							"    pm.expect(pm.response.json()['results'][0]['comments'][0]['subs']).to.be.equal(pm.collectionVariables.get(\"TEST_USER_ID\"), \"Response comment subs is invalid!\");",
 							"});",
 							"",
 							"pm.test('Result sorting works', function () {",
-							"    const port = pm.collectionVariables.get(\"SERVER_PORT\");",
-							"    pm.sendRequest(`http://localhost:${port}/api/reports?filter=RECEIVED`, function (err, response) {",
-							"        pm.expect(response.json().length == 1).to.be.equal(true, \"Invalid number of received reports!\");",
+							"    const server = `http://localhost:${pm.collectionVariables.get(\"SERVER_PORT\")}/api/reports`;",
+							"    pm.sendRequest(`${server}?filter=RECEIVED`, function (err, response) {",
+							"        pm.expect(response.json()['results'].length == 1).to.be.equal(true, \"Invalid number of received reports!\");",
 							"    });",
-							"    pm.sendRequest(`http://localhost:${port}/api/reports?filter=APPROVED`, function (err, response) {",
-							"        pm.expect(response.json().length == 0).to.be.equal(true, \"Invalid number of approved reports!\");",
+							"    pm.sendRequest(`${server}?filter=APPROVED`, function (err, response) {",
+							"        pm.expect(response.json()['results'].length == 0).to.be.equal(true, \"Invalid number of approved reports!\");",
 							"    });",
-							"    pm.sendRequest(`http://localhost:${port}/api/reports?filter=INVALID`, function (err, response) {",
-							"        pm.expect(response.json().length == 0).to.be.equal(true, \"Invalid number of invalid reports!\");",
+							"    pm.sendRequest(`${server}?filter=INVALID`, function (err, response) {",
+							"        pm.expect(response.json()['results'].length == 0).to.be.equal(true, \"Invalid number of invalid reports!\");",
 							"    });",
 							"});"
 						],
