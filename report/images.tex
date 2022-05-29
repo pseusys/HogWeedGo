@@ -232,7 +232,7 @@
 		\begin{tikzpicture}[thick, node distance = 0.75cm, on grid]
 			\node[inner, text width=12cm, label={[name=nn]Модель \textquote{\en{hogweed\_detector}}}] (nn0) {Cлой изменения размера и аугментации \textquote{\en{re\_shaper}}};
 			\node[inner, text width=12cm, below= of nn0] (nn1) {Слои предварительной обработки изображения};
-			\node[inner, text width=12cm, below= of nn1] (nn2) {Модель \textquote{XCeption} без \textquote{головы}};
+			\node[inner, text width=12cm, below= of nn1] (nn2) {Модель \textquote{MobileNetV2} без \textquote{головы}};
 			\node[inner, text width=12cm, below= of nn2] (nn3) {Слой исключения - \textquote{\en{dropout}}};
 			\node[inner, text width=12cm, below= of nn3] (nn4) {Полносвязный слой, осуществляющий классификацию - \textquote{\en{predictor}}};
 			\node[fit={(nn) (nn0) (nn4)}, draw] (ext_nn) {};
