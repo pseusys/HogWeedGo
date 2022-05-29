@@ -38,4 +38,4 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         release: Report release
-        files: ./report.pdf
+        files: ./report/report.pdf
