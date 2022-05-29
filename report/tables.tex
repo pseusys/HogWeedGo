@@ -192,32 +192,20 @@
 }
 
 \newcommand{\tableseven}{
-	\begin{xltabular}[!htbp]{\textwidth}{ | c | Y | }
-		\longcaption{Быстродействие системы с отчётами}
-		Путь запроса & Время ответа \\
+	\begin{xltabular}[!htbp]{\textwidth}{ | X | Y | }
+		\longcaption{Количество действий пользователя, необходимых для выполнения сценариев использования}
+		Сценарий использования & Количество дейтсвий \\
 		\hline
-		\code{/healthcheck} & 31 ms \\
+		Просмотр опубликованной отсортированной информации о наблюдениях & От 1 до 2 \\
 		\hline
-		\code{/api/me/prove\-\_email} & 23 ms \\
+		Просмотр информации о системе, её задачах и краткого руководства по использованию & От 1 до 2 \\
 		\hline
-		\code{/api/me/auth} & 709 ms \\
+		Авторизация в системе & \makecell{Основной: 8 \\ Дополнительный: 3}  \\
 		\hline
-		\code{/api/me/setup} & 409 ms \\
+		Отправка отчёта о наблюдении потенциально опасного растения & От 4 до 7 \\
 		\hline
-		\code{/api/me/profile} & 44 ms \\
+		Написание комментария к отчёту & 2 \\
 		\hline
-		\code{/api/me/log\-\_out} & 59 ms \\
-		\hline
-		\code{/api/me/log\-\_in} & 390 ms \\
-		\hline
-		\code{/api/reports} & 205 ms \\
-		\hline
-		\code{/api/users/\{id\}} & 57 ms \\
-		\hline
-		\code{/api/comments} & 87 ms \\
-		\hline
-		\code{/api/reports} & 25119 ms \\
-		\hline
-		\code{/api/me/leave} & 110 ms \\
+		Редактирование профиля & От 2 до 14 \\
 	\end{xltabular}
 }
