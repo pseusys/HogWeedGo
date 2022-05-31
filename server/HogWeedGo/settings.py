@@ -177,8 +177,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'user': '4/minute'
-    },
-    'PAGE_SIZE': 100
+    }
 }
 
 MOCK_SMTP_SERVER = os.getenv('MOCK_SMTP_SERVER', 'False') == 'True'
