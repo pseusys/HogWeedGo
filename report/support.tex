@@ -6,18 +6,25 @@
 
 \def\trueonehalfspace{1.213}
 
-\newcommand{\titlelongtext}[1]{\begin{spacing}{\trueonehalfspace}#1\end{spacing}}
+\newcommand{\titlelongtext}[1]{
+	\begin{spacing}{\trueonehalfspace}
+		#1
+	\end{spacing}
+}
 
 
 
 % Title sheets related commands:
 
 \newcommand{\@subscript}[1]{
-	\fontsize{12}{14.4}\centering{\textit{\textsuperscript{#1}}}
+	\fontsize{12}{14.4}
+	\centering
+	\textit{\textsuperscript{#1}}
 }
 
 \newcommand{\emptydate}{
-	\textquote{\uline{\hspace{1cm}}} \uline{\hspace{3cm}} 2022 г.
+	\textquote{\uline{\hspace{1cm}}} 
+	\uline{\hspace{3cm}} 2022 г.
 }
 
 \newcommand{\worktitle}[1]{
@@ -62,11 +69,19 @@
 % Special items in text definition commands:
 
 \let\latex@input\input
-\newcommand\current@input[1]{\def\currentfile{#1} \par\nobreak\latex@input{#1}}
+\newcommand\current@input[1]{
+	\def\currentfile{#1} \par\nobreak\latex@input{#1}
+}
 \AtBeginDocument{\let\input\current@input}
 
-\newcommand{\defineterm}[2]{\label{def:#1}\hyperref[lnk:#1]{#2}}
-\newcommand{\linkterm}[2]{\label{lnk:#1}\hyperref[def:#1]{\textbf{#2}}}
+\newcommand{\defineterm}[2]{
+	\label{def:#1}
+	\hyperref[lnk:#1]{#2}
+}
+\newcommand{\linkterm}[2]{
+	\label{lnk:#1}
+	\hyperref[def:#1]{\textbf{#2}}
+}
 
 
 
@@ -106,7 +121,9 @@
 	\endfoot
 }
 
-\newcommand{\rota}[1]{\makecell{\rotatebox[origin=c]{90}{#1}}}
+\newcommand{\rota}[1]{
+	\makecell{\rotatebox[origin=c]{90}{#1}}
+}
 
 \newcommand{\inlined}[1]{
 	\begin{itemize*}[itemjoin={\newline}]
@@ -137,9 +154,15 @@
 \titleformat{\subsubsection}[hang] {\bfseries}{\thesubsubsection\ } {0pt}{}
 \renewcommand{\thesection}{\arabic{section}}
 
-\newcommand{\@newcont}[1]{\addcontentsline{toc}{section}{#1}}
-\newcommand{\@newcontsect}[1]{\phantomsection\section*{#1}\@newcont{#1}}
-\newcommand{\@newcontnosect}[1]{\phantomsection\@newcont{#1}}
+\newcommand{\@newcont}[1]{
+	\addcontentsline{toc}{section}{#1}
+}
+\newcommand{\@newcontsect}[1]{
+	\phantomsection\section*{#1}\@newcont{#1}
+}
+\newcommand{\@newcontnosect}[1]{
+	\phantomsection\@newcont{#1}
+}
 \newcommand{\newcont}{\@ifstar{\@newcontnosect}{\@newcontsect}}
 
 
@@ -169,17 +192,36 @@
 
 \renewcommand\bibname{Список литературы}
 
-\newcommand{\@webnobibitem}[3]{\href{#1}{#1} // #2, дата обращения: #3}
-\newcommand{\@webbibitem}[4]{\bibitem{#1}\@webnobibitem{#2}{#3}{#4}}
-\newcommand{\weblink}{\@ifstar{\@webbibitem}{\@webnobibitem}}
+\newcommand{\@weblink}[4]{\bibitem{#1} #3. URL: \url{#2} (дата обращения: #4)}
+\newcommand{\@webarticle}[5]{\bibitem{#1} #3 // #4. URL: \url{#2} (дата обращения: #5)}
+\newcommand{\webbibitem}{\@ifstar{\@weblink}{\@webarticle}}
 
 
 
 % Additions related commands:
 
 \newcounter{addition}
-\newcommand{\additionref}[2]{\hyperref[add:#1]{#2}}
-\newcommand{\addition}[2]{\stepcounter{addition}\newcont{Приложение \russian@Alph{\value{addition}}: #2}\label{add:#1}}
+\renewcommand{\theaddition}{\russian@Alph{\value{addition}}}
+\newcommand{\additionref}[1]{\hyperref[add:#1]{Приложении \ref*{add:#1}}}
+\newcommand{\addition}[2]{
+	\refstepcounter{addition}
+	\newcont{Приложение \theaddition: #2}
+	\label{add:#1}
+}
+
+\newcounter{subaddition}[addition]
+\let\the@subadition\thesubaddition
+\renewcommand{\thesubaddition}{\theaddition.\the@subadition}
+\newcommand{\subadditionref}[1]{\hyperref[subadd:#1]{приложение \ref*{subadd:#1}}}
+\newcommand{\subaddition}[3][12]{
+	\refstepcounter{subaddition}
+	\begin{figure}[!htbp]
+		\includegraphics[width=#1cm]{#2}
+		\centering
+		\caption*{Приложение \thesubaddition. #3}
+	\end{figure}
+	\label{subadd:#2}
+}
 
 
 
