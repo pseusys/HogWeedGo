@@ -7,11 +7,8 @@ on:
     paths:
       - 'report/**'
       - 'HogWeedGo.openapi.yml'
+      - 'server/assets/privacy-policy.html'
       - '.github/workflows/report.yml'
-  workflow_run:
-    workflows: ["CLIENT"]
-    types:
-      - completed
 
 defaults:
   run:
@@ -36,15 +33,10 @@ jobs:
       with:
         root_file: ./report.tex
         working_directory: ./report/
-        
-    - name: Move PDF ✂️
-      run: mkdir ./build/ && cp ./report.pdf ./build/report.pdf
-    
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@v4
+      
+    - name: Update release 📩
+      uses: johnwbyrd/update-release@v1.0.0
       with:
-        branch: gh-pages
-        folder: ./report/build/
-        target-folder: ./report/
-        clean: false
- 
+        token: ${{ secrets.GITHUB_TOKEN }}
+        release: Report release
+        files: ./report/report.pdf

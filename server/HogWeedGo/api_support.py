@@ -63,7 +63,7 @@ def verify_photos(func):
 
 def random_token(size=8, email='', delay_minutes=10):
     random.seed(f'{settings.SECRET_KEY}{email}{time.time() // delay_minutes // 60}')
-    return ''.join(random.choice(ascii_letters) for _ in range(size))
+    return ''.join(random.choices(ascii_letters, k=size))
 
 
 def auth(request, email, password):
@@ -85,6 +85,8 @@ def send_email(subject, message, from_email, recipient_list, fail_silently=False
 
 
 class OptionalLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 100
+
     def __init__(self):
         self.request = None
         self.offset = None
@@ -94,8 +96,9 @@ class OptionalLimitOffsetPagination(LimitOffsetPagination):
     def paginate_queryset(self, queryset, request, view=None):
         self.count = self.get_count(queryset)
 
-        self.limit = self.get_limit(request)
-        if self.limit is None:
+        if self.limit_query_param in request.query_params or self.offset_query_param in request.query_params:
+            self.limit = self.get_limit(request)
+        else:
             self.limit = self.count
 
         self.offset = self.get_offset(request)

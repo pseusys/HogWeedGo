@@ -27,12 +27,21 @@
 \usepackage{xinttools}
 
 \usepackage{caption}
+\captionsetup{labelsep=endash}
+
 \usepackage{tikz}
 \usetikzlibrary{positioning, fit, backgrounds, calc}
-\graphicspath{ {./images/} }
+\graphicspath{{./images/}}
 
 % \usepackage{showkeys}
+\usepackage[hyphens]{url}
 \usepackage[unicode, colorlinks=true, linkcolor=, urlcolor=blue, citecolor=]{hyperref}
+\hypersetup {
+	pdfauthor={Сергеев А. Д.},
+	pdftitle={Разработка программной системы наблюдения за распространением потенциально опасных для человека видов растений},
+	pdfsubject={Удобство и скорость отправки и получения данных},
+	pdfkeywords={Опасные для человека растения, Мобильное приложение, Django, DRF, PostGIS, Flutter, BLoC, TensorFlow, Docker}
+}
 
 \input{support}
 
