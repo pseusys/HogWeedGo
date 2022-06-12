@@ -1,4 +1,5 @@
 from tensorflow.python.framework.config import set_visible_devices, get_visible_devices
+from sklearn.metrics import classification_report, accuracy_score
 from tensorflow.lite.python.interpreter import Interpreter
 from tensorflow.keras.backend import softmax, expand_dims
 from argparse import ArgumentParser
@@ -35,18 +36,21 @@ parser.add_argument('-n', '--network', required=True, help="Network, saved in '.
 parser.add_argument('-s', '--source', required=True, help="Dataset containing test dataset of labels and photo URLs")
 args = vars(parser.parse_args())
 
-# Load TFLite model and allocate tensors.
+# Load TFLite model and allocate tensors
 interpreter = Interpreter(model_path=args['network'])
 interpreter.allocate_tensors()
 
-# Get input and output tensors.
+# Get input and output tensors
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-# Test model on prepared test input data.
-matches = []
-time_total = 0
+# Read input and get labels
 test_data = read_csv(args['source']).to_records(index=False)
+labels = [CLASS_NAMES.index(label) for label, _ in test_data]
+
+# Test model on prepared test input data
+results = []
+time_total = 0
 for label, URL in test_data:
     try:
         img_data = Image.open(BytesIO(get(URL).content))
@@ -54,12 +58,14 @@ for label, URL in test_data:
             lap_time = time()
             result = predict(interpreter, img_data.resize(input_details[0]['shape'][1:3]))
             time_total += time() - lap_time
-            matches.append(1 if CLASS_NAMES.index(label) == argmax(result) else 0)
+            results.append(argmax(result))
     except Exception as e:
-        print(f"Test link {URL} invalid, skipping:\n{e}")
+        print(f"Test link {URL} invalid, exiting:\n{e}")
+        exit(1)
 
-# Print testing result.
-test_prob = sum(matches) / len(matches)
-print(f"Model average execution time is: {round(time_total / len(matches) * 1000)} ms")
-print(f"Test probability of model is: {round(test_prob, 3)} {'❌' if test_prob < DESIRED_RESULT else '✅'}")
-exit(1 if test_prob < DESIRED_RESULT else 0)
+# Print testing results
+accuracy = accuracy_score(labels, results)
+print(f"Model average execution time is: {round(time_total / len(results) * 1000)} ms")
+print(classification_report(labels, results, target_names=CLASS_NAMES))
+print(f"Test probability of model is: {round(accuracy, 3)} {'❌' if accuracy < DESIRED_RESULT else '✅'}")
+exit(1 if accuracy < DESIRED_RESULT else 0)
