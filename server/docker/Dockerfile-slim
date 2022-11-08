@@ -18,7 +18,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ARG WORKDIR
 ARG HOGWEED_PORT
 
-RUN apt-get update && apt-get install -y binutils libproj-dev gdal-bin net-tools && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y binutils libproj-dev gdal-bin net-tools postgresql-client && rm -rf /var/lib/apt/lists/*
 
 WORKDIR ./$WORKDIR
 COPY --from=builder ./$WORKDIR/.venv ./.venv

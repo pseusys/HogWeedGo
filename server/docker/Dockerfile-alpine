@@ -18,7 +18,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ARG WORKDIR
 ARG HOGWEED_PORT
 
-RUN apk add --no-cache geos gdal
+RUN apk add --no-cache geos gdal postgresql-client
 
 WORKDIR ./$WORKDIR
 COPY --from=builder ./$WORKDIR/.venv ./.venv

@@ -11,9 +11,3 @@
         }
     </style>
 {% endblock %}
-
-{% block userlinks %}{{ block.super }}
-    {% if user.is_superuser %} /
-        <a href="{% url 'admin:settings' %}">{% translate 'Settings' %}</a>
-    {% endif %}
-{% endblock %}

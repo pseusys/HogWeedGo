@@ -9,6 +9,10 @@
  - Debug + build mode: `docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up --build`
  - Debug mode: `docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.development up`
  - Release mode: `docker-compose -f ./docker/docker-compose.yml --env-file=./docker/.env.production up`
+
+#### Backup using:
+ - backup: `docker exec -it hogweed-server ./manage.py dbbackup`
+ - restore: `docker exec -it hogweed-server ./manage.py dbrestore`
  
 ### Launch server locally
 1. Download `bundled-server.zip` artifact from releases section, open it and unpack, run shell console there
@@ -50,6 +54,8 @@ Configs structure:
 - [x] Server website
 - [x] Server API
 - [x] Server API testing (in docker and locally)
-- [ ] Server settings (backup, logs, admin notifications)
+- [x] Server settings (logs, admin notifications)
+- [ ] Backups with custom file types OR remove custom file types
+- [ ] Replace scripts with Makefile
 - [ ] Languages + translation
 - [ ] Different authentication methods and providers

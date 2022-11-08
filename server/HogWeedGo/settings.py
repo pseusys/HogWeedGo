@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
     'HogWeedGo.apps.HogWeedGoConfig',
     'HogWeedGo.apps.HogWeedGoAdminConfig',
+    'dbbackup'
 ]
 
 MIDDLEWARE = [
@@ -184,6 +185,58 @@ MOCK_SMTP_SERVER = os.getenv('MOCK_SMTP_SERVER', 'False') == 'True'
 DEFAULT_FROM_EMAIL = f'no-reply@{ALLOWED_HOSTS[-1]}'
 EMAIL_HOST = 'mail-agent'
 EMAIL_PORT = 25
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'special': {
+            '()': 'HogWeedGo.log.SpecialFilter'
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs/debug.log',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'propagate': True,
+        },
+        'error': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+        },
+        'special': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+            'filters': ['special']
+        }
+    }
+}
+
+
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {
+    'location': BASE_DIR / 'backup'
+}
 
 
 if DOCKER:
