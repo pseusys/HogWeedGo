@@ -1,0 +1,2 @@
+# Mark all files in report dir as documentation and exclude from language analysis.
+report/* linguist-documentation
